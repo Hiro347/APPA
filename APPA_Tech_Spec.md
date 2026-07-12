@@ -333,10 +333,10 @@ CMD ["npm", "start"]
 
 ## 5. Komponen AI
 
-### Fine-tuning (di Colab / Lokal dengan Unsloth)
+### Fine-tuning (di Google Colab dengan Unsloth)
 
 - **Model dasar:** `Qwen3-4B-Instruct` (Utama) / `Qwen3-8B-Instruct` (Alternatif Cloud)
-- **Framework:** **Unsloth** (Wajib, karena 2x lebih cepat dan sangat hemat VRAM, cocok untuk laptop RTX 4060 8GB atau Colab T4).
+- **Framework:** **Unsloth** (Wajib, karena 2x lebih cepat dan sangat hemat VRAM, sangat optimal untuk Google Colab T4 gratis).
 - **Metode:** QLoRA (rank 16, alpha 32, 4-bit NF4)
 - **Output:** Model adapter (GGUF/Safetensors) di-push ke HuggingFace Hub → diakses via Inference API (Bukan deploy lokal pakai Ollama/vLLM saat demo agar Docker tetap ringan).
 
