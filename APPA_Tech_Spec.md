@@ -152,8 +152,8 @@ flowchart TD
     D -->|vector_db| G[Qdrant RAG]
     
     %% Filter & Condense Pipeline
-    F -->|URLs| H[Trafilatura: Full Page Scraping HTML -> Teks]
-    H --> I[LLM / Local NLP: Condense Teks Jadi Poin Fakta]
+    F -->|URLs| H[Crawl4AI: Headless Scraping HTML -> Markdown]
+    H --> I[Pydantic + LLM: Condense Markdown Jadi JSON Fakta]
     
     %% Otak Analisis & Komunikasi
     I --> J[LLM Call 2: Assess + Deteksi Anomali + Sintesis]
@@ -333,12 +333,12 @@ CMD ["npm", "start"]
 
 ## 5. Komponen AI
 
-### Fine-tuning (di Colab / HuggingFace, bukan Docker)
+### Fine-tuning (di Colab / Lokal dengan Unsloth)
 
-- **Model dasar:** Qwen3-8B (utama) / Llama-3.1-8B-Instruct (alternatif)
+- **Model dasar:** `Qwen3-4B-Instruct` (Utama) / `Qwen3-8B-Instruct` (Alternatif Cloud)
+- **Framework:** **Unsloth** (Wajib, karena 2x lebih cepat dan sangat hemat VRAM, cocok untuk laptop RTX 4060 8GB atau Colab T4).
 - **Metode:** QLoRA (rank 16, alpha 32, 4-bit NF4)
-- **Environment:** Google Colab T4 (gratis) atau HuggingFace AutoTrain
-- **Output:** Model adapter di-push ke HuggingFace Hub → diakses via Inference API
+- **Output:** Model adapter (GGUF/Safetensors) di-push ke HuggingFace Hub → diakses via Inference API (Bukan deploy lokal pakai Ollama/vLLM saat demo agar Docker tetap ringan).
 
 **Fokus fine-tuning:**
 - Klaster A (gaya bahasa dagang informal) — model menjawab santai, bukan kaku ala pasal UU
@@ -390,9 +390,9 @@ Jika waktu makin sempit, **fine-tuning adalah lapisan paling mudah dipangkas** �
 
 Selain *Tone of Voice* yang wajib menggunakan bahasa ramah (Bapak/Ibu) dan menerjemahkan jargon birokrasi, **kepribadian sejati AI APPA terletak pada alur kognitifnya**. System Prompt *Agent Orchestrator* harus memaksa LLM untuk berpikir dalam 3 pilar:
 
-1. **Otak Riset (WHAT to search):** Saat pengguna bertanya (misal: "Untung tipis nih"), AI wajib menerjemahkannya menjadi *search queries* ke Google (SerpApi) alih-alih berasumsi. (Contoh *prompt*: *"Jika margin tipis, *generate* query: tren harga [produk] di [lokasi], dan bahan pokok [lokasi]"*).
-2. **Otak Analisis (HOW to process):** Mampu memilah *noise* dari hasil *Full Page HTML Scraping*. (Contoh *prompt*: *"Abaikan opini politik dari artikel berita. Ekstrak hanya: inflasi riil, kelangkaan, kebijakan daerah. Gunakan sumber paling baru jika ada kontradiksi"*).
-3. **Otak Komunikasi (HOW to convey):** Menyampaikan hasil tanpa terkesan seperti jurnal akademik. (Contoh *prompt*: *"Gunakan bahasa empatik. Terjemahkan hasil analisismu menjadi 2 hal: satu paragraf simpulan ramah, dan output JSON `ui_type: pricing` & `ui_type: chart` untuk dirender aplikasi"*).
+1. **Otak Riset (WHAT to search):** Saat pengguna bertanya (misal: "Untung tipis nih"), AI wajib menerjemahkannya menjadi *search queries* ke Google (SerpApi) alih-alih berasumsi.
+2. **Otak Analisis (HOW to process):** Menggunakan **Crawl4AI** untuk *scraping* artikel (menembus JS/Anti-bot) dan menjadikannya teks *Markdown*. Setelah itu, AI WAJIB dikunci menggunakan **Pydantic Models** untuk mengekstrak data JSON yang 100% terstruktur tanpa halusinasi/narasi.
+3. **Otak Komunikasi (HOW to convey):** Menyampaikan hasil tanpa terkesan seperti jurnal akademik. Menggabungkan JSON Pydantic dengan gaya bahasa ramah untuk di-render oleh *Generative UI*.
 
 ### Agent Orchestrator (`core/agent.py`)
 
@@ -602,7 +602,7 @@ Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke sumber eksternal untu
 
 | Jenis Data | Sumber Eksternal | Format / Metode Akses | Fungsi |
 |---|---|---|---|
-| **Semua Data Pasar & Harga (Prioritas Utama)** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> Teks) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapatkan daftar URL, lalu melakukan *scraping* menggunakan `trafilatura` ke semua *website* di halaman pertama. LLM akan mengekstrak sebanyak mungkin angka dan sentimen pasar dari artikel ini. |
+| **Semua Data Pasar & Harga (Prioritas Utama)** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> **Markdown**) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapat URL, lalu melakukan *scraping* menggunakan **`Crawl4AI`** (berbasis Playwright) untuk menembus JS/Cloudflare. Teks *Markdown* kemudian diproses oleh LLM dengan **Pydantic** untuk memastikan *output* berupa JSON angka metrik yang 100% kaku. |
 | **Data Cadangan (Bonus/Fallback)** | Open Data Bapanas (Jawa Barat) | REST API / CSV | Hanya sebagai pembanding jika AI butuh kepastian harga pokok (HPP) pemerintah. |
 
 **Strategi Resiliensi (Live Demo Fallback):**
