@@ -11,9 +11,9 @@ Whenever the user asks you to implement a feature, fix a bug, or change the arch
 1. **Check the Backlog:** Read `APPA_Backlog.md` to understand the current phase.
 2. **Mark as Done:** If you completed a task, change `[ ]` to `[x]` in `APPA_Backlog.md`.
 3. **Add New Scope:** If the user asked you to do something that is NOT in the backlog (e.g., "add a new chart for weather"), you MUST add it as a new bullet point to the backlog.
-4. **Docs Sync:** If you make an architectural change, check if `APPA_Tech_Spec.md` or `APPA_Blueprint.md` needs updating.
+4. **STRICT NO DRIFT POLICY (Docs Sync):** If you make a technical, architectural, or feature logic change, you MUST update `APPA_Tech_Spec.md` and/or `APPA_Blueprint.md` immediately in the same turn. DO NOT leave the documentation out of sync with the codebase. Zero drift is tolerated.
 
-NEVER finish a coding session without ensuring the Backlog reflects what you just did.
+NEVER finish a coding session without ensuring BOTH the Backlog and the Documentation reflect exactly what you just built.
 
 ## Tech Stack Context
 - Frontend: Next.js, Generative UI (JSON to React components), Recharts.
