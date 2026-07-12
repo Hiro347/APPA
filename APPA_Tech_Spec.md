@@ -522,8 +522,8 @@ Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke beberapa sumber ekste
 
 | Jenis Data | Sumber Eksternal | Format / Metode Akses | Fungsi |
 |---|---|---|---|
-| **Semua Data Pasar & Harga** | Google Search API (SerpApi) | REST API (JSON Snippets) | **Strategi Utama MVP:** Google sudah me-*scrape* angka penting dari *dashboard* pemerintah (seperti Jabarprov) dan *e-commerce*. Alih-alih melakukan *web scraping* HTML yang rawan *error*, Backend cukup menarik *snippet* teks dari Google Search API, lalu meminta LLM mengekstrak angkanya menjadi *array* (LLM Data Extraction). |
-| **Sentimen & Tren Pasar** | Google Search API + *Article Scraping* | Web Scraping (Teks) | Mengambil konteks berita terbaru (misal: "kenapa harga naik", "cuaca buruk") untuk dianalisis oleh LLM (LLM Call 2 & 3). |
+| **Semua Data Pasar & Harga** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> Teks) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapatkan daftar URL, lalu melakukan *scraping* (misal pakai `newspaper3k` atau `BeautifulSoup`) ke semua *website* di halaman pertama. Seluruh teks artikel diproses oleh LLM untuk mengekstrak sebanyak mungkin angka dan metrik menjadi *array* JSON yang akurat. |
+| **Sentimen & Tren Pasar** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> Teks) | Mengambil keseluruhan isi artikel berita/opini (bukan cuma *snippet*) untuk menganalisis konteks mendalam (cuaca, regulasi baru, kelangkaan) oleh LLM (LLM Call 2 & 3). |
 
 Untuk babak penyisihan (V1), mitigasi latensi wajib dilakukan: lakukan *fan-out* secara paralel menggunakan `asyncio.gather`, terapkan *caching* (TTL 10-15 menit) untuk data volatil, dan sediakan *mock response toggle* untuk berjaga-jaga jika internet bermasalah saat demo *offline*.
 
