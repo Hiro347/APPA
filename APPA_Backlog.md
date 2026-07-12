@@ -15,12 +15,13 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 **Arya (Data & AI Base)**
 - [ ] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
 - [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
+- [ ] *Setup script* untuk menarik data API Bapanas (Jawa Barat) dan SerpApi (Google Shopping).
 - [ ] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
 - [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
 
 **Adillah (Bisnis & Validasi)**
 - [ ] Lakukan riset kompetitor langsung (terutama daftar & uji coba UMKM.AI).
-- [ ] Buat kerangka awal (ToC) untuk Dokumen Proposal 20 Halaman.
+- [ ] Buat kerangka awal (ToC) untuk Dokumen Proposal 20 Halaman, masukkan narasi Pilot Project Jawa Barat.
 - [ ] Jadwalkan dan lakukan wawancara awal dengan UMKM terkait validasi *pain point* regulasi.
 
 ---
@@ -28,9 +29,9 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 ## V1 (Tahap Penyisihan): Core Development (Minggu 3–4 | 1–14 Agustus)
 
 **Gilang (UI/UX & AI Prompting)**
-- [ ] Desain & koding UI utama Next.js (fokus *single chat interface* & Sidebar).
-- [ ] Bikin komponen UI spesifik untuk *Consolidated Report* (gaya Wayfinder).
-- [ ] Integrasikan Next.js ke FastAPI secara penuh (bisa kirim pesan & terima respons LLM).
+- [ ] Desain & koding UI utama Next.js menggunakan pola *Artifact Panel* (Split-pane / Modal).
+- [ ] Bikin 4 komponen *Generative UI* (Markdown, Checklist, Pricing, Chart).
+- [ ] Integrasikan `Recharts` untuk merender JSON dari backend menjadi grafik interaktif.
 - [ ] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi).
 
 **Arya (Fine-Tuning & Deploy)**
@@ -40,8 +41,8 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 - [ ] Update `.env` backend dengan model ID HuggingFace yang baru.
 
 **Adillah (Proposal & Storyboarding)**
-- [ ] Tulis isi lengkap proposal (integrasikan temuan wawancara & arsitektur teknis).
-- [ ] Bikin naskah/skrip untuk Video Proof of Work (7 menit).
+- [ ] Tulis isi lengkap proposal (tekankan penggunaan Bapanas/SerpApi dan fokus Jawa Barat).
+- [ ] Bikin naskah/skrip untuk Video Proof of Work (7 menit), *setting* persona di Jawa Barat.
 - [ ] Bikin naskah/skrip untuk Video Promosi (5 menit).
 
 ---
