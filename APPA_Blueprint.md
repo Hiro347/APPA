@@ -194,7 +194,7 @@ Agar arah pengembangan jelas dalam batas waktu 3 minggu, MVP ini secara ketat me
 ### ✅ IN-SCOPE (Wajib Ada untuk Demo MVP)
 | Fitur / Modul | Deskripsi Implementasi |
 |---|---|
-| **Chat Tunggal (Next.js)** | UI Chat 2 arah (Fase Klarifikasi natural) + *Consolidated Report* (Timeline Wayfinder). |
+| **Chat Tunggal (Next.js)** | UI Chat 2 arah (Fase Klarifikasi natural) + *Consolidated Report* dalam bentuk **Bento Grid** interaktif yang di-update dinamis oleh AI Agent. |
 | **Agent Orchestrator (FastAPI)** | Jantung AI. Memiliki fungsi RAG (Qdrant) untuk regulasi dan *Web Search Fan-out* untuk riset/harga kompetitor. |
 | **Checklist Regulasi F&B** | *Fitur Pendukung Kritis*. Memandu *user* mengurus NIB -> SPP-IRT -> Halal tanpa halusinasi (*JSON Railway Pattern*) jika bisnisnya tergolong F&B. |
 | **Rekomendasi Harga Jual** | *Pricing strategy* berdasar modal vs pasar saat ini (bukan tebak-tebakan masa depan). |
@@ -219,7 +219,7 @@ Prinsip Utama: **Jangan bangun fitur yang tidak secara langsung menaikkan bobot 
 
 | Member | Fokus Utama | Tanggung Jawab Konkret |
 |---|---|---|
-| **Gilang** | Frontend, Backend (API), Prompts | Next.js UI/UX, layout output laporan (Wayfinder-style), FastAPI routes, prompt engineering |
+| **Gilang** | Frontend, Backend (API), Prompts | Next.js UI/UX, layout output laporan Bento Grid (Agent-edited), FastAPI routes, prompt engineering |
 | **Arya** | AI, Data, Infrastruktur | Kurasi `regulatory_rules.json`, dataset 1000 entri, QLoRA fine-tuning, deploy HF, Qdrant seeding, Docker setup, evaluasi model |
 | **Adillah** | Bisnis, Deliverables, Validasi | Pembuatan proposal 20 halaman, produksi 2 video (Proof of Work & Promo), wawancara validasi bisnis, dokumentasi README |
 
@@ -229,7 +229,7 @@ Prinsip Utama: **Jangan bangun fitur yang tidak secara langsung menaikkan bobot 
 
 **V1: Tahap Penyisihan (MVP Inti) — Deadline 25 Agustus 2026**
 Fokus utama: Menembus final dengan memamerkan *core engine* tanpa terbebani infrastruktur *database* berat.
-- **Gilang:** Setup Next.js + FastAPI. Kembangkan UI Chat *Wayfinder* dan logika *Agent Orchestrator*. Fitur *Profile Persistence* di-**MOCK** menggunakan *memory/state* lokal (hilang saat di-*refresh*).
+- **Gilang:** Setup Next.js + FastAPI. Kembangkan UI Chat dengan output Bento Grid Artifact dan logika *Agent Orchestrator* yang mengupdate UI secara dinamis. Fitur *Profile Persistence* di-**MOCK** menggunakan *memory/state* lokal (hilang saat di-*refresh*).
 - **Arya:** Kurasi `regulatory_rules.json`, susun dataset 1.000 entri (termasuk 15% *chit-chat*), *training* QLoRA, dan *ingest* ke Qdrant.
 - **Adillah:** Draf kerangka proposal 20 halaman, rekam video *Proof of Work* (demo V1), dan *submit* berkas.
 

@@ -6,7 +6,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 
 **Gilang (Frontend & Backend Base)**
 - [x] Inisialisasi *repository* (Git) dan pasang `.pre-commit-config.yaml` & `.commitlintrc.yml`.
-- [ ] *Setup* kerangka Next.js (Frontend) dengan `npx create-next-app`.
+- [x] *Setup* kerangka Next.js (Frontend) dengan `npx create-next-app`.
 - [x] *Setup* kerangka FastAPI (Backend) dan `requirements.txt`.
 - [x] Konfigurasi `docker-compose.yml` awal (3 *services*: frontend, backend, qdrant).
 - [x] Buat rute API dasar `/chat` di FastAPI (tanpa LLM, kembalikan json statik dulu).
@@ -29,10 +29,13 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 ## V1 (Tahap Penyisihan): Core Development (Minggu 3–4 | 1–14 Agustus)
 
 **Gilang (UI/UX & AI Prompting)**
-- [ ] Desain & koding UI utama Next.js menggunakan pola *Artifact Panel* (Split-pane / Modal).
-- [ ] Bikin 4 komponen *Generative UI* (Markdown, Checklist, Pricing, Chart).
-- [ ] Integrasikan `Recharts` untuk merender JSON dari backend menjadi grafik interaktif.
-- [ ] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi).
+- [x] Desain & koding UI utama Next.js menggunakan pola *Bento Grid Artifact System* (satu tab laporan terkonsolidasi).
+- [x] Bikin komponen orchestrator `ArtifactView` (blok konten disatukan dalam satu file tanpa sub-komponen terpisah, dan bersifat read-only untuk user).
+- [x] Terapkan sistem update blok artifact secara dinamis oleh AI Agent (berbasis instruksi chat) tanpa form edit manual dari user.
+- [x] Integrasikan `Recharts` untuk merender JSON dari backend menjadi grafik interaktif (`ChartBlock`).
+- [ ] **Sinkronisasi Backend:** *Refactor* Pydantic schema (`routes.py`), *mock response* (`inference.py`), dan *System Prompt* (`assessment.py`) agar me-*return* JSON dengan struktur Bento Grid `artifacts`/`blocks` terbaru.
+- [ ] **Pipeline Transparency:** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* ke UI frontend secara *real-time*.
+- [ ] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
 
 **Arya (Fine-Tuning & Deploy)**
 - [ ] Selesaikan *training* QLoRA di Google Colab menggunakan *dataset* JSONL.
