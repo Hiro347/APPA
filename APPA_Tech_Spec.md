@@ -1,6 +1,6 @@
-# Tech Spec: APPA
+# Tech Spec: APPA (Analisa Pasar Pintar & Akurat)
 
-> **Dokumen ini adalah panduan teknis tim developer.** Berisi arsitektur, stack, project structure, database schema, dan standar kerja. Untuk positioning, persona, dan strategi bisnis, lihat [Blueprint](APPA_Blueprint.md).
+> **Dokumen ini adalah panduan teknis tim developer.** Berisi arsitektur, stack, project structure, database schema, dan standar kerja untuk APPA (Analisa Pasar Pintar & Akurat). Untuk positioning, persona, dan strategi bisnis, lihat [Blueprint](APPA_Blueprint.md).
 
 ---
 
@@ -388,11 +388,11 @@ Jika waktu makin sempit, **fine-tuning adalah lapisan paling mudah dipangkas** â
 
 ### System Prompt & AI Cognitive Workflow (Agentic Deep Research)
 
-Selain *Tone of Voice* yang wajib menggunakan bahasa ramah (Bapak/Ibu) dan menerjemahkan jargon birokrasi, **kepribadian sejati AI APPA terletak pada alur kognitifnya**. System Prompt *Agent Orchestrator* harus memaksa LLM untuk berpikir dalam 3 pilar:
+Selain *Tone of Voice* yang wajib menggunakan bahasa ramah (Bapak/Ibu) dan menerjemahkan jargon perdagangan lokal, **kepribadian sejati AI APPA terletak pada alur kognitifnya** yang menyeimbangkan analisa pasar dan regulasi. System Prompt *Agent Orchestrator* memaksa LLM untuk berpikir dalam 3 pilar:
 
-1. **Otak Riset (WHAT to search):** Saat pengguna bertanya (misal: "Untung tipis nih"), AI wajib menerjemahkannya menjadi *search queries* ke Google (SerpApi) alih-alih berasumsi.
-2. **Otak Analisis (HOW to process):** Menggunakan **Crawl4AI** untuk *scraping* artikel (menembus JS/Anti-bot) dan menjadikannya teks *Markdown*. Setelah itu, AI WAJIB dikunci menggunakan **Pydantic Models** untuk mengekstrak data JSON yang 100% terstruktur tanpa halusinasi/narasi.
-3. **Otak Komunikasi (HOW to convey):** Menyampaikan hasil tanpa terkesan seperti jurnal akademik. Menggabungkan JSON Pydantic dengan gaya bahasa ramah untuk di-render oleh *Generative UI*.
+1. **Otak Riset & Deteksi Regulasi (WHAT to search/fetch):** Menerjemahkan kebutuhan pengguna menjadi kueri pencarian harga pasar/kompetitor (SerpApi) serta mendeteksi apakah diperlukan pengecekan regulasi dari Qdrant.
+2. **Otak Analisis Kelayakan (HOW to process):** Menganalisis data pasar dari Crawl4AI/SerpApi secara dinamis, mengekstrak parameter (modal, HPP, kompetitor) dengan **Pydantic Models**, dan memadukannya dengan aturan regulasi lokal jika terdeteksi bidang F&B.
+3. **Otak Komunikasi (HOW to convey):** Menyajikan gabungan data riset pasar dan rekomendasi legalitas secara ramah, terstruktur, dan siap dieksekusi melalui *Generative UI*.
 
 ### Agent Orchestrator (`core/agent.py`)
 
@@ -487,12 +487,12 @@ sequenceDiagram
 
 ### Mekanisme Anti-Halusinasi (Penjelasan)
 
-Untuk mencegah LLM berhalusinasi mengarang urutan izin (yang berakibat fatal pada nilai *compliance*), kita mengimplementasikan pola injeksi instruksi ketat (Agentic Workflow):
-1. **LLM Mengekstrak, bukan Menjawab:** Pada LLM Call 1, model hanya bertugas mendeteksi entitas (misal: `{"kategori": "fb_mikro"}`). LLM **tidak** diizinkan menjawab urutan hukum di tahap ini.
-2. **Fase Klarifikasi (Pencegahan Token Terbuang):** Jika entitas belum lengkap (misal user hanya bilang "hi" atau "jual makanan"), Python memblokir akses RAG dan langsung meminta LLM membalas dengan obrolan santai/bertanya balik.
-3. **Python Mengambil Alih (Rule-Based):** Jika entitas lengkap, script Python backend mencocokkan `"fb_mikro"` dengan `regulatory_rules.json` dan mendapatkan kepastian urutan absolut: `[NIB, SPP-IRT, Halal]`. Python lalu menarik detail teks tiap izin dari Qdrant (RAG).
-4. **Injeksi Prompt Ketat (Call 2):** Python merakit *System Prompt* yang mendikte LLM secara mutlak: *"Aturan sistem: Klien WAJIB mengurus 1. NIB, 2. SPP-IRT, 3. Halal (Tenggat 17 Okt 2026). Konteks Qdrant: [...]. Tugasmu: Sintesiskan menjadi laporan format Wayfinder."*
-5. **Hasil Deterministik:** LLM dipaksa menjadi sekadar "penulis laporan" yang merapikan logika Python. Ini memastikan akurasi urutan hukum 100% tanpa mengorbankan keluwesan bahasa AI.
+Untuk memastikan keandalan hasil analisis pasar sekaligus mencegah LLM berhalusinasi mengarang urutan izin, kita menggunakan alur kerja terstruktur (Agentic Workflow):
+1. **LLM Mengekstrak, bukan Menjawab:** Pada LLM Call 1, model mendeteksi entitas riset pasar (kategori produk, kisaran harga, lokasi) dan status izin awal (misal: `{"kategori": "fb_mikro", "NIB": false}`).
+2. **Fase Klarifikasi (Pencegahan Token Terbuang):** Jika informasi kurang untuk dianalisis, model membalas dengan obrolan santai/bertanya balik untuk melengkapi profil usaha.
+3. **Penyatuan Data Pasar & Regulasi:** Jika data lengkap, backend Python melakukan pencarian web untuk tren harga dan kompetitor secara paralel dengan mencocokkan kategori perizinan di `regulatory_rules.json`. Rincian hukum ditarik dari Qdrant jika terdeteksi bisnis F&B.
+4. **Injeksi Prompt Ketat (Call 2):** Python merakit *System Prompt* yang menggabungkan hasil pencarian tren pasar real-time dan syarat perizinan mutlak dari database lokal.
+5. **Sintesis Terarah:** LLM menyintesis data tersebut menjadi laporan terstruktur (Wayfinder-style) yang memadukan prospek bisnis, rekomendasi harga, dan checklist legalitas secara proporsional.
 
 > [!WARNING]
 > **Implikasi Dataset QLoRA (Untuk Arya):**

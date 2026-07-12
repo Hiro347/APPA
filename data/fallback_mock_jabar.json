@@ -1,0 +1,124 @@
+{
+  "keripik_singkong_pedas": {
+    "product": "Keripik Singkong Pedas",
+    "region": "Jawa Barat (Bandung & Surabaya)",
+    "market_demand": "Tinggi. Kategori camilan pedas menyumbang 40% dari total penjualan makanan ringan UMK di wilayah Jawa Barat. Konsumsi meningkat saat akhir pekan dan sore hari.",
+    "average_competitor_price": 12500,
+    "price_range": {
+      "warung_kelontong": "Rp 5.000 - Rp 8.000 (kemasan kecil 80g)",
+      "marketplace_online": "Rp 12.000 - Rp 18.000 (kemasan ziplock 150g)",
+      "supermarket_modern": "Rp 15.000 - Rp 22.000 (kemasan premium 200g)"
+    },
+    "commodity_price": {
+      "singkong_mentah_petani": "Rp 3.500/kg",
+      "singkong_pasar_induk": "Rp 5.000/kg",
+      "cabai_rawit_merah": "Rp 48.000/kg (stabil dalam 2 minggu terakhir)"
+    },
+    "competitors": [
+      {
+        "name": "Keripik Maicih",
+        "scale": "Nasional / Premium",
+        "pricing": "Rp 18.000",
+        "strategy": "Kekuatan branding level kepedasan dan distribusi ritel modern."
+      },
+      {
+        "name": "Keripik Singkong Pedas Kiloan (Curah)",
+        "scale": "Mikro / Lokal",
+        "pricing": "Rp 35.000/kg",
+        "strategy": "Menjual curah ke warung-warung makan dengan kemasan plastik tipis biasa."
+      }
+    ],
+    "sources": [
+      "Pusat Data Harga Pangan Jabar (Bapanas)",
+      "Shopee Indonesia Shopping Trends 2026",
+      "Riset Pasar Lokal APPA"
+    ]
+  },
+  "bakso_sapi_beku": {
+    "product": "Bakso Sapi Beku (Frozen Food)",
+    "region": "Jabodetabek & Jawa Barat",
+    "market_demand": "Sangat Tinggi. Kategori frozen food berkembang pesat sejak pandemi dengan kenaikan penjualan 30% YoY. Bakso sapi adalah produk paling populer (>50% pangsa pasar makanan beku rumahan).",
+    "average_competitor_price": 32000,
+    "price_range": {
+      "agen_frozen_food": "Rp 25.000 - Rp 30.000 (isi 50 butir)",
+      "supermarket": "Rp 35.000 - Rp 55.000 (premium)",
+      "toko_online": "Rp 28.000 - Rp 38.000"
+    },
+    "commodity_price": {
+      "daging_sapi_murni_paha": "Rp 125.000/kg",
+      "daging_sapi_tetelan": "Rp 85.000/kg",
+      "tepung_tapioka": "Rp 12.000/kg"
+    },
+    "competitors": [
+      {
+        "name": "Bakso Sumber Selera",
+        "scale": "Nasional / Ritel Besar",
+        "pricing": "Rp 38.000 (isi 50)",
+        "strategy": "Jaringan ritel modern luas dan sertifikat halal kuat."
+      },
+      {
+        "name": "Bakso Home-made Ibu Nur",
+        "scale": "Mikro Lokal / Reseller",
+        "pricing": "Rp 27.000 (isi 40)",
+        "strategy": "Penjualan via status WA, grup arisan, dan pemasaran langsung."
+      }
+    ],
+    "sources": [
+      "Asosiasi Pengusaha Frozen Food Indonesia 2026",
+      "SerpApi Google Shopping",
+      "Data Harga Pangan Nasional"
+    ]
+  },
+  "kopi_bubuk_lokal": {
+    "product": "Kopi Bubuk Murni / Blend",
+    "region": "Jawa Barat (Bandung & Garut)",
+    "market_demand": "Tinggi. Kebiasaan ngopi harian di Bandung menciptakan pasar kopi bubuk rumahan (blend Robusta-Arabika) yang sangat stabil untuk konsumsi harian di warung-warung kopi lokal.",
+    "average_competitor_price": 28000,
+    "price_range": {
+      "pasar_tradisional": "Rp 15.000 - Rp 20.000 (kemasan 250g biasa)",
+      "coffeeshop_roastery": "Rp 40.000 - Rp 75.000 (kemasan ziplock premium 250g)",
+      "warung_kopi_kelontong": "Rp 22.000 - Rp 30.000"
+    },
+    "commodity_price": {
+      "green_bean_robusta_dampit": "Rp 52.000/kg",
+      "green_bean_arabika_prianger": "Rp 95.000/kg"
+    },
+    "competitors": [
+      {
+        "name": "Kopi Aroma Bandung",
+        "scale": "Legenda Lokal / Ritel",
+        "pricing": "Rp 30.000 (250g)",
+        "strategy": "Branding legendaris, kualitas konsisten, antrean pembeli fisik."
+      },
+      {
+        "name": "Kopi Bubuk Curah Pasar",
+        "scale": "Tradisional",
+        "pricing": "Rp 65.000/kg",
+        "strategy": "Harga sangat murah, menyasar pengusaha warkop pinggir jalan."
+      }
+    ],
+    "sources": [
+      "Asosiasi Eksportir dan Industri Kopi Indonesia (AEKI)",
+      "Survei Warkop Bandung 2026"
+    ]
+  },
+  "default_market": {
+    "product": "Makanan Olahan Umum",
+    "region": "Jawa",
+    "market_demand": "Sedang - Tinggi. Konsumsi rumah tangga untuk makanan olahan mendominasi pengeluaran UMKM (>60%). Tren rasa didominasi pedas, manis, dan gurih.",
+    "average_competitor_price": 15000,
+    "price_range": {
+      "warung": "Rp 5.000 - Rp 10.000",
+      "toko_online": "Rp 12.000 - Rp 25.000"
+    },
+    "commodity_price": {
+      "beras_medium": "Rp 13.500/kg",
+      "minyak_goreng_curah": "Rp 16.000/liter",
+      "gula_pasir": "Rp 18.000/kg"
+    },
+    "competitors": [],
+    "sources": [
+      "BPS Pengeluaran Konsumen 2025"
+    ]
+  }
+}

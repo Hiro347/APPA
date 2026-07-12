@@ -1,0 +1,87 @@
+{
+  "fb_pangan_olahan_kering_rendah": {
+    "kategori_nama": "F&B Pangan Olahan Kering / Risiko Rendah (Skala Rumah Tangga)",
+    "kriteria_bisnis": "Produk pangan olahan kering, masa simpan > 7 hari pada suhu ruang, tidak menggunakan bahan baku impor/daging segar/susu segar tanpa pengolahan dasar, skala industri rumah tangga (IRT). Contoh: keripik pisang, kering tempe, kue kering, kopi bubuk.",
+    "urutan_izin": [
+      {
+        "izin": "NIB (Nomor Induk Berusaha)",
+        "kode": "NIB",
+        "wajib": true,
+        "dasar_hukum": "PP 28/2025 tentang Perizinan Berusaha Berbasis Risiko",
+        "prasyarat": "KTP (NIK), Akun di oss.go.id, KBLI yang sesuai (misal: 10794 untuk industri keripik)",
+        "biaya": "Gratis (100% Bebas Biaya)",
+        "durasi": "Selesai dalam hitungan menit (instan)",
+        "cara_urus": "Daftar online di oss.go.id, verifikasi NIK, pilih skala Mikro & Kecil, tentukan KBLI produk, dan klik terbitkan NIB."
+      },
+      {
+        "izin": "SPP-IRT (Sertifikat Produksi Pangan Industri Rumah Tangga)",
+        "kode": "SPP-IRT",
+        "wajib": true,
+        "dasar_hukum": "Peraturan BPOM No. 4/2024 tentang Pengawasan Pangan Olahan Industri Rumah Tangga",
+        "prasyarat": "NIB, memiliki tempat produksi bersih di rumah tinggal, mengikuti Penyuluhan Keamanan Pangan (PKP)",
+        "biaya": "Gratis",
+        "durasi": "1 hari kerja (online)",
+        "cara_urus": "Masuk ke sppirt.pom.go.id atau integrasi via akun OSS, daftarkan produk, isi data komposisi, klaim, label, dan dapatkan nomor SPP-IRT secara online."
+      },
+      {
+        "izin": "Sertifikasi Halal (Self-Declare / SEHATI)",
+        "kode": "HALAL_SEHATI",
+        "wajib": true,
+        "tenggat": "2026-10-17",
+        "dasar_hukum": "UU No. 33/2014 jo. PP No. 42/2024 tentang Penyelenggaraan Jaminan Produk Halal",
+        "prasyarat": "NIB, SPP-IRT (jika diperlukan), bahan baku yang digunakan 100% dipastikan halal, proses produksi terbebas dari kontaminasi non-halal",
+        "biaya": "Gratis (melalui Program Sertifikasi Halal Gratis / SEHATI)",
+        "durasi": "21 - 30 hari kerja",
+        "cara_urus": "Daftar di akun SIHALAL (ptsp.halal.go.id), ajukan permohonan sertifikasi skema self-declare, diverifikasi oleh Pendamping PPH, disetujui Komite Fatwa MUI, diterbitkan sertifikat oleh BPJPH."
+      }
+    ]
+  },
+  "fb_pangan_olahan_basah_tinggi": {
+    "kategori_nama": "F&B Pangan Olahan Risiko Tinggi / Basah (Skala BPOM)",
+    "kriteria_bisnis": "Produk pangan olahan basah/beku (frozen food), masa simpan < 7 hari (jika berisiko patogen), mengandung daging/ikan/susu olahan segar tanpa proses kering, makanan kaleng, produk bayi/ibu hamil, makanan impor. Contoh: bakso beku, yogurt, sosis, kornet.",
+    "urutan_izin": [
+      {
+        "izin": "NIB (Nomor Induk Berusaha)",
+        "kode": "NIB",
+        "wajib": true,
+        "dasar_hukum": "PP 28/2025",
+        "prasyarat": "KTP (NIK), Akun di oss.go.id, KBLI produsen pangan sesuai",
+        "biaya": "Gratis",
+        "durasi": "Instan",
+        "cara_urus": "Daftar online di oss.go.id, verifikasi data usaha, pilih KBLI pengolahan pangan risiko menengah/tinggi."
+      },
+      {
+        "izin": "Izin Edar BPOM MD (Pangan Olahan Dalam Negeri)",
+        "kode": "BPOM_MD",
+        "wajib": true,
+        "dasar_hukum": "Peraturan BPOM No. 27/2017 jo. Perubahannya tentang Pendaftaran Pangan Olahan",
+        "prasyarat": "NIB, Audit sarana produksi (PSB - Pemeriksaan Sarana oleh Balai BPOM dengan status minimal B), denah bangunan, hasil uji laboratorium produk",
+        "biaya": "Tarif PNBP resmi (berdasarkan PP No. 32/2017, berkisar Rp 100.000 - Rp 300.000 per produk untuk usaha mikro)",
+        "durasi": "30 - 60 hari kerja setelah dokumen lengkap",
+        "cara_urus": "Ajukan pendaftaran akun perusahaan di e-reg.pom.go.id, daftarkan sarana produksi (PSB), setelah sarana disetujui lakukan pendaftaran produk dengan mengunggah komposisi, hasil lab, rancangan label kemasan."
+      },
+      {
+        "izin": "Sertifikasi Halal Reguler",
+        "kode": "HALAL_REGULER",
+        "wajib": true,
+        "tenggat": "2026-10-17",
+        "dasar_hukum": "UU No. 33/2014 jo. PP No. 42/2024",
+        "prasyarat": "NIB, Izin Edar BPOM MD, Sertifikat Penyelia Halal, Sistem Jaminan Produk Halal (SJPH)",
+        "biaya": "Berbayar (tarif berkisar Rp 300.000 - Rp 650.000 untuk UMK, tergantung tarif BPJPH & LPH)",
+        "durasi": "30 - 45 hari kerja",
+        "cara_urus": "Daftar di SIHALAL (ptsp.halal.go.id), pilih skema Reguler, tunjuk Lembaga Pemeriksa Halal (LPH) untuk mengaudit proses produksi ke lokasi, hasil audit disidangkan oleh Komite Fatwa MUI, BPJPH menerbitkan sertifikat."
+      }
+    ]
+  },
+  "pajak_umkm": {
+    "kategori_nama": "Pajak Penghasilan (PPh) Final UMKM 0.5%",
+    "kriteria_bisnis": "Kewajiban perpajakan untuk pelaku UMKM perorangan maupun badan usaha dengan omset di bawah Rp 4.8 Miliar per tahun.",
+    "aturan": {
+      "tarif": "0.5% dari peredaran bruto (omset) bulanan",
+      "dasar_hukum": "PP No. 20/2026 tentang PPh Final atas Penghasilan dari Usaha bagi WP dengan Peredaran Bruto Tertentu (Mengubah PP No. 55/2022)",
+      "WP_Orang_Pribadi": "Bebas pajak (omset Rp 0) untuk omset sampai dengan Rp 500 juta setahun. Selebihnya dikenai 0.5%. Berlaku tanpa batas waktu.",
+      "WP_PT_Perorangan": "Dikenai 0.5% dari rupiah pertama (tidak ada batas bebas Rp 500 juta). Berlaku tanpa batas waktu.",
+      "WP_CV_Firma_PT_Umum": "WP Badan baru berbentuk CV/Firma/PT umum per April 2026 tidak lagi mendapatkan tarif PPh Final 0.5% (wajib menggunakan tarif normal pembukuan). CV/Firma lama yang sudah berjalan dibatasi maksimal 4 tahun."
+    }
+  }
+}

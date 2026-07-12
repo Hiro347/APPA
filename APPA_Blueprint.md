@@ -1,8 +1,8 @@
-# Cetak Biru Proyek: APPA
+# Cetak Biru Proyek: APPA (Analisa Pasar Pintar & Akurat)
 
-### AI Co-Pilot untuk Membuka, Menjalankan, dan Mematuhi Regulasi Bisnis — UMKM Indonesia
+### AI Market Research & Business Copilot untuk UMKM Indonesia
 
-APPA membantu pelaku UMKM Indonesia menjawab tiga pertanyaan tersulit dalam membuka usaha: **apakah ide ini layak, izin apa saja yang dibutuhkan (dan dalam urutan apa), dan dari mana modal datang** — lewat satu asisten yang mengenal bisnis penggunanya seiring waktu, bukan chatbot yang mulai dari nol tiap sesi.
+APPA (**Analisa Pasar Pintar & Akurat**) membantu pelaku UMKM Indonesia melakukan riset pasar secara cerdas sekaligus mendeteksi kesiapan regulasi usaha mereka. APPA menjawab tiga pertanyaan tersulit: **apakah ide ini layak (analisis pasar & kompetitor), izin apa saja yang dibutuhkan secara legal (checklist regulasi jika dibutuhkan), dan dari mana modal datang (rekomendasi pembiayaan)** — lewat satu asisten chatbot yang mengingat profil bisnis penggunanya seiring waktu.
 
 > **Dokumen ini adalah panduan bisnis & produk tim.** Berisi positioning, persona, konten regulasi, diferensiasi, dan model bisnis — bahan utama untuk proposal dan pitching. Untuk arsitektur, stack teknologi, dan panduan development, lihat [Tech Spec](APPA_Tech_Spec.md).
 
@@ -10,20 +10,20 @@ APPA membantu pelaku UMKM Indonesia menjawab tiga pertanyaan tersulit dalam memb
 
 ## 1. Positioning & Elevator Pitch
 
-**Nama produk tetap APPA** (mengganti nama dekat deadline Batch 2, 18 Juli 2026, lebih berisiko daripada manfaatnya). Yang berubah hanya subjudul dan framing pitching.
+**Nama produk tetap APPA** (singkatan dari **Analisa Pasar Pintar & Akurat**).
 
-**Subjudul:** *"Asisten AI untuk Membuka, Menjalankan, dan Mematuhi Regulasi Bisnis UMKM Indonesia — dari Ide sampai Siap Berjualan Legal."*
+**Subjudul:** *"Asisten AI untuk Riset Pasar Pintar dan Kesiapan Regulasi Usaha UMKM Indonesia — dari Ide sampai Siap Berjualan Legal secara Efektif."*
 
 **Kategori posisi (headline utama, ditebalkan):**
 
 | Opsi | Kapan dipakai |
 |---|---|
-| **AI Business Launch & Compliance Copilot** *(rekomendasi)* | Judul slide utama |
+| **AI Market Intelligence & Business Copilot** *(rekomendasi)* | Judul slide utama |
 | AI Business Intelligence untuk UMKM | Kalau juri berlatar korporat/data |
-| Regulatory Intelligence for Indonesian SMEs | Kalimat pendukung saat fokus ke modul Checklist Regulasi |
+| Smart Commerce & Compliance Assistant | Kalimat pendukung saat fokus ke modul kelayakan & legalitas |
 
 **Elevator pitch:**
-> "74% UMKM Indonesia meluncurkan produk baru tanpa riset pasar, dan meski NIB kini gratis dan terbit dalam hitungan menit lewat OSS, mayoritas UMKM masih belum punya legalitas dasar. Sementara itu, tenggat Wajib Halal untuk seluruh produk makanan-minuman UMKM jatuh 17 Oktober 2026 — kurang dari 100 hari dari sekarang. APPA adalah co-pilot yang menjawab tiga pertanyaan sekaligus — layakkah ide ini, izin apa yang saya butuhkan dan urutannya, dan dari mana modalnya — dan mengingat perjalanan bisnis Anda antar sesi, bukan menjawab dari nol tiap kali."
+> "74% UMKM Indonesia meluncurkan produk baru tanpa riset pasar terlebih dahulu karena biaya riset pasar konvensional yang mahal. Selain itu, banyak pelaku usaha yang belum memiliki izin legalitas dasar seperti NIB, SPP-IRT, dan sertifikasi Halal yang wajib dipenuhi menjelang tenggat 17 Oktober 2026. APPA (Analisa Pasar Pintar & Akurat) adalah AI chatbot riset pasar terintegrasi yang membantu UMKM menganalisis kelayakan pasar, harga jual, dan kompetitor secara real-time, sekaligus memandu kesiapan perizinan usaha mereka secara bertahap dan mengingat profil bisnis mereka lintas sesi."
 
 **Mantra pitching (ulangi terus ke juri):** *"Kami bukan chatbot. Kami mengubah birokrasi dan informasi bisnis yang tersebar menjadi checklist dan rencana aksi yang bisa langsung dijalankan."* Ini tidak mengklaim "lebih pintar dari ChatGPT" — prinsip *vertical specialist* ini dipertahankan dari v2/v3 karena sudah sejalan dengan rekomendasi *Critical Review*.
 
@@ -36,14 +36,14 @@ APPA membantu pelaku UMKM Indonesia menjawab tiga pertanyaan tersulit dalam memb
 
 ### Argumen penghubung ke tema Smart Commerce (wajib masuk proposal & slide)
 
-Nama produk adalah APPA, dan tema yang disasar adalah Smart Commerce. Kedua hal ini terhubung langsung, bukan dipaksakan:
+Nama produk adalah APPA (Analisa Pasar Pintar & Akurat), dan tema yang disasar adalah Smart Commerce. Kedua hal ini terhubung langsung, bukan dipaksakan:
 
-> Riset pasar tidak hanya tentang tren harga dan preferensi konsumen — riset pasar adalah tentang **kelayakan operasional**. Di Indonesia, transaksi komersial (Smart Commerce) tidak dapat terjadi tanpa kepatuhan hukum dasar:
+> Riset pasar tidak hanya tentang tren harga dan preferensi konsumen — riset pasar adalah tentang **kelayakan komersial dan operasional**. Di Indonesia, transaksi komersial (Smart Commerce) tidak dapat terjadi tanpa kepatuhan hukum dasar:
 > - Tanpa **NIB**, UMKM tidak bisa mendaftar sebagai seller di marketplace (Shopee, Tokopedia).
 > - Tanpa **SPP-IRT**, produk pangan olahan tidak bisa dijual legal di ritel modern (Indomaret, Alfamart).
 > - Tanpa **Sertifikasi Halal** (tenggat 17 Oktober 2026), seluruh produk makanan-minuman UMKM kehilangan hak jual di pasar formal.
 >
-> **Sertifikasi Halal, SPP-IRT, dan NIB adalah kunci pembuka gerbang bagi UMKM untuk menjual produknya di platform e-commerce dan ritel modern secara legal.** APPA memastikan UMKM bukan hanya tahu *apa yang mau dijual* dan *ke siapa*, tapi juga *apakah mereka secara legal boleh menjualnya* — dan langkah konkret untuk sampai ke sana.
+> **Sertifikasi Halal, SPP-IRT, dan NIB adalah kunci pembuka gerbang bagi UMKM untuk menjual produknya di platform e-commerce dan ritel modern secara legal.** APPA memastikan UMKM bukan hanya tahu *apa yang mau dijual* dan *ke siapa* (Riset Pasar), tapi juga *apakah mereka secara legal boleh menjualnya* (Regulasi) — dan langkah konkret untuk sampai ke sana.
 
 | Komponen APPA | Relevansi ke Smart Commerce (Rulebook) |
 |---|---|
@@ -73,11 +73,11 @@ Gunakan tabel ini di slide proposal untuk menunjukkan bahwa setiap modul memetak
 |---|---|---|---|
 | 1 | Analisis Peluang | Demografi & Studi Kasus UMKM + fan-out real-time | Sudah ada |
 | 2 | Analisis Kompetitor | Search API + Harga Acuan Komoditas | Sudah ada |
-| 3 | **Checklist Regulasi** | Koleksi Regulasi & Perizinan — **modul unggulan** | Perlu pendalaman konten (Bagian 5) |
-| 4 | **Rekomendasi Harga (Pricing)** | Menghitung harga jual berdasar modal (HPP) vs harga kompetitor saat ini (Web Search) | **FITUR BARU** (Aman dari risiko prediksi) |
-| 5 | Rencana Aksi — **satu laporan konsolidasi** | Perluasan skema output — **bukan LLM call baru** | Perluasan kecil di dataset |
+| 3 | Rekomendasi Harga (Pricing) | Menghitung harga jual berdasar modal (HPP) vs harga kompetitor saat ini (Web Search) | **FITUR BARU** (Aman dari risiko prediksi) |
+| 4 | **Checklist Regulasi** | Panduan regulasi & perizinan (NIB, SPP-IRT, Halal) — *dihasilkan jika dibutuhkan* | Perlu pendalaman konten (Bagian 5) |
+| 5 | Rencana Aksi — **satu laporan konsolidasi** | Laporan analisa pasar terstruktur dikombinasikan dengan checklist kepatuhan hukum | Perluasan kecil di dataset |
 
-Yang kurang bukan arsitektur, tapi kedalaman konten Qdrant untuk regulasi (Bagian 5) dan proporsi contoh regulasi di dataset training.
+Integrasi pilar riset pasar dan perizinan memastikan pengguna mendapatkan analisis kelayakan komersial yang lengkap dan siap eksekusi.
 
 ---
 
@@ -96,16 +96,16 @@ Yang kurang bukan arsitektur, tapi kedalaman konten Qdrant untuk regulasi (Bagia
 
 ---
 
-## 5. Checklist Regulasi — Modul Unggulan (Seluruh Ekosistem F&B)
+## 5. Kepatuhan Regulasi Terintegrasi (Fokus Ekosistem F&B)
 
-**Go-To-Market Strategy (Fokus Penilaian):** MVP ini **secara eksklusif difokuskan pada seluruh ekosistem F&B Pangan Olahan (Risiko Rendah & Tinggi)**. Alasan bisnis yang harus disampaikan ke Juri: 60% UMKM Indonesia berada di sektor ini, dan mereka menghadapi urgensi hidup-mati yaitu *Tenggat Wajib Halal 17 Oktober 2026*. Mencoba merangkum seluruh regulasi bisnis Indonesia dalam 6 minggu akan menghasilkan AI yang "lebar tapi dangkal" (seperti kompetitor UMKM.AI). Sebaliknya, cakupan menyeluruh di sektor F&B memungkinkan kita membangun asisten (*regulatory_rules.json*) yang akurasinya mutlak 100% dan tidak bisa ditandingi oleh model AI generalis mana pun.
+**Strategi Integrasi Cerdas:** Untuk memberikan solusi analisis pasar yang bernilai tinggi, modul regulasi ditawarkan sebagai pendukung kelayakan bisnis, **difokuskan khusus pada ekosistem F&B Pangan Olahan**. Alasan bisnis: F&B mencakup lebih dari 60% UMKM Indonesia dan sedang menghadapi urgensi *Tenggat Wajib Halal 17 Oktober 2026*. APPA mengintegrasikan pengecekan izin ini secara otomatis ketika mendeteksi kategori bisnis makanan/minuman, sehingga pengguna tidak perlu bertanya secara terpisah tentang aspek hukum.
 
-**Skenario Demo Killer (Pembanding Risiko):**
-- *User:* "Mau jual keripik pisang." -> AI mengarahkan ke SPP-IRT (Risiko Rendah).
-- *User:* "Mau jual bakso sapi beku (frozen)." -> AI mendeteksi risiko tinggi, memblokir SPP-IRT, dan mengarahkan ke wajib Izin Edar BPOM (MD).
-Ini menunjukkan kecerdasan *business intelligence* sistem dalam menyelamatkan pengguna dari kesalahan pendaftaran fatal.
+**Skenario Demo Aspek Kepatuhan:**
+- *User:* bertanya tentang prospek jualan keripik pisang di pasar lokal $\rightarrow$ AI memberikan analisis pasar, lalu menambahkan checklist regulasi SPP-IRT (Risiko Rendah) dan sertifikat Halal Self-Declare.
+- *User:* bertanya tentang jualan bakso sapi beku (frozen) $\rightarrow$ AI mendeteksi kategori makanan basah beku berisiko lebih tinggi, lalu mengarahkan ke wajib Izin Edar BPOM MD (bukan SPP-IRT).
+Ini menunjukkan bahwa analisis kelayakan APPA mencakup aspek komersial sekaligus legalitas operasional secara seimbang.
 
-*(Catatan: Jika user bertanya tentang sektor di luar F&B misal Kosmetik/Jasa/Restoran Dine-in, AI akan otomatis melakukan fallback ke mode RAG Qdrant standar dengan memberikan disclaimer elegan bahwa MVP ini dioptimalkan khusus untuk Pangan Olahan Kemasan.)*
+*(Catatan: Jika kueri riset pasar tidak berkaitan dengan makanan, AI akan fokus pada parameter pasar standar dan memberikan disclaimer regulasi umum jika diperlukan).*
 
 ### Satu sumber kebenaran, bukan sekadar diagram
 
@@ -196,7 +196,7 @@ Agar arah pengembangan jelas dalam batas waktu 3 minggu, MVP ini secara ketat me
 |---|---|
 | **Chat Tunggal (Next.js)** | UI Chat 2 arah (Fase Klarifikasi natural) + *Consolidated Report* (Timeline Wayfinder). |
 | **Agent Orchestrator (FastAPI)** | Jantung AI. Memiliki fungsi RAG (Qdrant) untuk regulasi dan *Web Search Fan-out* untuk riset/harga kompetitor. |
-| **Checklist Regulasi F&B** | *Killer Feature*. Memandu *user* ngurus NIB -> SPP-IRT -> Halal tanpa halusinasi (*JSON Railway Pattern*). |
+| **Checklist Regulasi F&B** | *Fitur Pendukung Kritis*. Memandu *user* mengurus NIB -> SPP-IRT -> Halal tanpa halusinasi (*JSON Railway Pattern*) jika bisnisnya tergolong F&B. |
 | **Rekomendasi Harga Jual** | *Pricing strategy* berdasar modal vs pasar saat ini (bukan tebak-tebakan masa depan). |
 | **Profile Persistence** | Menyimpan profil bisnis *user* secara persisten lintas-sesi (Modal, Kategori, Status Izin). *Di-mock via state lokal pada V1, dan bermigrasi ke database SQLite pada V2.* |
 
