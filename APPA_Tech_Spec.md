@@ -456,15 +456,19 @@ Alur per request:
 
 ## 7. Komponen Frontend (Next.js)
 
-### Syarat Data UI/UX (Generative UI Components)
+### Syarat Data UI/UX (Generative UI & Artifact Pattern)
 
-UI berfokus pada **satu halaman Chat dinamis**. Kita menggunakan pendekatan **Generative UI**: alih-alih me-render teks Markdown biasa, API `/chat` akan mengembalikan array *JSON objects*. Frontend (Next.js) bertugas melakukan *manual parsing* dan me-render komponen React yang sesuai dengan field `ui_type`.
+UI berfokus pada **satu halaman dinamis** dengan mengadopsi **Artifact UI Pattern** (mirip Claude/Gemini). Alih-alih me-render teks Markdown biasa, API `/chat` akan mengembalikan array *JSON objects*. 
 
-Daftar 4 komponen wajib yang harus dibuat oleh Frontend:
+**Konsep Layout Wajib:**
+1. **Main Chat Panel:** Menampilkan *history* obrolan teks. Saat komponen visual dihasilkan, *chat* hanya menampilkan teks referensi singkat (misal: "Berikut adalah laporan Anda. [Buka Dashboard]").
+2. **Artifact Panel (Split-Pane Kanan / Modal):** Panel khusus untuk me-render komponen React (Generative UI) berdasarkan *payload* JSON. Hal ini memungkinkan *user* melakukan *follow-up chat* yang akan me-*update state* komponen di dalam *Artifact Panel* tanpa mengotori *history chat* utama dengan grafik yang bertumpuk.
+
+Daftar 4 komponen wajib yang harus di-render di dalam Artifact Panel:
 
 | Nama Komponen | `ui_type` | Skema Data JSON (Payload dari Backend) |
 |---|---|---|
-| `<MarkdownText />` | `text` | `{ "ui_type": "text", "content": "Teks markdown...", "sources": [] }` |
+| `<MarkdownText />` | `text` | *(Dirender di Main Chat)* `{ "ui_type": "text", "content": "Teks markdown...", "sources": [] }` |
 | `<WayfinderChecklist />` | `checklist` | `{ "ui_type": "checklist", "items": [{"title": "NIB", "status": "wajib"}], "sources": ["PP 28/2025"] }` |
 | `<PricingDashboard />` | `pricing` | `{ "ui_type": "pricing", "hpp": 5000, "market_avg": 12000, "recommendation": 10000, "sources": ["SerpApi Google"] }` |
 | `<TrendChart />` | `chart` | `{ "ui_type": "chart", "xAxis": ["Jan", "Feb"], "yAxis": [50000, 80000], "sources": ["Scraping Bapanas"] }` |
