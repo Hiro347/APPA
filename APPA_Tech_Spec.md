@@ -144,25 +144,36 @@ appa/
 flowchart TD
     A[User input via Next.js] -->|POST /chat| B[FastAPI Backend]
     B --> C[Ambil profil dari SQLite]
-    C --> D[LLM Call 1: dekomposisi + routing + entity extraction]
+    
+    %% Otak Riset
+    C --> D[LLM Call 1: Dekomposisi + Entity Extraction + Generate Queries]
     D --> E[profile_updater: update SQLite]
-    D -->|web_search| F[Google Search API]
-    D -->|vector_db| G[Qdrant]
-    F --> H[LLM Call 2: assess + deteksi anomali]
-    G --> H
-    H --> I{Perlu deep-dive?}
-    I -- ya, maks 1x --> J[Deep-dive search]
-    J --> K[LLM Call 3: sintesis final]
-    I -- tidak --> K
-    K --> L[Return JSON response ke Next.js]
+    D -->|search queries| F[Google Search API]
+    D -->|vector_db| G[Qdrant RAG]
+    
+    %% Filter & Condense Pipeline
+    F -->|URLs| H[Trafilatura: Full Page Scraping HTML -> Teks]
+    H --> I[LLM / Local NLP: Condense Teks Jadi Poin Fakta]
+    
+    %% Otak Analisis & Komunikasi
+    I --> J[LLM Call 2: Assess + Deteksi Anomali + Sintesis]
+    G --> J
+    J --> K{Perlu deep-dive?}
+    K -- ya, maks 1x --> L[Deep-dive search]
+    L --> M[LLM Call 3: Sintesis final]
+    K -- tidak --> M
+    
+    %% Generative UI Output
+    M --> N[Return JSON: Generative UI Components]
+    N --> O[Next.js Render: Artifact Panel]
 ```
 
 ### Data flow per LLM call
 
 | Call | Input | Output | Catatan |
 |---|---|---|---|
-| **LLM Call 1** | User message + user profile | `{route, sub_queries[], extracted_entities}` | Entity extraction terjadi di sini — bukan call terpisah |
-| **LLM Call 2** | Search results + Qdrant results + profile | `{assessment, anomaly_flag, need_deep_dive}` | Jika `need_deep_dive=false`, langsung ke sintesis |
+| **LLM Call 1 (Riset)** | User message + user profile | `{route, sub_queries[], extracted_entities}` | Entity extraction & Query Generation terjadi di sini |
+| **LLM Call 2 (Analisis)** | Condensed Search + Qdrant results + profile | `{assessment, anomaly_flag, need_deep_dive}` | Jika `need_deep_dive=false`, langsung ke sintesis UI |
 | **LLM Call 3** | Semua konteks + deep-dive results (opsional) | Final response (laporan konsolidasi) | Output terformat sesuai Klaster B dataset |
 
 ### API Endpoints (Kontrak Data Frontend & Backend)
