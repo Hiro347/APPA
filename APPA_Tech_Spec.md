@@ -165,13 +165,63 @@ flowchart TD
 | **LLM Call 2** | Search results + Qdrant results + profile | `{assessment, anomaly_flag, need_deep_dive}` | Jika `need_deep_dive=false`, langsung ke sintesis |
 | **LLM Call 3** | Semua konteks + deep-dive results (opsional) | Final response (laporan konsolidasi) | Output terformat sesuai Klaster B dataset |
 
-### API Endpoints
+### API Endpoints (Kontrak Data Frontend & Backend)
 
-| Method | Path | Fungsi | Request | Response |
-|---|---|---|---|---|
-| `POST` | `/chat` | Kirim pesan, terima respons AI | `{user_id, message}` | `{response, profile_summary, sources[]}` |
-| `GET` | `/profile/{user_id}` | Ambil profil untuk sidebar | — | `{business_type, product, location, compliance_status[]}` |
-| `POST` | `/seed` | Trigger Qdrant seeding (dev only) | — | `{status, collections_created}` |
+Demi menjaga konsistensi antara Frontend (Next.js) dan Backend (FastAPI), berikut adalah kontrak data mutlak (*Payload* JSON) untuk 3 *endpoint* utama:
+
+#### 1. `POST /chat` (Core Engine)
+Digunakan oleh Frontend untuk mengirim pesan dan menerima balasan berupa *array* komponen *Generative UI*.
+- **Request Body:**
+  ```json
+  {
+    "user_id": "user_123",
+    "message": "Modal saya 5 juta, harga pasaran berapa?",
+    "chat_history": [
+       {"role": "user", "content": "Halo"},
+       {"role": "assistant", "content": "Ada yang bisa dibantu?"}
+    ]
+  }
+  ```
+  *(Catatan: Frontend wajib mengirim `chat_history` agar Backend tetap stateless dan tidak perlu menyimpan riwayat obrolan di database).*
+- **Response Body:**
+  ```json
+  {
+    "components": [
+      {
+        "ui_type": "text",
+        "content": "Berdasarkan modal 5 juta, ini rekomendasinya. [Buka Dashboard]",
+        "sources": []
+      },
+      {
+        "ui_type": "pricing",
+        "hpp": 5000,
+        "market_avg": 12000,
+        "recommendation": 10000,
+        "sources": ["SerpApi Google Shopping"]
+      }
+    ],
+    "profile_updated": true 
+  }
+  ```
+
+#### 2. `GET /profile/{user_id}` (Profile Persistence)
+Digunakan oleh *Sidebar* Frontend untuk merender data bisnis *user* secara pasif (Read-Only).
+- **Response Body:**
+  ```json
+  {
+    "business_type": "F&B Mikro",
+    "product_category": "Keripik Singkong",
+    "capital_hpp": 5000,
+    "compliance_status": [
+      {"item": "NIB", "status": "done"},
+      {"item": "SPP-IRT", "status": "pending"}
+    ]
+  }
+  ```
+
+#### 3. `POST /seed` (Dev / Setup Only)
+Trigger awal untuk memasukkan `regulatory_rules.json` ke dalam Qdrant Vector DB saat *deployment*.
+- **Response:** `{"status": "success", "collections_created": ["regulations"]}`
 
 ---
 
