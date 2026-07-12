@@ -1,16 +1,16 @@
-# Cetak Biru Proyek: RisetPasar.AI
+# Cetak Biru Proyek: APPA
 
 ### AI Co-Pilot untuk Membuka, Menjalankan, dan Mematuhi Regulasi Bisnis — UMKM Indonesia
 
-RisetPasar.AI membantu pelaku UMKM Indonesia menjawab tiga pertanyaan tersulit dalam membuka usaha: **apakah ide ini layak, izin apa saja yang dibutuhkan (dan dalam urutan apa), dan dari mana modal datang** — lewat satu asisten yang mengenal bisnis penggunanya seiring waktu, bukan chatbot yang mulai dari nol tiap sesi.
+APPA membantu pelaku UMKM Indonesia menjawab tiga pertanyaan tersulit dalam membuka usaha: **apakah ide ini layak, izin apa saja yang dibutuhkan (dan dalam urutan apa), dan dari mana modal datang** — lewat satu asisten yang mengenal bisnis penggunanya seiring waktu, bukan chatbot yang mulai dari nol tiap sesi.
 
-> **Dokumen ini adalah panduan bisnis & produk tim.** Berisi positioning, persona, konten regulasi, diferensiasi, dan model bisnis — bahan utama untuk proposal dan pitching. Untuk arsitektur, stack teknologi, dan panduan development, lihat [Tech Spec](RisetPasar-AI_Tech_Spec.md).
+> **Dokumen ini adalah panduan bisnis & produk tim.** Berisi positioning, persona, konten regulasi, diferensiasi, dan model bisnis — bahan utama untuk proposal dan pitching. Untuk arsitektur, stack teknologi, dan panduan development, lihat [Tech Spec](APPA_Tech_Spec.md).
 
 ---
 
 ## 1. Positioning & Elevator Pitch
 
-**Nama produk tetap RisetPasar.AI** (mengganti nama dekat deadline Batch 2, 18 Juli 2026, lebih berisiko daripada manfaatnya). Yang berubah hanya subjudul dan framing pitching.
+**Nama produk tetap APPA** (mengganti nama dekat deadline Batch 2, 18 Juli 2026, lebih berisiko daripada manfaatnya). Yang berubah hanya subjudul dan framing pitching.
 
 **Subjudul:** *"Asisten AI untuk Membuka, Menjalankan, dan Mematuhi Regulasi Bisnis UMKM Indonesia — dari Ide sampai Siap Berjualan Legal."*
 
@@ -23,11 +23,11 @@ RisetPasar.AI membantu pelaku UMKM Indonesia menjawab tiga pertanyaan tersulit d
 | Regulatory Intelligence for Indonesian SMEs | Kalimat pendukung saat fokus ke modul Checklist Regulasi |
 
 **Elevator pitch:**
-> "74% UMKM Indonesia meluncurkan produk baru tanpa riset pasar, dan meski NIB kini gratis dan terbit dalam hitungan menit lewat OSS, mayoritas UMKM masih belum punya legalitas dasar. Sementara itu, tenggat Wajib Halal untuk seluruh produk makanan-minuman UMKM jatuh 17 Oktober 2026 — kurang dari 100 hari dari sekarang. RisetPasar.AI adalah co-pilot yang menjawab tiga pertanyaan sekaligus — layakkah ide ini, izin apa yang saya butuhkan dan urutannya, dan dari mana modalnya — dan mengingat perjalanan bisnis Anda antar sesi, bukan menjawab dari nol tiap kali."
+> "74% UMKM Indonesia meluncurkan produk baru tanpa riset pasar, dan meski NIB kini gratis dan terbit dalam hitungan menit lewat OSS, mayoritas UMKM masih belum punya legalitas dasar. Sementara itu, tenggat Wajib Halal untuk seluruh produk makanan-minuman UMKM jatuh 17 Oktober 2026 — kurang dari 100 hari dari sekarang. APPA adalah co-pilot yang menjawab tiga pertanyaan sekaligus — layakkah ide ini, izin apa yang saya butuhkan dan urutannya, dan dari mana modalnya — dan mengingat perjalanan bisnis Anda antar sesi, bukan menjawab dari nol tiap kali."
 
 **Mantra pitching (ulangi terus ke juri):** *"Kami bukan chatbot. Kami mengubah birokrasi dan informasi bisnis yang tersebar menjadi checklist dan rencana aksi yang bisa langsung dijalankan."* Ini tidak mengklaim "lebih pintar dari ChatGPT" — prinsip *vertical specialist* ini dipertahankan dari v2/v3 karena sudah sejalan dengan rekomendasi *Critical Review*.
 
-**Prinsip format output (rujukan: Wayfinder, lablab.ai/Bright Data Hackathon 2026):** Output final RisetPasar.AI bukan sekadar checklist bercentang, tapi **satu laporan konsolidasi** yang menyatukan kelayakan usaha, urutan izin dengan tenggat, opsi pembiayaan, dan sinyal risiko pasar dalam satu dokumen. "Kami bukan chatbot" dibuktikan lewat bentuk output, bukan cuma diklaim di slide — dan harus tercermin literal di UI demo.
+**Prinsip format output (rujukan: Wayfinder, lablab.ai/Bright Data Hackathon 2026):** Output final APPA bukan sekadar checklist bercentang, tapi **satu laporan konsolidasi** yang menyatukan kelayakan usaha, urutan izin dengan tenggat, opsi pembiayaan, dan sinyal risiko pasar dalam satu dokumen. "Kami bukan chatbot" dibuktikan lewat bentuk output, bukan cuma diklaim di slide — dan harus tercermin literal di UI demo.
 
 **Kenapa positioning ini kredibel — bukan cuma klaim:**
 1.  **Arsitektur sudah siap menampung modul kepatuhan tanpa rebuild** — bounded fan-out 3-call yang sama dipakai untuk riset pasar dan checklist regulasi (lihat Tech Spec).
@@ -36,16 +36,16 @@ RisetPasar.AI membantu pelaku UMKM Indonesia menjawab tiga pertanyaan tersulit d
 
 ### Argumen penghubung ke tema Smart Commerce (wajib masuk proposal & slide)
 
-Nama produk adalah RisetPasar.AI, dan tema yang disasar adalah Smart Commerce. Kedua hal ini terhubung langsung, bukan dipaksakan:
+Nama produk adalah APPA, dan tema yang disasar adalah Smart Commerce. Kedua hal ini terhubung langsung, bukan dipaksakan:
 
 > Riset pasar tidak hanya tentang tren harga dan preferensi konsumen — riset pasar adalah tentang **kelayakan operasional**. Di Indonesia, transaksi komersial (Smart Commerce) tidak dapat terjadi tanpa kepatuhan hukum dasar:
 > - Tanpa **NIB**, UMKM tidak bisa mendaftar sebagai seller di marketplace (Shopee, Tokopedia).
 > - Tanpa **SPP-IRT**, produk pangan olahan tidak bisa dijual legal di ritel modern (Indomaret, Alfamart).
 > - Tanpa **Sertifikasi Halal** (tenggat 17 Oktober 2026), seluruh produk makanan-minuman UMKM kehilangan hak jual di pasar formal.
 >
-> **Sertifikasi Halal, SPP-IRT, dan NIB adalah kunci pembuka gerbang bagi UMKM untuk menjual produknya di platform e-commerce dan ritel modern secara legal.** RisetPasar.AI memastikan UMKM bukan hanya tahu *apa yang mau dijual* dan *ke siapa*, tapi juga *apakah mereka secara legal boleh menjualnya* — dan langkah konkret untuk sampai ke sana.
+> **Sertifikasi Halal, SPP-IRT, dan NIB adalah kunci pembuka gerbang bagi UMKM untuk menjual produknya di platform e-commerce dan ritel modern secara legal.** APPA memastikan UMKM bukan hanya tahu *apa yang mau dijual* dan *ke siapa*, tapi juga *apakah mereka secara legal boleh menjualnya* — dan langkah konkret untuk sampai ke sana.
 
-| Komponen RisetPasar.AI | Relevansi ke Smart Commerce (Rulebook) |
+| Komponen APPA | Relevansi ke Smart Commerce (Rulebook) |
 |---|---|
 | Analisis Peluang & Kompetitor | *"sisi konsumen, sales operasional"* — memahami pasar sebelum menjual |
 | Checklist Regulasi (NIB → SPP-IRT → Halal) | *"transaksi komersial"* — syarat legal agar transaksi bisa terjadi |
@@ -95,11 +95,16 @@ Yang kurang bukan arsitektur, tapi kedalaman konten Qdrant untuk regulasi (Bagia
 
 ---
 
-## 5. Checklist Regulasi — Modul Unggulan (F&B Focused MVP)
+## 5. Checklist Regulasi — Modul Unggulan (Seluruh Ekosistem F&B)
 
-**Go-To-Market Strategy (Fokus Penilaian):** MVP ini **secara eksklusif difokuskan pada sektor F&B (Makanan & Minuman) Skala Mikro/Rumahan**. Alasan bisnis yang harus disampaikan ke Juri: 60% UMKM Indonesia berada di sektor ini, dan mereka menghadapi urgensi hidup-mati yaitu *Tenggat Wajib Halal 17 Oktober 2026*. Mencoba merangkum seluruh regulasi bisnis Indonesia dalam 6 minggu akan menghasilkan AI yang "lebar tapi dangkal" (seperti kompetitor UMKM.AI). Sebaliknya, fokus F&B memungkinkan kita membangun asisten (*regulatory_rules.json*) yang akurasinya mutlak 100% dan tidak bisa ditandingi oleh model AI generalis mana pun.
+**Go-To-Market Strategy (Fokus Penilaian):** MVP ini **secara eksklusif difokuskan pada seluruh ekosistem F&B Pangan Olahan (Risiko Rendah & Tinggi)**. Alasan bisnis yang harus disampaikan ke Juri: 60% UMKM Indonesia berada di sektor ini, dan mereka menghadapi urgensi hidup-mati yaitu *Tenggat Wajib Halal 17 Oktober 2026*. Mencoba merangkum seluruh regulasi bisnis Indonesia dalam 6 minggu akan menghasilkan AI yang "lebar tapi dangkal" (seperti kompetitor UMKM.AI). Sebaliknya, cakupan menyeluruh di sektor F&B memungkinkan kita membangun asisten (*regulatory_rules.json*) yang akurasinya mutlak 100% dan tidak bisa ditandingi oleh model AI generalis mana pun.
 
-*(Catatan: Jika user bertanya tentang sektor di luar F&B misal Kosmetik/Jasa, AI akan otomatis melakukan fallback ke mode RAG Qdrant standar dengan memberikan disclaimer elegan bahwa MVP ini dioptimalkan khusus untuk Pangan Olahan.)*
+**Skenario Demo Killer (Pembanding Risiko):**
+- *User:* "Mau jual keripik pisang." -> AI mengarahkan ke SPP-IRT (Risiko Rendah).
+- *User:* "Mau jual bakso sapi beku (frozen)." -> AI mendeteksi risiko tinggi, memblokir SPP-IRT, dan mengarahkan ke wajib Izin Edar BPOM (MD).
+Ini menunjukkan kecerdasan *business intelligence* sistem dalam menyelamatkan pengguna dari kesalahan pendaftaran fatal.
+
+*(Catatan: Jika user bertanya tentang sektor di luar F&B misal Kosmetik/Jasa/Restoran Dine-in, AI akan otomatis melakukan fallback ke mode RAG Qdrant standar dengan memberikan disclaimer elegan bahwa MVP ini dioptimalkan khusus untuk Pangan Olahan Kemasan.)*
 
 ### Satu sumber kebenaran, bukan sekadar diagram
 
@@ -190,7 +195,7 @@ Harga Pro (hipotesis, perlu validasi): Rp29.000–49.000/bulan — **harus diuji
 | Notifikasi/monitoring otomatis | Bertentangan langsung dengan aturan sinkron platform |
 | Aplikasi mobile terpisah | Web app cukup untuk demo dan validasi |
 | Multi-agent/ReAct terbuka | Bertentangan dengan batas 3x panggilan LLM |
-| Cakupan regulasi di luar Sektor F&B Skala Mikro | MVP difokuskan khusus ke kuliner rumahan untuk membuktikan akurasi 100% pada *use case* paling darurat (Tenggat Halal 2026). Kedalaman > keluasan. |
+| Cakupan regulasi di luar Sektor F&B Pangan Olahan | MVP difokuskan khusus ke ekosistem kuliner (rendah & tinggi risiko) untuk membuktikan akurasi 100% pada *use case* paling darurat (Tenggat Halal 2026). Kedalaman > keluasan. |
 | Ablation 3-arm penuh + RAGAS 4-metrik lengkap | Proyek eval sendiri yang bersaing waktu dengan kurasi regulasi — versi ringan sudah cukup untuk klaim ke juri |
 
 Prinsip: tidak meningkatkan peluang menang sebesar biaya implementasinya.

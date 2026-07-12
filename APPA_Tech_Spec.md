@@ -1,6 +1,6 @@
-# Tech Spec: RisetPasar.AI
+# Tech Spec: APPA
 
-> **Dokumen ini adalah panduan teknis tim developer.** Berisi arsitektur, stack, project structure, database schema, dan standar kerja. Untuk positioning, persona, dan strategi bisnis, lihat [Blueprint](RisetPasar-AI_Blueprint.md).
+> **Dokumen ini adalah panduan teknis tim developer.** Berisi arsitektur, stack, project structure, database schema, dan standar kerja. Untuk positioning, persona, dan strategi bisnis, lihat [Blueprint](APPA_Blueprint.md).
 
 ---
 
@@ -26,7 +26,7 @@
 Tiga folder utama (`frontend/`, `backend/`, `ai/`) masing-masing bisa diubah tanpa menyentuh yang lain. Juri yang buka repo langsung melihat pemisahan bersih.
 
 ```
-risetpasar-ai/
+appa/
 ├── docker-compose.yml          # Orchestrasi 3 container
 ├── README.md                   # Setup guide (baca Bagian 10)
 ├── .pre-commit-config.yaml     # Conventional commits enforcement
@@ -169,7 +169,7 @@ services:
     environment:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      - HF_MODEL_ID=risetpasar/qwen3-8b-finetuned  # ganti setelah training
+      - HF_MODEL_ID=appa/qwen3-8b-finetuned  # ganti setelah training
       - HF_API_TOKEN=${HF_API_TOKEN}
       - SEARCH_API_KEY=${SEARCH_API_KEY}
     depends_on:
@@ -364,7 +364,7 @@ UI fokus pada satu hal: **chat input tunggal, output AI.** Tidak ada halaman lai
 
 ```
 ┌─────────────────────────────────────────────┐
-│  RisetPasar.AI              [Profile Badge]  │
+│  APPA              [Profile Badge]  │
 ├──────────┬──────────────────────────────────┤
 │          │                                   │
 │ Sidebar  │         Chat Area                 │
@@ -492,8 +492,8 @@ pre-commit install --hook-type commit-msg
 
 ### Quick Start (production-like, via Docker)
 ```bash
-git clone https://github.com/[tim]/risetpasar-ai.git
-cd risetpasar-ai
+git clone https://github.com/[tim]/appa.git
+cd appa
 cp .env.example .env        # isi HF_API_TOKEN dan SEARCH_API_KEY
 docker compose up --build   # tunggu sampai semua service healthy
 # Buka http://localhost:3000

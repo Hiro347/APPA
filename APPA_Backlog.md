@@ -1,0 +1,60 @@
+# APPA — Project Backlog
+
+Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai panduan Conventional Commits.
+
+## Fase 1: Foundation & Data (Minggu 1–2 | 18–31 Juli)
+
+**Gilang (Frontend & Backend Base)**
+- [x] Inisialisasi *repository* (Git) dan pasang `.pre-commit-config.yaml` & `.commitlintrc.yml`.
+- [ ] *Setup* kerangka Next.js (Frontend) dengan `npx create-next-app`.
+- [ ] *Setup* kerangka FastAPI (Backend) dan `requirements.txt`.
+- [ ] Konfigurasi `docker-compose.yml` awal (3 *services*: frontend, backend, qdrant).
+- [ ] Buat rute API dasar `/chat` di FastAPI (tanpa LLM, kembalikan json statik dulu).
+
+**Arya (Data & AI Base)**
+- [ ] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
+- [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
+- [ ] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
+- [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
+
+**Adillah (Bisnis & Validasi)**
+- [ ] Lakukan riset kompetitor langsung (terutama daftar & uji coba UMKM.AI).
+- [ ] Buat kerangka awal (ToC) untuk Dokumen Proposal 20 Halaman.
+- [ ] Jadwalkan dan lakukan wawancara awal dengan UMKM terkait validasi *pain point* regulasi.
+
+---
+
+## Fase 2: Core Development & Fine-Tuning (Minggu 3–4 | 1–14 Agustus)
+
+**Gilang (UI/UX & AI Prompting)**
+- [ ] Desain & koding UI utama Next.js (fokus *single chat interface* & Sidebar).
+- [ ] Bikin komponen UI spesifik untuk *Consolidated Report* (gaya Wayfinder).
+- [ ] Integrasikan Next.js ke FastAPI secara penuh (bisa kirim pesan & terima respons LLM).
+- [ ] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi).
+
+**Arya (Fine-Tuning & Deploy)**
+- [ ] Selesaikan *training* QLoRA di Google Colab menggunakan *dataset* JSONL.
+- [ ] Evaluasi akurasi dan perbandingan respons model sebelum vs sesudah.
+- [ ] *Push* model *fine-tuned* ke HuggingFace Hub.
+- [ ] Update `.env` backend dengan model ID HuggingFace yang baru.
+
+**Adillah (Proposal & Storyboarding)**
+- [ ] Tulis isi lengkap proposal (integrasikan temuan wawancara & arsitektur teknis).
+- [ ] Bikin naskah/skrip untuk Video Proof of Work (7 menit).
+- [ ] Bikin naskah/skrip untuk Video Promosi (5 menit).
+
+---
+
+## Fase 3: Integration & Deliverables (Minggu 5–6 | 15–25 Agustus)
+
+**Gilang & Arya (Testing & Bug Fixing)**
+- [ ] *End-to-End Testing*: Coba jalankan aplikasi dengan *use case* yang ekstrem/rumit.
+- [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
+- [ ] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
+- [ ] *CODE FREEZE* — dilarang menambah fitur baru.
+
+**Adillah (Media & Submit)**
+- [ ] Rekam layar (*screen record*) jalannya aplikasi untuk Video Proof of Work.
+- [ ] Buat *Voice Over* dan selesaikan *editing* Video Promosi.
+- [ ] Periksa ulang format README di GitHub (Setup Guide, dll).
+- [ ] **SUBMIT seluruh berkas ke portal AIC COMPFEST 18 sebelum 25 Agustus 23:55 WIB.**
