@@ -375,6 +375,14 @@ Jika waktu makin sempit, **fine-tuning adalah lapisan paling mudah dipangkas** â
 
 ## 6. Komponen Backend (FastAPI)
 
+### System Prompt & AI Cognitive Workflow (Agentic Deep Research)
+
+Selain *Tone of Voice* yang wajib menggunakan bahasa ramah (Bapak/Ibu) dan menerjemahkan jargon birokrasi, **kepribadian sejati AI APPA terletak pada alur kognitifnya**. System Prompt *Agent Orchestrator* harus memaksa LLM untuk berpikir dalam 3 pilar:
+
+1. **Otak Riset (WHAT to search):** Saat pengguna bertanya (misal: "Untung tipis nih"), AI wajib menerjemahkannya menjadi *search queries* ke Google (SerpApi) alih-alih berasumsi. (Contoh *prompt*: *"Jika margin tipis, *generate* query: tren harga [produk] di [lokasi], dan bahan pokok [lokasi]"*).
+2. **Otak Analisis (HOW to process):** Mampu memilah *noise* dari hasil *Full Page HTML Scraping*. (Contoh *prompt*: *"Abaikan opini politik dari artikel berita. Ekstrak hanya: inflasi riil, kelangkaan, kebijakan daerah. Gunakan sumber paling baru jika ada kontradiksi"*).
+3. **Otak Komunikasi (HOW to convey):** Menyampaikan hasil tanpa terkesan seperti jurnal akademik. (Contoh *prompt*: *"Gunakan bahasa empatik. Terjemahkan hasil analisismu menjadi 2 hal: satu paragraf simpulan ramah, dan output JSON `ui_type: pricing` & `ui_type: chart` untuk dirender aplikasi"*).
+
 ### Agent Orchestrator (`core/agent.py`)
 
 ```python
