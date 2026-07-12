@@ -2,7 +2,7 @@
 
 Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai panduan Conventional Commits.
 
-## Fase 1: Foundation & Data (Minggu 1–2 | 18–31 Juli)
+## V1 (Tahap Penyisihan): Foundation & Data (Minggu 1–2 | 18–31 Juli)
 
 **Gilang (Frontend & Backend Base)**
 - [x] Inisialisasi *repository* (Git) dan pasang `.pre-commit-config.yaml` & `.commitlintrc.yml`.
@@ -10,6 +10,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 - [ ] *Setup* kerangka FastAPI (Backend) dan `requirements.txt`.
 - [ ] Konfigurasi `docker-compose.yml` awal (3 *services*: frontend, backend, qdrant).
 - [ ] Buat rute API dasar `/chat` di FastAPI (tanpa LLM, kembalikan json statik dulu).
+- [ ] Buat sistem *Mock Profile Persistence* (In-Memory/Context) untuk V1.
 
 **Arya (Data & AI Base)**
 - [ ] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
@@ -24,7 +25,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 
 ---
 
-## Fase 2: Core Development & Fine-Tuning (Minggu 3–4 | 1–14 Agustus)
+## V1 (Tahap Penyisihan): Core Development (Minggu 3–4 | 1–14 Agustus)
 
 **Gilang (UI/UX & AI Prompting)**
 - [ ] Desain & koding UI utama Next.js (fokus *single chat interface* & Sidebar).
@@ -45,7 +46,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 
 ---
 
-## Fase 3: Integration & Deliverables (Minggu 5–6 | 15–25 Agustus)
+## V1 (Tahap Penyisihan): Integration & Deliverables (Minggu 5–6 | 15–25 Agustus)
 
 **Gilang & Arya (Testing & Bug Fixing)**
 - [ ] *End-to-End Testing*: Coba jalankan aplikasi dengan *use case* yang ekstrem/rumit.
@@ -54,7 +55,22 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
 
 **Adillah (Media & Submit)**
-- [ ] Rekam layar (*screen record*) jalannya aplikasi untuk Video Proof of Work.
+- [ ] Rekam layar (*screen record*) jalannya aplikasi untuk Video Proof of Work (Mendemonstrasikan Mock Profile).
 - [ ] Buat *Voice Over* dan selesaikan *editing* Video Promosi.
 - [ ] Periksa ulang format README di GitHub (Setup Guide, dll).
+- [ ] *Double check* semua persyaratan pendaftaran Batch 2 dan finalisasi dokumen di *website* Compfest.
 - [ ] **SUBMIT seluruh berkas ke portal AIC COMPFEST 18 sebelum 25 Agustus 23:55 WIB.**
+
+---
+
+## V2 (Tahap Finalis): Live Hackathon & Pitching (26–27 September)
+
+**Gilang (Live Hackathon 10 Jam)**
+- [ ] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya.
+- [ ] Koding UI *Mini Dashboard Evaluasi Bulanan* (Persona 6) untuk demo *live*.
+
+**Arya**
+- [ ] *Tuning* ulang latensi Qdrant dan respons `Qwen3-8B` agar stabil saat didemokan langsung di depan juri.
+
+**Adillah**
+- [ ] Presentasi *Live Pitching*, mendemonstrasikan kelancaran UI Next.js dan sistem *database* yang baru saja dirakit saat Hackathon.

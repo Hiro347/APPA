@@ -4,6 +4,44 @@
 
 ---
 
+## Arsitektur Sistem (High-Level)
+
+Diagram ini mengilustrasikan **Modular Architecture** (bobot penilaian Juri 25%) yang memisahkan Frontend, Backend, dan Database ke dalam container terpisah, dengan eksekusi LLM dilakukan via API eksternal (HuggingFace) agar hemat *resource* sesuai *rulebook*.
+
+```mermaid
+graph TD
+    %% Styling
+    classDef frontend fill:#3178c6,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef backend fill:#059669,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef database fill:#ea580c,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef external fill:#475569,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef file fill:#eab308,stroke:#fff,stroke-width:2px,color:#000;
+
+    User([User / Browser]) -->|HTTP Request| NextJS
+    
+    subgraph "Docker Compose (Host Environment)"
+        NextJS["Next.js Container<br/>(Frontend UI/UX)"]:::frontend
+        FastAPI["FastAPI Container<br/>(Agent Orchestrator)"]:::backend
+        Qdrant["Qdrant Container<br/>(Vector Database)"]:::database
+        
+        NextJS <-->|REST API| FastAPI
+        FastAPI <-->|gRPC / HTTP| Qdrant
+        
+        Rules["regulatory_rules.json<br/>(JSON Railway)"]:::file
+        Rules -.->|Anti-Hallucination Logic| FastAPI
+    end
+
+    subgraph "External APIs"
+        HF["HuggingFace Inference API<br/>(Qwen3-8B Fine-Tuned)"]:::external
+        Google["Google Search API<br/>(Real-time Market Data)"]:::external
+    end
+
+    FastAPI <-->|Prompt + Context| HF
+    FastAPI <-->|Search Queries| Google
+```
+
+---
+
 ## 1. Tech Stack
 
 | Layer | Teknologi | Kenapa dipilih |
@@ -303,21 +341,30 @@ async def handle_chat(user_id: str, message: str) -> ChatResponse:
     route = call1_result.route
     entities = call1_result.extracted_entities
     
-    # 3. Update profil (implicit, sebelum call 2)
+    # 3. Cek Kelengkapan Entitas (Fase Klarifikasi)
+    if not entities.get("tingkat_risiko") or not entities.get("kategori"):
+        # Konteks ambigu/santai (misal: "hi"), skip Deep Research
+        chat_response = await inference.call_llm(
+            prompt=message,
+            system_prompt=prompts.clarification(profile)
+        )
+        return ChatResponse(response=chat_response, profile_summary=profile)
+        
+    # 4. Update profil (implicit, sebelum call 2)
     profile_manager.update_profile(user_id, entities)
     
-    # 4. Fan-out: search + vector DB (paralel)
+    # 5. Fan-out: search + vector DB (paralel)
     search_task = tool_executor.web_search(call1_result.sub_queries)
     qdrant_task = tool_executor.vector_search(call1_result.sub_queries)
     search_results, qdrant_results = await asyncio.gather(search_task, qdrant_task)
     
-    # 5. LLM Call 2: assessment
+    # 6. LLM Call 2: assessment (Sintesis Laporan)
     call2_result = await inference.call_llm(
         prompt=build_context(search_results, qdrant_results, profile),
         system_prompt=prompts.assessment()
     )
     
-    # 6. Conditional deep-dive (LLM Call 3)
+    # 7. Conditional deep-dive (LLM Call 3)
     if call2_result.need_deep_dive:
         deep_results = await tool_executor.deep_search(call2_result.deep_query)
         final = await inference.call_llm(...)
@@ -327,22 +374,73 @@ async def handle_chat(user_id: str, message: str) -> ChatResponse:
     return ChatResponse(response=final, profile_summary=profile)
 ```
 
-### Mekanisme Anti-Halusinasi (The "JSON Railway" Pattern)
+### Diagram Alur Agentic (JSON Railway Pattern)
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant P as Python Backend
+    participant L as LLM (HuggingFace)
+    participant J as JSON (Rules)
+    participant Q as Qdrant (Vector DB)
+
+    U->>P: "Saya jualan makanan" (Ambiguitas)
+    
+    rect rgb(30, 41, 59)
+    note right of P: LLM Call 1: Ekstraksi Entitas
+    P->>L: Prompt: Ekstrak entitas dari pesan user
+    L-->>P: {"kategori": "fb_pangan_olahan", "risiko": null}
+    end
+
+    alt Entitas Kurang (Fase Klarifikasi)
+        P->>L: Prompt: Balas natural & tanya tingkat risikonya
+        L-->>P: "Halo! Makanannya jenis basah/beku atau kering ya?"
+        P-->>U: Render Chat Biasa (Tunggu balasan user)
+    else Entitas Lengkap (Deep Research)
+        rect rgb(15, 23, 42)
+        note right of P: Python Rule-Based Routing
+        P->>J: Cek urutan izin untuk "risiko_rendah"
+        J-->>P: Urutan mutlak: [NIB, SPP-IRT, Halal]
+        
+        P->>Q: RAG: Ambil detail teks hukum
+        Q-->>P: [Pasal PP 28/2025, dll]
+        end
+
+        rect rgb(30, 41, 59)
+        note right of P: LLM Call 2: Sintesis Laporan
+        P->>L: System Prompt Ketat: "User wajib urus 1. NIB...<br/>Tugas: Buat laporan konsolidasi."
+        L-->>P: Laporan rapi tanpa halusinasi urutan
+        end
+        
+        P-->>U: Render UI Consolidated Report (Wayfinder-style)
+    end
+```
+
+### Mekanisme Anti-Halusinasi (Penjelasan)
 
 Untuk mencegah LLM berhalusinasi mengarang urutan izin (yang berakibat fatal pada nilai *compliance*), kita mengimplementasikan pola injeksi instruksi ketat (Agentic Workflow):
 1. **LLM Mengekstrak, bukan Menjawab:** Pada LLM Call 1, model hanya bertugas mendeteksi entitas (misal: `{"kategori": "fb_mikro"}`). LLM **tidak** diizinkan menjawab urutan hukum di tahap ini.
-2. **Python Mengambil Alih (Rule-Based):** Script Python backend mencocokkan `"fb_mikro"` dengan `regulatory_rules.json` dan mendapatkan kepastian urutan absolut: `[NIB, SPP-IRT, Halal]`. Python lalu menarik detail teks tiap izin dari Qdrant (RAG).
-3. **Injeksi Prompt Ketat (Call 2):** Python merakit *System Prompt* yang mendikte LLM secara mutlak: *"Aturan sistem: Klien WAJIB mengurus 1. NIB, 2. SPP-IRT, 3. Halal (Tenggat 17 Okt 2026). Konteks Qdrant: [...]. Tugasmu: Sintesiskan menjadi laporan format Wayfinder."*
-4. **Hasil Deterministik:** LLM dipaksa menjadi sekadar "penulis laporan" yang merapikan logika Python. Ini memastikan akurasi urutan hukum 100% tanpa mengorbankan keluwesan bahasa AI.
+2. **Fase Klarifikasi (Pencegahan Token Terbuang):** Jika entitas belum lengkap (misal user hanya bilang "hi" atau "jual makanan"), Python memblokir akses RAG dan langsung meminta LLM membalas dengan obrolan santai/bertanya balik.
+3. **Python Mengambil Alih (Rule-Based):** Jika entitas lengkap, script Python backend mencocokkan `"fb_mikro"` dengan `regulatory_rules.json` dan mendapatkan kepastian urutan absolut: `[NIB, SPP-IRT, Halal]`. Python lalu menarik detail teks tiap izin dari Qdrant (RAG).
+4. **Injeksi Prompt Ketat (Call 2):** Python merakit *System Prompt* yang mendikte LLM secara mutlak: *"Aturan sistem: Klien WAJIB mengurus 1. NIB, 2. SPP-IRT, 3. Halal (Tenggat 17 Okt 2026). Konteks Qdrant: [...]. Tugasmu: Sintesiskan menjadi laporan format Wayfinder."*
+5. **Hasil Deterministik:** LLM dipaksa menjadi sekadar "penulis laporan" yang merapikan logika Python. Ini memastikan akurasi urutan hukum 100% tanpa mengorbankan keluwesan bahasa AI.
+
+> [!WARNING]
+> **Implikasi Dataset QLoRA (Untuk Arya):**
+> Karena adanya *Fase Klarifikasi* natural ini, dataset JSONL 1.000 entri **TIDAK BOLEH** seluruhnya berisi tanya-jawab hukum kaku. Sisipkan **15-20% data chit-chat** (obrolan santai/Klarifikasi) agar model `Qwen3-8B` tidak mengalami *catastrophic forgetting* (lupa cara menyapa dan ngobrol luwes).
 
 ### Profile Manager (`core/profile_manager.py`)
+
+**Strategi Staging (V1 vs V2):**
+- **V1 (Tahap Penyisihan):** Menggunakan *Mock Profile* (*in-memory dictionary* di Python atau React Context). Data otomatis terhapus saat tab di-*refresh*. Mempercepat proses produksi MVP inti.
+- **V2 (Hackathon Finalis):** Migrasi ke `SQLite` sesungguhnya. Profil disimpan permanen lintas-sesi.
 
 **Implicit update tanpa UI tambahan** — sesuai batasan MVP rulebook (UI hanya input tunggal + output AI).
 
 Alur per request:
 1. User mengirim pesan via chat (satu-satunya input)
 2. LLM Call 1 menghasilkan `extracted_entities` (JSON) sebagai bagian dari routing
-3. `profile_updater()` membandingkan entities vs profil SQLite → UPDATE field yang berubah
+3. `profile_updater()` membandingkan entities vs profil (Mock/SQLite) → UPDATE field yang berubah
 4. Profil terbaru dipakai sebagai konteks LLM Call 2 & 3
 5. Respons dikembalikan — user hanya melihat chat biasa
 
@@ -358,29 +456,19 @@ Alur per request:
 
 ## 7. Komponen Frontend (Next.js)
 
-### Layout
+### Syarat Data UI/UX (Frontend Requirements)
 
-UI fokus pada satu hal: **chat input tunggal, output AI.** Tidak ada halaman lain.
+UI berfokus pada **satu halaman Chat dinamis**. Desain spesifik dibebaskan kepada Frontend Engineer, namun komponen UI **wajib** mampu me-render *payload* data berikut dari API Backend:
 
-```
-┌─────────────────────────────────────────────┐
-│  APPA              [Profile Badge]  │
-├──────────┬──────────────────────────────────┤
-│          │                                   │
-│ Sidebar  │         Chat Area                 │
-│ (read-   │                                   │
-│  only)   │  ┌─────────────────────────────┐  │
-│          │  │ AI: Untuk usaha keripik...   │  │
-│ NIB: ✅  │  │                              │  │
-│ SPP: ❌  │  │ User: Saya jual keripik...   │  │
-│ Halal: ❌│  │                              │  │
-│          │  └─────────────────────────────┘  │
-│          │                                   │
-│          │  ┌─────────────────────────────┐  │
-│          │  │ Ketik pesan...         [➤]  │  │
-│          │  └─────────────────────────────┘  │
-└──────────┴──────────────────────────────────┘
-```
+1. **Area Chat Utama:**
+   - Mampu me-render teks biasa (*Markdown*) untuk Fase Klarifikasi (chit-chat).
+   - Mampu berubah wujud menjadi komponen visual (misal: *Timeline UI* vertikal bergaya Wayfinder) saat menerima *Consolidated Report*.
+   - Mampu menampilkan *Mini Dashboard/Card* untuk fitur **Rekomendasi Harga Jual (Pricing Strategy)** dan Evaluasi.
+
+2. **Panel Profile Persistence (Disarankan: Sidebar / Header):**
+   - Wajib secara *real-time* menampilkan data `business_profile` milik *user* yang ditarik dari database SQLite secara permanen lintas-sesi (bukan *context window* sementara).
+   - Indikator wajib tampil: Kategori Bisnis, Modal/HPP, dan Status Checklist Legalitas (NIB: ✅/❌, SPP-IRT: ✅/❌, Halal: ✅/❌).
+   - Panel ini bersifat *Read-Only* (*user* tidak bisa klik edit; profil terupdate murni lewat obrolan dengan AI).
 
 ### Komunikasi dengan backend
 
@@ -535,18 +623,19 @@ python seed_qdrant.py  # Ingest regulatory_rules.json ke Qdrant
 | **Arya** | AI, Data, Infrastruktur | Kurasi `regulatory_rules.json`, dataset 1000 entri, QLoRA fine-tuning, deploy HF, Qdrant seeding, Docker setup, evaluasi model |
 | **Adillah** | Bisnis, Deliverables, Validasi | Pembuatan proposal 20 halaman, produksi 2 video (Proof of Work & Promo), wawancara validasi bisnis, dokumentasi README |
 
-### Fase Eksekusi Paralel (Deadline 25 Agustus 2026)
+### Roadmap Rilis & Fase Eksekusi
 
-**Fase 1: Foundation & Data (Minggu 1–2 | 18–31 Juli)**
-- **Gilang:** Setup Docker (Next.js + FastAPI), rute API `/chat` dengan *prompt* dasar, dan *setup* Git Hooks.
-- **Arya:** Kurasi `regulatory_rules.json`, susun dataset 1.000 entri, dan *script ingest* ke Qdrant.
-- **Adillah:** Riset kompetitor, draf kerangka proposal 20 halaman, dan wawancara validasi UMKM awal.
+**V1: Tahap Penyisihan (MVP Inti) — Deadline 25 Agustus 2026**
+Fokus utama: Menembus final dengan memamerkan *core engine* tanpa terbebani infrastruktur *database* berat.
+- **Gilang:** Setup Next.js + FastAPI. Kembangkan UI Chat *Wayfinder* dan logika *Agent Orchestrator*. Fitur *Profile Persistence* di-**MOCK** menggunakan *memory/state* lokal (hilang saat di-*refresh*).
+- **Arya:** Kurasi `regulatory_rules.json`, susun dataset 1.000 entri (termasuk 15% *chit-chat*), *training* QLoRA, dan *ingest* ke Qdrant.
+- **Adillah:** Draf kerangka proposal 20 halaman, rekam video *Proof of Work* (demo V1), dan *submit* berkas.
 
-**Fase 2: Core Development & Fine-Tuning (Minggu 3–4 | 1–14 Agustus)**
-- **Gilang:** Selesaikan UI/UX Next.js (khususnya *layout* konsolidasi ala Wayfinder), integrasi penuh ke *backend API*.
-- **Arya:** *Training* QLoRA di Colab, evaluasi model, *deploy* ke HF Hub, dan *update endpoint* backend.
-- **Adillah:** Finalisasi isi proposal (menyesuaikan hasil fitur dari Gilang & Arya), mulai menyusun naskah/storyboard video.
+**V2: Tahap Finalis (Live Hackathon & Pitching) — 26 & 27 September 2026**
+Fokus utama: Implementasi *database* sungguhan untuk memukau juri saat demo *live* dan sesi Hackathon *offline* 10 jam.
+- **Gilang (Saat Hackathon 10 Jam):** Migrasi *Mock Profile* ke **SQLite** sesungguhnya. Tambahkan fitur UI *Mini Dashboard Evaluasi Bulanan* (Persona 6).
+- **Arya:** *Tuning* ulang model berdasarkan hasil eval V1, perbaikan latensi pencarian Qdrant.
+- **Adillah:** Menyusun bahan presentasi untuk *Live Pitching*, menekankan transisi sistem ke *database* permanen tingkat produksi.
 
-**Fase 3: Integration & Deliverables (Minggu 5–6 | 15–25 Agustus)**
-- **Gilang & Arya:** *Testing End-to-End*, *freeze* kode, perbaikan *bug*. Simulasi run `docker compose up --build` dari nol.
-- **Adillah:** Rekam dan edit 2 video (Proof of Work & Promo), finalisasi README, dan *submit* seluruh berkas sebelum 25 Agustus 23:55 WIB.
+**V3: Lanjutan Pasca-Lomba (Scale Up)**
+- Implementasi daftar *Out-Scope*: Aplikasi Mobile Terpisah, Sistem Notifikasi Otomatis, dan ekspansi ke regulasi di luar sektor F&B.

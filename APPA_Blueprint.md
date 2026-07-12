@@ -74,7 +74,7 @@ Gunakan tabel ini di slide proposal untuk menunjukkan bahwa setiap modul memetak
 | 1 | Analisis Peluang | Demografi & Studi Kasus UMKM + fan-out real-time | Sudah ada |
 | 2 | Analisis Kompetitor | Search API + Harga Acuan Komoditas | Sudah ada |
 | 3 | **Checklist Regulasi** | Koleksi Regulasi & Perizinan — **modul unggulan** | Perlu pendalaman konten (Bagian 5) |
-| 4 | Rekomendasi Pembiayaan | Skema Pembiayaan UMKM (KUR dkk.) | Perlu update angka 2026 |
+| 4 | **Rekomendasi Harga (Pricing)** | Menghitung harga jual berdasar modal (HPP) vs harga kompetitor saat ini (Web Search) | **FITUR BARU** (Aman dari risiko prediksi) |
 | 5 | Rencana Aksi — **satu laporan konsolidasi** | Perluasan skema output — **bukan LLM call baru** | Perluasan kecil di dataset |
 
 Yang kurang bukan arsitektur, tapi kedalaman konten Qdrant untuk regulasi (Bagian 5) dan proporsi contoh regulasi di dataset training.
@@ -83,15 +83,16 @@ Yang kurang bukan arsitektur, tapi kedalaman konten Qdrant untuk regulasi (Bagia
 
 ## 4. Persona & Prioritas Demo
 
-| # | Persona | Trigger | Contoh Query | Fitur Terkait |
-|---|---|---|---|---|
-| 1 | Calon pedagang (pre-launch) | Sebelum belanja bahan baku | "Modal 2 juta, jual keripik pedas di Surabaya, worth it?" | Format output baku |
-| 2 | Pedagang mau ekspansi | Buka cabang/lini baru | "Bakso Malang, buka cabang di Batu?" | Fan-out multi-query |
-| 3 | Reseller/dropship rutin | Cek harga rutin | "Harga skincare X turun nggak minggu ini?" | User Profile Persistence |
-| 4 | Pengepul bahan baku | Reaktif (cuaca, gagal panen) | "Cabai rawit Bandung kenapa naik terus?" | Conditional Deep-Dive |
-| **5** | **Produsen rumahan naik kelas legal** | Mau masuk marketplace/retail resmi, tenggat Halal mendekat | "Jual keripik dari rumah, mau masuk Shopee/Indomaret — izin apa aja, urut dari mana?" | Checklist Regulasi + Profile Persistence lintas sesi |
+| # | Persona | Trigger | Contoh Query | Fitur Terkait | Output AI (Bentuk UI) |
+|---|---|---|---|---|---|
+| 1 | Calon pedagang (pre-launch) | Sebelum belanja bahan baku | "Modal 2 juta, jual keripik pedas di Surabaya, worth it?" | Format output baku | Laporan Kelayakan (Tingkat Kompetisi, Perkiraan Margin, Skor Kelayakan 1-10) |
+| 2 | Pedagang mau ekspansi | Buka cabang/lini baru | "Bakso Malang, buka cabang di Batu?" | Fan-out multi-query | Tabel Perbandingan 2 Lokasi (Demografi, Kepadatan Kompetitor) |
+| 3 | Reseller/dropship rutin | Cek harga rutin | "Harga skincare X turun nggak minggu ini?" | User Profile Persistence | Tabel Historis (*Price Tracker*) & Notifikasi Perubahan |
+| 4 | Pengepul bahan baku | Reaktif (cuaca, gagal panen) | "Cabai rawit Bandung kenapa naik terus?" | Conditional Deep-Dive | Analisis Paragraf Mendalam (Hasil rangkuman berita Web Search terbaru) |
+| **5** | **Produsen rumahan naik kelas legal** | Mau masuk marketplace/retail resmi, tenggat Halal mendekat | "Jual makanan dari rumah, urut dari mana?" | Checklist Regulasi + Profile Persistence | **1. Chat Klarifikasi:** "Makanannya jenis apa? Basah/Kering?"<br/>**2. Consolidated Report:** *Timeline* izin & estimasi biaya |
+| 6 | Bisnis Stabil (Evaluasi Rutin) | Cek performa bulanan vs Tren Pasar | "Penjualan keripik bulan ini turun 20%, ada tren pasar baru nggak?" | Profile Persistence (Memory) + Web Search | **Mini Dashboard Evaluasi**: Grafik/Tabel perbandingan performa bulan lalu vs ringkasan tren pasar saat ini |
 
-**Fokus demo: Persona 4 & 5.** Persona 4 paling visual secara teknis. Persona 5 menunjukkan perjalanan legalitas (NIB → SPP-IRT → Halal, berjarak minggu) — cerita *profile persistence* paling kuat sekaligus menunjukkan positioning baru.
+**Fokus demo: Persona 4 & 5.** Persona 4 paling visual secara teknis. Persona 5 menunjukkan perjalanan dua arah yang sangat organik: **AI tidak langsung mereset, melainkan melakukan klarifikasi (chit-chat)** sampai entitas bisnis dirasa cukup, barulah merender perjalanan legalitas (NIB → SPP-IRT → Halal) — cerita *profile persistence* paling kuat sekaligus menunjukkan kecerdasan *Agentic Workflow*. Persona 6 menegaskan bahwa APPA menemani *sepanjang* bisnis berjalan.
 
 ---
 
@@ -186,19 +187,29 @@ Harga Pro (hipotesis, perlu validasi): Rp29.000–49.000/bulan — **harus diuji
 
 ---
 
-## 9. Batasan Scope — Kill Your Darlings
+## 9. Penegasan Scope MVP (In-Scope vs Out-Scope)
 
-| Sengaja TIDAK dibangun | Alasan |
+Agar arah pengembangan jelas dalam batas waktu 3 minggu, MVP ini secara ketat membagi apa yang **dibangun** dan yang **ditinggalkan**.
+
+### ✅ IN-SCOPE (Wajib Ada untuk Demo MVP)
+| Fitur / Modul | Deskripsi Implementasi |
 |---|---|
-| Dashboard analytics | Effort tinggi, dampak diferensiasi rendah |
-| Forecasting harga jangka panjang | Di luar batas 3-call architecture; risiko klaim akurasi tak terpertanggungjawabkan |
-| Notifikasi/monitoring otomatis | Bertentangan langsung dengan aturan sinkron platform |
-| Aplikasi mobile terpisah | Web app cukup untuk demo dan validasi |
-| Multi-agent/ReAct terbuka | Bertentangan dengan batas 3x panggilan LLM |
-| Cakupan regulasi di luar Sektor F&B Pangan Olahan | MVP difokuskan khusus ke ekosistem kuliner (rendah & tinggi risiko) untuk membuktikan akurasi 100% pada *use case* paling darurat (Tenggat Halal 2026). Kedalaman > keluasan. |
-| Ablation 3-arm penuh + RAGAS 4-metrik lengkap | Proyek eval sendiri yang bersaing waktu dengan kurasi regulasi — versi ringan sudah cukup untuk klaim ke juri |
+| **Chat Tunggal (Next.js)** | UI Chat 2 arah (Fase Klarifikasi natural) + *Consolidated Report* (Timeline Wayfinder). |
+| **Agent Orchestrator (FastAPI)** | Jantung AI. Memiliki fungsi RAG (Qdrant) untuk regulasi dan *Web Search Fan-out* untuk riset/harga kompetitor. |
+| **Checklist Regulasi F&B** | *Killer Feature*. Memandu *user* ngurus NIB -> SPP-IRT -> Halal tanpa halusinasi (*JSON Railway Pattern*). |
+| **Rekomendasi Harga Jual** | *Pricing strategy* berdasar modal vs pasar saat ini (bukan tebak-tebakan masa depan). |
+| **Profile Persistence** | Menyimpan profil bisnis *user* secara persisten lintas-sesi (Modal, Kategori, Status Izin). *Di-mock via state lokal pada V1, dan bermigrasi ke database SQLite pada V2.* |
 
-Prinsip: tidak meningkatkan peluang menang sebesar biaya implementasinya.
+### ❌ OUT-SCOPE (Kill Your Darlings - Sengaja Dibuang)
+| Sengaja TIDAK dibangun | Alasan (Buat Juri) |
+|---|---|
+| Dashboard Analytics (Grafik Kompleks) | Terlalu berat dibangun dari nol; kita buktikan nilai lewat laporan *chat* konsolidasi. |
+| Forecasting Harga Jangka Panjang | Murni menebak masa depan berisiko tinggi halusinasi, keluar dari *scope* 3-call arsitektur. |
+| Notifikasi Otomatis (Email/WA) | *Rulebook* membatasi ke sistem web *synchronous*, notifikasi melanggar ini. |
+| Aplikasi Mobile (Android/iOS) | Waktu tidak cukup; *Responsive Web App* Next.js sudah sangat memadai. |
+| Regulasi luar Sektor F&B Pangan | Kita kejar *depth* (akurasi 100% untuk urgensi Halal 2026), bukan *breadth* (lebar tapi dangkal). |
+
+Prinsip Utama: **Jangan bangun fitur yang tidak secara langsung menaikkan bobot penilaian juri atau mengurangi nilai compliance.**
 
 ---
 
@@ -214,21 +225,22 @@ Prinsip: tidak meningkatkan peluang menang sebesar biaya implementasinya.
 
 *Catatan: Peran Adillah sangat kritis karena evaluasi Juri pada dokumen proposal dan video memiliki bobot gabungan sebesar 30%. Kesalahan data di regulasi juga bisa berakibat fatal pada kualitas output.*
 
-### Fase Eksekusi Paralel (Deadline 25 Agustus 2026)
+### Roadmap Rilis & Fase Eksekusi
 
-**Fase 1: Foundation & Data (Minggu 1–2 | 18–31 Juli)**
-- **Gilang:** Setup Docker (Next.js + FastAPI), rute API `/chat` dengan *prompt* dasar, dan *setup* Git Hooks.
-- **Arya:** Kurasi `regulatory_rules.json`, susun dataset 1.000 entri, dan *script ingest* ke Qdrant.
-- **Adillah:** Riset kompetitor, draf kerangka proposal 20 halaman, dan wawancara validasi UMKM awal.
+**V1: Tahap Penyisihan (MVP Inti) — Deadline 25 Agustus 2026**
+Fokus utama: Menembus final dengan memamerkan *core engine* tanpa terbebani infrastruktur *database* berat.
+- **Gilang:** Setup Next.js + FastAPI. Kembangkan UI Chat *Wayfinder* dan logika *Agent Orchestrator*. Fitur *Profile Persistence* di-**MOCK** menggunakan *memory/state* lokal (hilang saat di-*refresh*).
+- **Arya:** Kurasi `regulatory_rules.json`, susun dataset 1.000 entri (termasuk 15% *chit-chat*), *training* QLoRA, dan *ingest* ke Qdrant.
+- **Adillah:** Draf kerangka proposal 20 halaman, rekam video *Proof of Work* (demo V1), dan *submit* berkas.
 
-**Fase 2: Core Development & Fine-Tuning (Minggu 3–4 | 1–14 Agustus)**
-- **Gilang:** Selesaikan UI/UX Next.js (khususnya *layout* konsolidasi ala Wayfinder), integrasi penuh ke *backend API*.
-- **Arya:** *Training* QLoRA di Colab, evaluasi model, *deploy* ke HF Hub, dan *update endpoint* backend.
-- **Adillah:** Finalisasi isi proposal (menyesuaikan hasil fitur dari Gilang & Arya), mulai menyusun naskah/storyboard video.
+**V2: Tahap Finalis (Live Hackathon & Pitching) — 26 & 27 September 2026**
+Fokus utama: Implementasi *database* sungguhan untuk memukau juri saat demo *live* dan sesi Hackathon *offline* 10 jam.
+- **Gilang (Saat Hackathon 10 Jam):** Migrasi *Mock Profile* ke **SQLite** sesungguhnya. Tambahkan fitur UI *Mini Dashboard Evaluasi Bulanan* (Persona 6).
+- **Arya:** *Tuning* ulang model berdasarkan hasil eval V1, perbaikan latensi pencarian Qdrant.
+- **Adillah:** Menyusun bahan presentasi untuk *Live Pitching*, menekankan transisi sistem ke *database* permanen tingkat produksi.
 
-**Fase 3: Integration & Deliverables (Minggu 5–6 | 15–25 Agustus)**
-- **Gilang & Arya:** *Testing End-to-End*, *freeze* kode, perbaikan *bug*. Simulasi run `docker compose up --build` dari nol.
-- **Adillah:** Rekam dan edit 2 video (Proof of Work & Promo), finalisasi README, dan *submit* seluruh berkas sebelum 25 Agustus 23:55 WIB.
+**V3: Lanjutan Pasca-Lomba (Scale Up)**
+- Implementasi daftar *Out-Scope*: Aplikasi Mobile Terpisah, Sistem Notifikasi Otomatis, dan ekspansi ke regulasi di luar sektor F&B.
 
 ---
 
