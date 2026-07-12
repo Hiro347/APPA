@@ -7,16 +7,16 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 **Gilang (Frontend & Backend Base)**
 - [x] Inisialisasi *repository* (Git) dan pasang `.pre-commit-config.yaml` & `.commitlintrc.yml`.
 - [ ] *Setup* kerangka Next.js (Frontend) dengan `npx create-next-app`.
-- [ ] *Setup* kerangka FastAPI (Backend) dan `requirements.txt`.
-- [ ] Konfigurasi `docker-compose.yml` awal (3 *services*: frontend, backend, qdrant).
-- [ ] Buat rute API dasar `/chat` di FastAPI (tanpa LLM, kembalikan json statik dulu).
-- [ ] Buat sistem *Mock Profile Persistence* (In-Memory/Context) untuk V1.
+- [x] *Setup* kerangka FastAPI (Backend) dan `requirements.txt`.
+- [x] Konfigurasi `docker-compose.yml` awal (3 *services*: frontend, backend, qdrant).
+- [x] Buat rute API dasar `/chat` di FastAPI (tanpa LLM, kembalikan json statik dulu).
+- [x] Buat sistem *Mock Profile Persistence* (In-Memory/Context) untuk V1.
 
 **Arya (Data & AI Base)**
-- [ ] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
+- [x] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
 - [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
 - [ ] *Setup script* untuk menarik data API Bapanas (Jawa Barat) dan SerpApi (Google Shopping).
-- [ ] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
+- [x] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
 - [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
 
 **Adillah (Bisnis & Validasi)**
@@ -67,7 +67,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 ## V2 (Tahap Finalis): Live Hackathon & Pitching (26–27 September)
 
 **Gilang (Live Hackathon 10 Jam)**
-- [ ] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya.
+- [x] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya.
 - [ ] Koding UI *Mini Dashboard Evaluasi Bulanan* (Persona 6) untuk demo *live*.
 
 **Arya**

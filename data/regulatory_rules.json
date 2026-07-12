@@ -83,5 +83,121 @@
       "WP_PT_Perorangan": "Dikenai 0.5% dari rupiah pertama (tidak ada batas bebas Rp 500 juta). Berlaku tanpa batas waktu.",
       "WP_CV_Firma_PT_Umum": "WP Badan baru berbentuk CV/Firma/PT umum per April 2026 tidak lagi mendapatkan tarif PPh Final 0.5% (wajib menggunakan tarif normal pembukuan). CV/Firma lama yang sudah berjalan dibatasi maksimal 4 tahun."
     }
+  },
+  "fb_pangan_siap_saji": {
+    "kategori_nama": "F&B Pangan Siap Saji (Restoran, Cafe, Katering, Warung)",
+    "kriteria_bisnis": "Produk makanan/minuman yang diolah dan disajikan di tempat untuk langsung dikonsumsi, atau layanan katering/pesanan tanpa label kemasan tahan lama. Tidak membutuhkan Izin Edar BPOM/SPP-IRT. Contoh: Warung nasi, cafe kopi seduh, katering hajatan, restoran cepat saji.",
+    "urutan_izin": [
+      {
+        "izin": "NIB (Nomor Induk Berusaha)",
+        "kode": "NIB",
+        "wajib": true,
+        "dasar_hukum": "PP 28/2025",
+        "prasyarat": "KTP (NIK), Akun oss.go.id, KBLI relevan (misal: 56101 Restoran, 56210 Katering, 56303 Kedai Minuman)",
+        "biaya": "Gratis",
+        "durasi": "Instan",
+        "cara_urus": "Pendaftaran online melalui sistem OSS dengan mengisi modal usaha dan skala usaha."
+      },
+      {
+        "izin": "Sertifikat Laik Higiene Sanitasi (SLHS)",
+        "kode": "SLHS",
+        "wajib": true,
+        "dasar_hukum": "Permenkes No. 14 Tahun 2021 tentang Standar Kegiatan Usaha dan Produk pada Penyelenggaraan Perizinan Berusaha Berbasis Risiko Sektor Kesehatan",
+        "prasyarat": "NIB, memiliki penjamah makanan yang bersertifikat pelatihan higiene sanitasi, denah dapur, hasil uji lab air/makanan.",
+        "biaya": "Bervariasi tergantung Perda setempat (umumnya gratis untuk inspeksi, namun uji lab bayar mandiri di labkesda/swasta)",
+        "durasi": "14 - 30 hari kerja",
+        "cara_urus": "Diajukan melalui menu PB UMKU di OSS. Dinas Kesehatan setempat akan menjadwalkan Inspeksi Kesehatan Lingkungan (IKL) ke lokasi restoran/dapur."
+      },
+      {
+        "izin": "Sertifikasi Halal (Reguler / Self-Declare)",
+        "kode": "HALAL_RESTORAN",
+        "wajib": true,
+        "tenggat": "2026-10-17",
+        "dasar_hukum": "UU No. 33/2014 jo. PP No. 42/2024",
+        "prasyarat": "NIB, Menu makanan/minuman dipastikan terbebas dari bahan non-halal, pembelian daging dari RPH Halal (Rumah Potong Hewan Halal).",
+        "biaya": "Bisa gratis via SEHATI jika menu sederhana, atau berbayar jika menu kompleks dan banyak cabang (Reguler).",
+        "durasi": "21 - 45 hari kerja",
+        "cara_urus": "Pengajuan melalui ptsp.halal.go.id (SIHALAL), dengan melampirkan daftar menu dan rincian bahan."
+      }
+    ]
+  },
+  "fb_pangan_segar_nabati": {
+    "kategori_nama": "Pangan Segar Asal Tumbuhan (PSAT)",
+    "kriteria_bisnis": "Pangan asal tumbuhan yang belum mengalami pengolahan lebih lanjut, bisa berupa segar langsung atau potong/kupas kemasan. Contoh: beras kemasan, sayur hidroponik kemasan, buah potong.",
+    "urutan_izin": [
+      {
+        "izin": "NIB",
+        "kode": "NIB",
+        "wajib": true,
+        "dasar_hukum": "PP 28/2025",
+        "prasyarat": "KTP, Akun OSS",
+        "biaya": "Gratis",
+        "durasi": "Instan",
+        "cara_urus": "Daftar OSS."
+      },
+      {
+        "izin": "PSAT-PDUK (Pangan Segar Asal Tumbuhan Produksi Dalam Negeri Usaha Kecil)",
+        "kode": "PSAT_PDUK",
+        "wajib": true,
+        "dasar_hukum": "Permentan No. 15 Tahun 2021",
+        "prasyarat": "NIB, desain kemasan, standar operasional penanganan/pengemasan yang baik.",
+        "biaya": "Gratis",
+        "durasi": "7 - 14 hari",
+        "cara_urus": "Melalui OSS di integrasikan ke Otoritas Kompeten Keamanan Pangan Daerah (OKKPD) tingkat Kabupaten/Kota."
+      }
+    ]
+  },
+  "pelindungan_merek_haki": {
+    "kategori_nama": "Hak Kekayaan Intelektual (HAKI) - Pelindungan Merek",
+    "kriteria_bisnis": "Pelaku usaha yang ingin mengamankan nama produk, logo, atau identitas brand dari plagiarisme atau klaim pihak lain. Sangat disarankan untuk usaha F&B skala menengah/franchise.",
+    "urutan_izin": [
+      {
+        "izin": "Sertifikat Pendaftaran Merek",
+        "kode": "HAKI_MEREK",
+        "wajib": false,
+        "dasar_hukum": "UU No. 20 Tahun 2016 tentang Merek dan Indikasi Geografis",
+        "prasyarat": "KTP, Surat Keterangan UMK (Dinas Koperasi/OSS), desain logo/merek.",
+        "biaya": "Rp 500.000 untuk UMK (tarif PNBP umum Rp 1.800.000)",
+        "durasi": "8 - 18 bulan",
+        "cara_urus": "Dilakukan pendaftaran secara mandiri di merek.dgip.go.id, melalui tahap pemeriksaan formalitas, publikasi, hingga pemeriksaan substantif."
+      }
+    ]
+  },
+  "fb_pangan_segar_hewan": {
+    "kategori_nama": "Pangan Segar Asal Hewan (PSAH)",
+    "kriteria_bisnis": "Usaha penjualan daging segar/beku mentah (sapi, ayam, dll), telur, susu sapi mentah, cold storage produk hewan, atau rumah potong hewan.",
+    "urutan_izin": [
+      {
+        "izin": "NIB (Nomor Induk Berusaha)",
+        "kode": "NIB",
+        "wajib": true,
+        "dasar_hukum": "PP 28/2025",
+        "prasyarat": "KTP, Akun OSS, KBLI relevan (misal: perdagangan daging, peternakan)",
+        "biaya": "Gratis",
+        "durasi": "Instan",
+        "cara_urus": "Pendaftaran online di oss.go.id."
+      },
+      {
+        "izin": "Sertifikat Nomor Kontrol Veteriner (NKV)",
+        "kode": "NKV",
+        "wajib": true,
+        "dasar_hukum": "Permentan No. 11 Tahun 2020 tentang Sertifikasi Nomor Kontrol Veteriner Unit Usaha Produk Hewan",
+        "prasyarat": "NIB, memenuhi standar higiene sanitasi hewan, biosecurity, dan untuk skala tertentu membutuhkan dokter hewan penanggung jawab.",
+        "biaya": "Tergantung Perda setempat, namun biasanya ada tarif PNBP/Retribusi untuk audit lapangan",
+        "durasi": "20 - 40 hari kerja",
+        "cara_urus": "Melalui PB UMKU di OSS yang terintegrasi langsung dengan SISNAS NKV. Dinas Peternakan akan melakukan audit kelayakan ke lokasi usaha."
+      },
+      {
+        "izin": "Sertifikasi Halal (Khusus RPH/RPU)",
+        "kode": "HALAL_RPH",
+        "wajib": true,
+        "tenggat": "2026-10-17",
+        "dasar_hukum": "UU No. 33/2014 jo. PP No. 42/2024",
+        "prasyarat": "NIB, Sertifikat NKV (biasanya disyaratkan untuk RPH), Juru Sembelih Halal (Juleha) bersertifikat kompetensi.",
+        "biaya": "Berbayar (Tarif Reguler)",
+        "durasi": "30 - 45 hari kerja",
+        "cara_urus": "Pendaftaran via SIHALAL (ptsp.halal.go.id), proses audit lapangan oleh LPH, dan penetapan halal oleh MUI."
+      }
+    ]
   }
 }
