@@ -193,7 +193,7 @@ Digunakan oleh Frontend untuk mengirim pesan dan menerima balasan berupa *array*
     ]
   }
   ```
-  *(Catatan: Frontend wajib mengirim `chat_history` agar Backend tetap stateless dan tidak perlu menyimpan riwayat obrolan di database).*
+  *(Catatan Penting - Token Limit: Frontend WAJIB menerapkan pola **Sliding Window**. Jangan kirim seluruh riwayat dari awal. Cukup potong dan kirim **10 pesan terakhir** ke dalam array `chat_history` agar API HuggingFace tidak error kehabisan memory/context window).*
 - **Response Body:**
   ```json
   {
@@ -594,16 +594,20 @@ CREATE TABLE user_profiles (
 | **Regulasi & Perizinan** | NIB, SPP-IRT/BPOM, Halal, PPh Final | `regulatory_rules.json` → chunked + embedded | Ad hoc + verifikasi tiap milestone |
 | **Studi Kasus UMKM** | Pola sukses/gagal | Jurnal Kemenkop UKM | Ad hoc |
 
+*Catatan Embeddings:* Qdrant akan diisi menggunakan model embedding yang ringan dan gratis secara lokal, yakni **`sentence-transformers/all-MiniLM-L6-v2`** via Python. Tidak menggunakan API berbayar (OpenAI) untuk menghemat biaya kompetisi.
+
 ### Integrasi Sumber Data Eksternal (Data Sourcing Strategy)
 
-Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke beberapa sumber eksternal untuk melengkapi data laporan (*Generative UI*):
+Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke sumber eksternal untuk melengkapi data laporan (*Generative UI*). **Google Scraping adalah prioritas utama (Primary Source)**, sementara portal pemerintah (Bapanas Jabar) hanya bersifat bonus/pendukung.
 
 | Jenis Data | Sumber Eksternal | Format / Metode Akses | Fungsi |
 |---|---|---|---|
-| **Semua Data Pasar & Harga** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> Teks) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapatkan daftar URL, lalu melakukan *scraping* (misal pakai `newspaper3k` atau `BeautifulSoup`) ke semua *website* di halaman pertama. Seluruh teks artikel diproses oleh LLM untuk mengekstrak sebanyak mungkin angka dan metrik menjadi *array* JSON yang akurat. |
-| **Sentimen & Tren Pasar** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> Teks) | Mengambil keseluruhan isi artikel berita/opini (bukan cuma *snippet*) untuk menganalisis konteks mendalam (cuaca, regulasi baru, kelangkaan) oleh LLM (LLM Call 2 & 3). |
+| **Semua Data Pasar & Harga (Prioritas Utama)** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> Teks) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapatkan daftar URL, lalu melakukan *scraping* menggunakan `trafilatura` ke semua *website* di halaman pertama. LLM akan mengekstrak sebanyak mungkin angka dan sentimen pasar dari artikel ini. |
+| **Data Cadangan (Bonus/Fallback)** | Open Data Bapanas (Jawa Barat) | REST API / CSV | Hanya sebagai pembanding jika AI butuh kepastian harga pokok (HPP) pemerintah. |
 
-Untuk babak penyisihan (V1), mitigasi latensi wajib dilakukan: lakukan *fan-out* secara paralel menggunakan `asyncio.gather`, terapkan *caching* (TTL 10-15 menit) untuk data volatil, dan sediakan *mock response toggle* untuk berjaga-jaga jika internet bermasalah saat demo *offline*.
+**Strategi Resiliensi (Live Demo Fallback):**
+Penyakit utama *live hackathon offline* adalah koneksi internet *down* atau limit API habis. 
+Untuk mencegah aplikasi *crash*, Arya wajib menyiapkan `data/fallback_mock_jabar.json`. Jika `asyncio.gather` gagal menghubungi Google/Bapanas setelah 3 detik (*timeout*), *Agent* otomatis menarik data dari *file json lokal* ini. Demo akan tetap berjalan lancar!
 
 ---
 
