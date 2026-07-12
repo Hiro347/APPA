@@ -514,12 +514,19 @@ CREATE TABLE user_profiles (
 | Koleksi | Isi | Sumber | Update |
 |---|---|---|---|
 | **Regulasi & Perizinan** | NIB, SPP-IRT/BPOM, Halal, PPh Final | `regulatory_rules.json` → chunked + embedded | Ad hoc + verifikasi tiap milestone |
-| **Demografi & Sosioekonomi** | Populasi, pendapatan, kepadatan per kecamatan | BPS, Satu Data Indonesia | Tahunan |
-| **Harga Acuan Komoditas** | Baseline harga pangan strategis | PIHPS BI, Kemendag | Bulanan |
-| **Skema Pembiayaan UMKM** | KUR (plafon Rp308,41T 2026, bunga 6%/3%) | kur.kemenkeu.go.id | Tahunan |
 | **Studi Kasus UMKM** | Pola sukses/gagal | Jurnal Kemenkop UKM | Ad hoc |
 
-Untuk babak penyisihan, prioritaskan **Regulasi** dan **Demografi**, cakupan 2–3 kota contoh. Mitigasi latensi: fan-out paralel, caching TTL 10–15 menit untuk data volatil, mock search toggle untuk demo offline.
+### Integrasi Sumber Data Eksternal (Data Sourcing Strategy)
+
+Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke beberapa sumber eksternal untuk melengkapi data laporan (*Generative UI*):
+
+| Jenis Data | Sumber Eksternal | Format / Metode Akses | Fungsi |
+|---|---|---|---|
+| **Harga Komoditas Dasar** | Open Data Bapanas / Satu Data | REST API (JSON) | Mengambil *raw array numbers* (cabai, daging, dll) untuk komponen `<TrendChart />`. |
+| **Harga Produk Kompetitor** | SerpApi (Google Shopping) | REST API (JSON) | Mengambil rata-rata harga produk kemasan serupa di *e-commerce* untuk komponen `<PricingDashboard />`. |
+| **Sentimen & Tren Pasar** | Google Search API + *Article Scraping* | Web Scraping (Teks) | Mengambil konteks berita terbaru (misal: "kenapa harga naik", "cuaca buruk") untuk dianalisis oleh LLM (LLM Call 2 & 3). |
+
+Untuk babak penyisihan (V1), mitigasi latensi wajib dilakukan: lakukan *fan-out* secara paralel menggunakan `asyncio.gather`, terapkan *caching* (TTL 10-15 menit) untuk data volatil, dan sediakan *mock response toggle* untuk berjaga-jaga jika internet bermasalah saat demo *offline*.
 
 ---
 
