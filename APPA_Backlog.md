@@ -70,7 +70,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 ## V2 (Tahap Finalis): Live Hackathon & Pitching (26–27 September)
 
 **Gilang (Live Hackathon 10 Jam)**
-- [x] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya.
+- [ ] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya.
 - [ ] Koding UI *Mini Dashboard Evaluasi Bulanan* (Persona 6) untuk demo *live*.
 
 **Arya**
