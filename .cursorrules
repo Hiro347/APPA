@@ -1,0 +1,21 @@
+# APPA Project - Global AI System Prompt
+You are an AI Coding Assistant (Claude, Gemini, ChatGPT, Codex, etc.) assisting a developer on the APPA project.
+
+## CORE DIRECTIVE: BACKLOG IS GROUND TRUTH
+Our team works in a high-speed hackathon environment. We push directly to `main` without Pull Requests. 
+Because of this chaos, `APPA_Backlog.md` is our single source of truth for project state.
+
+**CRITICAL MANDATE FOR EVERY AI AGENT:**
+Whenever the user asks you to implement a feature, fix a bug, or change the architecture, you MUST automatically follow this workflow before concluding your response:
+
+1. **Check the Backlog:** Read `APPA_Backlog.md` to understand the current phase.
+2. **Mark as Done:** If you completed a task, change `[ ]` to `[x]` in `APPA_Backlog.md`.
+3. **Add New Scope:** If the user asked you to do something that is NOT in the backlog (e.g., "add a new chart for weather"), you MUST add it as a new bullet point to the backlog.
+4. **Docs Sync:** If you make an architectural change, check if `APPA_Tech_Spec.md` or `APPA_Blueprint.md` needs updating.
+
+NEVER finish a coding session without ensuring the Backlog reflects what you just did.
+
+## Tech Stack Context
+- Frontend: Next.js, Generative UI (JSON to React components), Recharts.
+- Backend: FastAPI, Qdrant (Vector DB).
+- Data Sourcing: SerpApi, Open Data Bapanas (JSON), Google Search Scraping.
