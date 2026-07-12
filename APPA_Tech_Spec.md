@@ -456,19 +456,24 @@ Alur per request:
 
 ## 7. Komponen Frontend (Next.js)
 
-### Syarat Data UI/UX (Frontend Requirements)
+### Syarat Data UI/UX (Generative UI Components)
 
-UI berfokus pada **satu halaman Chat dinamis**. Desain spesifik dibebaskan kepada Frontend Engineer, namun komponen UI **wajib** mampu me-render *payload* data berikut dari API Backend:
+UI berfokus pada **satu halaman Chat dinamis**. Kita menggunakan pendekatan **Generative UI**: alih-alih me-render teks Markdown biasa, API `/chat` akan mengembalikan array *JSON objects*. Frontend (Next.js) bertugas melakukan *manual parsing* dan me-render komponen React yang sesuai dengan field `ui_type`.
 
-1. **Area Chat Utama:**
-   - Mampu me-render teks biasa (*Markdown*) untuk Fase Klarifikasi (chit-chat).
-   - Mampu berubah wujud menjadi komponen visual (misal: *Timeline UI* vertikal bergaya Wayfinder) saat menerima *Consolidated Report*.
-   - Mampu menampilkan *Mini Dashboard/Card* untuk fitur **Rekomendasi Harga Jual (Pricing Strategy)** dan Evaluasi.
+Daftar 4 komponen wajib yang harus dibuat oleh Frontend:
 
-2. **Panel Profile Persistence (Disarankan: Sidebar / Header):**
-   - Wajib secara *real-time* menampilkan data `business_profile` milik *user* yang ditarik dari database SQLite secara permanen lintas-sesi (bukan *context window* sementara).
-   - Indikator wajib tampil: Kategori Bisnis, Modal/HPP, dan Status Checklist Legalitas (NIB: ✅/❌, SPP-IRT: ✅/❌, Halal: ✅/❌).
-   - Panel ini bersifat *Read-Only* (*user* tidak bisa klik edit; profil terupdate murni lewat obrolan dengan AI).
+| Nama Komponen | `ui_type` | Skema Data JSON (Payload dari Backend) |
+|---|---|---|
+| `<MarkdownText />` | `text` | `{ "ui_type": "text", "content": "Teks markdown...", "sources": [] }` |
+| `<WayfinderChecklist />` | `checklist` | `{ "ui_type": "checklist", "items": [{"title": "NIB", "status": "wajib"}], "sources": ["PP 28/2025"] }` |
+| `<PricingDashboard />` | `pricing` | `{ "ui_type": "pricing", "hpp": 5000, "market_avg": 12000, "recommendation": 10000, "sources": ["SerpApi Google"] }` |
+| `<TrendChart />` | `chart` | `{ "ui_type": "chart", "xAxis": ["Jan", "Feb"], "yAxis": [50000, 80000], "sources": ["Scraping Bapanas"] }` |
+
+**Aturan Wajib Sitasi (Anti-Halusinasi):**
+Setiap objek komponen JSON **WAJIB** memiliki key `"sources": []`. Di UI Next.js, setiap komponen visual ini harus memiliki ikon kecil `[?]` atau tulisan *Powered by* yang jika diklik akan menampilkan sumber data tersebut kepada juri.
+
+### Panel Profile Persistence (Disarankan: Sidebar / Header)
+- Wajib secara *real-time* menampilkan indikator *Read-Only*: Kategori Bisnis, Modal/HPP, dan Status Checklist Legalitas (NIB: ✅/❌, SPP-IRT: ✅/❌). Profil ter-*update* murni lewat ekstraksi LLM di obrolan (di-*mock* via state untuk V1).
 
 ### Komunikasi dengan backend
 
