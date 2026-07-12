@@ -13,6 +13,12 @@ Whenever the user asks you to implement a feature, fix a bug, or change the arch
 3. **Add New Scope:** If the user asked you to do something that is NOT in the backlog (e.g., "add a new chart for weather"), you MUST add it as a new bullet point to the backlog.
 4. **STRICT NO DRIFT POLICY (Docs Sync):** If you make a technical, architectural, or feature logic change, you MUST update `APPA_Tech_Spec.md` and/or `APPA_Blueprint.md` immediately in the same turn. DO NOT leave the documentation out of sync with the codebase. Zero drift is tolerated.
 
+## PRE-COMMIT MANDATORY CHECK
+Before you execute `git commit` on behalf of the user, you MUST:
+1. Run `git status`.
+2. Verify that `APPA_Backlog.md` is in the "Changes to be committed" list.
+3. If it is NOT staged, you MUST stop and ask the user: *"Are you sure you want to commit without updating the backlog/docs?"* or update it yourself before proceeding.
+
 NEVER finish a coding session without ensuring BOTH the Backlog and the Documentation reflect exactly what you just built.
 
 ## Tech Stack Context
