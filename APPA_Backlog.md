@@ -42,7 +42,7 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 
 ### 🧠 Workstream B: AI Training & Data (PIC: Arya)
 - [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
-- [ ] *Setup script* untuk menarik data API Bapanas (Jawa Barat) dan SerpApi (Google Shopping).
+- [ ] *Setup script* Web Scraper menggunakan kombinasi `duckduckgo-search` dan `Crawl4AI` untuk mengekstrak data harga pasar/kompetitor secara *open-source*.
 - [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
 - [ ] Selesaikan *training* QLoRA di Google Colab menggunakan *dataset* JSONL.
 - [ ] Evaluasi akurasi dan perbandingan respons model sebelum vs sesudah.
@@ -64,6 +64,8 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 
 **Gilang & Arya (Testing & Bug Fixing):**
 - [ ] *End-to-End Testing*: Coba jalankan aplikasi dengan *use case* yang ekstrem/rumit.
+- [ ] **Tuning Prompt Engineering:** Perbaiki prompt secara iteratif saat menemukan *edge cases* atau halusinasi JSON selama testing berjalan.
+- [ ] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) baik di *frontend* (`api.ts`) maupun *backend* agar tidak kena limit token HuggingFace.
 - [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
 - [ ] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
