@@ -1,49 +1,57 @@
-# APPA — Project Backlog
+# APPA — Project Backlog & Alur Kerja Paralel
 
 Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai panduan Conventional Commits.
+Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat mengeksekusi tugasnya secara **paralel** tanpa saling memblokir.
 
-## V1 (Tahap Penyisihan): Foundation & Data (Minggu 1–2 | 18–31 Juli)
+---
 
-**Gilang (Frontend & Backend Base)**
+## 🏁 FOUNDATION (Selesai)
+*Infrastruktur dasar agar semua Workstream bisa berjalan serentak.*
+
+**Gilang (Frontend & Backend Base):**
 - [x] Inisialisasi *repository* (Git) dan pasang `.pre-commit-config.yaml` & `.commitlintrc.yml`.
 - [x] *Setup* kerangka Next.js (Frontend) dengan `npx create-next-app`.
 - [x] *Setup* kerangka FastAPI (Backend) dan `requirements.txt`.
 - [x] Konfigurasi `docker-compose.yml` awal (3 *services*: frontend, backend, qdrant).
 - [x] Buat rute API dasar `/chat` di FastAPI (tanpa LLM, kembalikan json statik dulu).
-- [x] Buat sistem *Mock Profile Persistence* (In-Memory/Context) untuk V1.
+- [x] Buat sistem *Mock Profile Persistence* (In-Memory/Context) untuk V1. (Selesai lebih awal: Backend sudah menggunakan SQLite di `models.py`!)
 
-**Arya (Data & AI Base)**
+**Arya (Data & AI Base):**
 - [x] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
-- [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
-- [ ] *Setup script* untuk menarik data API Bapanas (Jawa Barat) dan SerpApi (Google Shopping).
 - [x] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
-- [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
 
-**Adillah (Bisnis, Validasi & UI Dev)**
-- [ ] Lakukan riset kompetitor langsung (terutama daftar & uji coba UMKM.AI).
-- [ ] Buat kerangka awal (ToC) untuk Dokumen Proposal 20 Halaman, masukkan narasi Pilot Project Jawa Barat.
+**Adillah (Bisnis, Validasi & UI Dev):**
 - [ ] Koding komponen UI statis pendukung di Next.js (layout, typography, styling dasar).
 
----
-
-## V1 (Tahap Penyisihan): Core Development (Minggu 3–4 | 1–14 Agustus)
-
-**Gilang (UI/UX & AI Prompting)**
+**Gilang (UI/UX - Selesai):**
 - [x] Desain & koding UI utama Next.js menggunakan pola *Bento Grid Artifact System* (satu tab laporan terkonsolidasi).
 - [x] Bikin komponen orchestrator `ArtifactView` (blok konten disatukan dalam satu file tanpa sub-komponen terpisah, dan bersifat read-only untuk user).
 - [x] Terapkan sistem update blok artifact secara dinamis oleh AI Agent (berbasis instruksi chat) tanpa form edit manual dari user.
 - [x] Integrasikan `Recharts` untuk merender JSON dari backend menjadi grafik interaktif (`ChartBlock`).
+
+---
+
+## 🚀 PARALLEL SPRINT (Fase Berjalan)
+*Ketiga Workstream di bawah ini dieksekusi secara bersamaan (Paralel).*
+
+### 🛠️ Workstream A: Core Engine & Sinkronisasi (PIC: Gilang)
 - [ ] **Sinkronisasi Backend:** *Refactor* Pydantic schema (`routes.py`), *mock response* (`inference.py`), dan *System Prompt* (`assessment.py`) agar me-*return* JSON dengan struktur Bento Grid `artifacts`/`blocks` terbaru.
 - [ ] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
 - [ ] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
+- [ ] Pastikan integrasi *database* ke endpoint API berjalan lancar (saat ini frontend masih pakai MOCK_PROFILE, backend sudah SQLite).
 
-**Arya (Fine-Tuning & Deploy)**
+### 🧠 Workstream B: AI Training & Data (PIC: Arya)
+- [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
+- [ ] *Setup script* untuk menarik data API Bapanas (Jawa Barat) dan SerpApi (Google Shopping).
+- [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
 - [ ] Selesaikan *training* QLoRA di Google Colab menggunakan *dataset* JSONL.
 - [ ] Evaluasi akurasi dan perbandingan respons model sebelum vs sesudah.
 - [ ] *Push* model *fine-tuned* ke HuggingFace Hub.
 - [ ] Update `.env` backend dengan model ID HuggingFace yang baru.
 
-**Adillah (Proposal, Storyboarding & Frontend Integration)**
+### 💼 Workstream C: Bisnis, Deliverables & Frontend Integration (PIC: Adillah)
+- [ ] Lakukan riset kompetitor langsung (terutama daftar & uji coba UMKM.AI).
+- [ ] Buat kerangka awal (ToC) untuk Dokumen Proposal 20 Halaman, masukkan narasi Pilot Project Jawa Barat.
 - [ ] Tulis isi lengkap proposal (tekankan penggunaan Bapanas/SerpApi dan fokus Jawa Barat).
 - [ ] Bikin naskah/skrip untuk Video Proof of Work (7 menit), *setting* persona di Jawa Barat.
 - [ ] Bikin naskah/skrip untuk Video Promosi (5 menit).
@@ -51,29 +59,30 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 
 ---
 
-## V1 (Tahap Penyisihan): Integration & Deliverables (Minggu 5–6 | 15–25 Agustus)
+## 🧩 INTEGRATION & TESTING (Setelah Sprint Paralel Selesai)
+*Fase penyatuan seluruh komponen, pencarian bug, dan finalisasi berkas.*
 
-**Gilang & Arya (Testing & Bug Fixing)**
+**Gilang & Arya (Testing & Bug Fixing):**
 - [ ] *End-to-End Testing*: Coba jalankan aplikasi dengan *use case* yang ekstrem/rumit.
 - [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
 - [ ] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
 
-**Adillah (Media, Submit & UI Bug Fixing)**
+**Adillah (Media, Submit & UI Bug Fixing):**
+- [ ] Lakukan perbaikan *bug layout* (UI Fixing) di Next.js hasil dari *End-to-End Testing*.
 - [ ] Rekam layar (*screen record*) jalannya aplikasi untuk Video Proof of Work (Mendemonstrasikan Mock Profile).
 - [ ] Buat *Voice Over* dan selesaikan *editing* Video Promosi.
-- [ ] Lakukan perbaikan *bug layout* (UI Fixing) di Next.js hasil dari *End-to-End Testing*.
 - [ ] Periksa ulang format README di GitHub (Setup Guide, dll).
 - [ ] *Double check* semua persyaratan pendaftaran Batch 2 dan finalisasi dokumen di *website* Compfest.
 - [ ] **SUBMIT seluruh berkas ke portal AIC COMPFEST 18 sebelum 25 Agustus 23:55 WIB.**
 
 ---
 
-## V2 (Tahap Finalis): Live Hackathon & Pitching (26–27 September)
+## 🏆 HACKATHON LIVE (V2 - 26 & 27 September)
+*Persiapan presentasi final 10 jam offline.*
 
 **Gilang (Live Hackathon 10 Jam)**
-- [ ] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya.
-- [ ] Pastikan integrasi *database* ke endpoint API berjalan lancar.
+- [x] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya. (Selesai lebih awal di Foundation!)
 
 **Arya**
 - [ ] *Tuning* ulang latensi Qdrant dan respons `Qwen3-8B` agar stabil saat didemokan langsung di depan juri.
@@ -81,3 +90,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 **Adillah (Pitching & UI Dev)**
 - [ ] Koding UI *Mini Dashboard Evaluasi Bulanan* (Persona 6) untuk demo *live* (selama 10 jam Hackathon).
 - [ ] Presentasi *Live Pitching*, mendemonstrasikan kelancaran UI Next.js dan sistem *database* yang baru saja dirakit saat Hackathon.
+
+---
+**Status Audit File:**
+- [x] Seluruh file core Backend & Frontend telah diaudit secara presisi.
