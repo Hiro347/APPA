@@ -19,10 +19,10 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 - [x] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
 - [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
 
-**Adillah (Bisnis & Validasi)**
+**Adillah (Bisnis, Validasi & UI Dev)**
 - [ ] Lakukan riset kompetitor langsung (terutama daftar & uji coba UMKM.AI).
 - [ ] Buat kerangka awal (ToC) untuk Dokumen Proposal 20 Halaman, masukkan narasi Pilot Project Jawa Barat.
-- [ ] Jadwalkan dan lakukan wawancara awal dengan UMKM terkait validasi *pain point* regulasi.
+- [ ] Koding komponen UI statis pendukung di Next.js (layout, typography, styling dasar).
 
 ---
 
@@ -34,7 +34,7 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 - [x] Terapkan sistem update blok artifact secara dinamis oleh AI Agent (berbasis instruksi chat) tanpa form edit manual dari user.
 - [x] Integrasikan `Recharts` untuk merender JSON dari backend menjadi grafik interaktif (`ChartBlock`).
 - [ ] **Sinkronisasi Backend:** *Refactor* Pydantic schema (`routes.py`), *mock response* (`inference.py`), dan *System Prompt* (`assessment.py`) agar me-*return* JSON dengan struktur Bento Grid `artifacts`/`blocks` terbaru.
-- [ ] **Pipeline Transparency:** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* ke UI frontend secara *real-time*.
+- [ ] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
 - [ ] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
 
 **Arya (Fine-Tuning & Deploy)**
@@ -43,10 +43,11 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 - [ ] *Push* model *fine-tuned* ke HuggingFace Hub.
 - [ ] Update `.env` backend dengan model ID HuggingFace yang baru.
 
-**Adillah (Proposal & Storyboarding)**
+**Adillah (Proposal, Storyboarding & Frontend Integration)**
 - [ ] Tulis isi lengkap proposal (tekankan penggunaan Bapanas/SerpApi dan fokus Jawa Barat).
 - [ ] Bikin naskah/skrip untuk Video Proof of Work (7 menit), *setting* persona di Jawa Barat.
 - [ ] Bikin naskah/skrip untuk Video Promosi (5 menit).
+- [ ] **Pipeline Transparency (Frontend):** Koding integrasi *client-side* SSE/WebSockets di Next.js untuk merender *streaming* data dari backend.
 
 ---
 
@@ -58,9 +59,10 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 - [ ] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
 
-**Adillah (Media & Submit)**
+**Adillah (Media, Submit & UI Bug Fixing)**
 - [ ] Rekam layar (*screen record*) jalannya aplikasi untuk Video Proof of Work (Mendemonstrasikan Mock Profile).
 - [ ] Buat *Voice Over* dan selesaikan *editing* Video Promosi.
+- [ ] Lakukan perbaikan *bug layout* (UI Fixing) di Next.js hasil dari *End-to-End Testing*.
 - [ ] Periksa ulang format README di GitHub (Setup Guide, dll).
 - [ ] *Double check* semua persyaratan pendaftaran Batch 2 dan finalisasi dokumen di *website* Compfest.
 - [ ] **SUBMIT seluruh berkas ke portal AIC COMPFEST 18 sebelum 25 Agustus 23:55 WIB.**
@@ -71,10 +73,11 @@ Centang (`[x]`) tugas yang sudah selesai. Jangan lupa lakukan *commit* sesuai pa
 
 **Gilang (Live Hackathon 10 Jam)**
 - [ ] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya.
-- [ ] Koding UI *Mini Dashboard Evaluasi Bulanan* (Persona 6) untuk demo *live*.
+- [ ] Pastikan integrasi *database* ke endpoint API berjalan lancar.
 
 **Arya**
 - [ ] *Tuning* ulang latensi Qdrant dan respons `Qwen3-8B` agar stabil saat didemokan langsung di depan juri.
 
-**Adillah**
+**Adillah (Pitching & UI Dev)**
+- [ ] Koding UI *Mini Dashboard Evaluasi Bulanan* (Persona 6) untuk demo *live* (selama 10 jam Hackathon).
 - [ ] Presentasi *Live Pitching*, mendemonstrasikan kelancaran UI Next.js dan sistem *database* yang baru saja dirakit saat Hackathon.
