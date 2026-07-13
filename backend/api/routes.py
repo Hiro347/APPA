@@ -3,7 +3,9 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from core.agent import handle_chat
 from core.profile_manager import get_profile
-from data.seed.seed_qdrant import seed as seed_qdrant_db
+# from data.seed.seed_qdrant import seed as seed_qdrant_db
+def seed_qdrant_db():
+    print("Warning: Qdrant seeding is not yet implemented.")
 
 router = APIRouter()
 
@@ -18,20 +20,22 @@ class ChatRequest(BaseModel):
     message: str = Field(..., description="The user's input text message")
     chat_history: Optional[List[ChatHistoryItem]] = Field(default=[], description="Sliding window of the last 10 messages")
 
-class UIComponent(BaseModel):
-    ui_type: str = Field(..., description="Type of visual component to render: 'text', 'checklist', 'pricing', 'chart'")
-    content: Optional[str] = None
-    items: Optional[List[dict]] = None
-    hpp: Optional[int] = None
-    market_avg: Optional[int] = None
-    recommendation: Optional[int] = None
-    xAxis: Optional[List[str]] = None
-    yAxis: Optional[List[int]] = None
+class Block(BaseModel):
+    type: str = Field(..., description="Block type: 'text', 'metric', 'checklist', 'chart', 'table'")
+    content: Optional[str] = Field(default=None, description="Text content, only for type='text'")
+    data: Optional[dict] = Field(default=None, description="Structured data payload for metric/checklist/chart/table blocks")
     sources: List[str] = Field(default=[])
 
+class ArtifactPayload(BaseModel):
+    id: str = Field(..., description="Unique artifact identifier")
+    title: str = Field(..., description="Display title for the artifact tab")
+    blocks: List[Block] = Field(..., description="Array of content blocks for the Bento Grid")
+    sources: List[str] = Field(default=[], description="Global source references for the entire artifact")
+
 class ChatResponse(BaseModel):
-    components: List[UIComponent] = Field(..., description="Array of components for Generative UI rendering")
-    profile_updated: bool = Field(default=True)
+    response: str = Field(..., description="Plain text chat response shown in the message bubble")
+    artifacts: List[ArtifactPayload] = Field(default=[], description="Array of Bento Grid artifacts to render")
+    profile_updated: bool = Field(default=False)
 
 class UserProfileResponse(BaseModel):
     business_type: Optional[str] = None

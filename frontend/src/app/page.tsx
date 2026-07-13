@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useChat } from '@/hooks/useChat';
 import { TabItem } from '@/lib/types';
 import { ProfileSidebar } from '@/components/layout/ProfileSidebar';
@@ -11,6 +11,8 @@ import { ArtifactView } from '@/components/artifacts/ArtifactView';
 export default function Home() {
   const { messages, artifacts, profile, isProcessing, send, updateArtifact } = useChat();
   const [activeTab, setActiveTab] = useState('chat');
+
+  // Auto-switch is disabled to prevent jarring jumps when hitting enter
 
   // Derive tabs from artifacts
   const tabs: TabItem[] = useMemo(() => {

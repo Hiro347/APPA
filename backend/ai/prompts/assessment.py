@@ -31,27 +31,40 @@ Kamu harus membalas HANYA dengan satu blok JSON yang valid, tanpa teks penjelasa
 
 Struktur JSON yang diharapkan:
 {{
-  "components": [
+  "response": "Berdasarkan analisa APPA, berikut laporan kelayakan bisnis [Produk] di [Lokasi]. Silakan lihat tab laporan di atas untuk detail visualnya.",
+  "artifacts": [
     {{
-      "ui_type": "text",
-      "content": "# Laporan Analisa Pasar Pintar & Akurat: [Nama Produk]\\n\\n[Isi laporan terstruktur dalam markdown...]",
-      "sources": ["SerpApi Google", "Aturan Pemerintah"]
-    }},
-    {{
-      "ui_type": "checklist",
-      "items": [
-        {{ "title": "NIB (Nomor Induk Berusaha)", "status": "wajib" }},
-        {{ "title": "SPP-IRT", "status": "wajib" }},
-        {{ "title": "Sertifikasi Halal Self-Declare", "status": "wajib" }}
-      ],
-      "sources": ["regulatory_rules.json", "PP 28/2025"]
-    }},
-    {{
-      "ui_type": "pricing",
-      "hpp": 5000,
-      "market_avg": 12500,
-      "recommendation": 10000,
-      "sources": ["SerpApi Google Shopping"]
+      "id": "art-assessment-001",
+      "title": "Laporan Kelayakan Usaha [Nama Produk]",
+      "sources": ["Google Shopping", "Tokopedia", "PP 28/2025"],
+      "blocks": [
+        {{
+          "type": "text",
+          "content": "### Ringkasan Eksekutif\\n\\n[Isi laporan 5 bagian terstruktur dalam markdown...]",
+          "sources": ["Analisis APPA", "SerpApi Google"]
+        }},
+        {{
+          "type": "metric",
+          "data": {{ "hpp": 5000, "market_avg": 12500, "recommendation": 10000 }},
+          "sources": ["SerpApi Google Shopping"]
+        }},
+        {{
+          "type": "checklist",
+          "data": {{
+            "items": [
+              {{ "title": "NIB (Nomor Induk Berusaha)", "status": "wajib", "description": "Daftar gratis di oss.go.id" }},
+              {{ "title": "SPP-IRT", "status": "wajib", "description": "Daftar online di sppirt.pom.go.id" }},
+              {{ "title": "Sertifikasi Halal Self-Declare", "status": "wajib", "description": "Gratis via SEHATI di SIHALAL" }}
+            ]
+          }},
+          "sources": ["regulatory_rules.json", "PP 28/2025"]
+        }},
+        {{
+          "type": "chart",
+          "data": {{ "xAxis": ["Tokopedia", "Shopee", "Rekomendasi"], "yAxis": [12000, 11500, 10000], "label": "Perbandingan Harga Pasar" }},
+          "sources": ["Google Shopping"]
+        }}
+      ]
     }}
   ],
   "profile_updated": true

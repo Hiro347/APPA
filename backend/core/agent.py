@@ -3,6 +3,7 @@ import logging
 import asyncio
 import re
 from core.profile_manager import get_profile, update_profile
+from core.fallback import build_fallback_response
 from ai.entity_extractor import extract_entities_and_queries
 from ai.inference import call_llm
 from ai.prompts.synthesis import get_clarification_prompt
@@ -53,15 +54,10 @@ async def handle_chat(user_id: str, message: str) -> dict:
             None, call_llm, message, system_prompt
         )
         
-        # Package into standard Generative UI payload
+        # Package into standard Bento Grid payload (no artifacts for clarification)
         return {
-            "components": [
-                {
-                    "ui_type": "text",
-                    "content": chat_response,
-                    "sources": []
-                }
-            ],
+            "response": chat_response,
+            "artifacts": [],
             "profile_updated": True
         }
         
@@ -92,62 +88,22 @@ async def handle_chat(user_id: str, message: str) -> dict:
 
 def _parse_assessment_output(output: str, profile: dict) -> dict:
     """
-    Cleans and parses the LLM Call 2 output. 
-    If parsing fails, generates a robust fallback Generative UI JSON.
+    Parses LLM Call 2 output.
+    On parse failure, delegates to core/fallback.py for a safe Bento Grid response.
     """
     cleaned_output = output.strip()
-    
-    # Find JSON blocks
+
+    # Extract JSON block (handles cases where LLM wraps response in markdown)
     json_match = re.search(r'(\{.*\})', cleaned_output, re.DOTALL)
     if json_match:
         cleaned_output = json_match.group(1)
-        
+
     try:
         data = json.loads(cleaned_output)
-        if "components" in data and isinstance(data["components"], list):
+        if "artifacts" in data and isinstance(data["artifacts"], list):
             return data
     except Exception as e:
         logger.warning(f"Failed to parse LLM assessment JSON: {e}. Output was: {output}")
-        
-    # Fallback response formatting if LLM response is corrupted or plain text
-    fallback_content = (
-        f"### Laporan Hasil Analisa Pasar & Regulasi: {profile.get('product_category', 'Produk')} ({profile.get('target_location', 'Wilayah')})\n\n"
-        f"Maaf, saya mengalami kendala teknis saat memformat laporan. Namun, berikut poin-poin penting yang berhasil dihimpun:\n\n"
-        f"1. **Analisa Pasar:** Permintaan pasar tergolong sedang-tinggi di {profile.get('target_location')}. Pastikan Anda menguji coba harga produk agar bersaing.\n"
-        f"2. **Aspek Legalitas:** Disarankan segera mengurus NIB gratis secara online. "
-    )
-    
-    # Check if F&B Basah or Kering for generic fallback perizinan
-    product_cat = profile.get('product_category', '').lower()
-    is_basah = "bakso" in product_cat or "frozen" in product_cat or "daging" in product_cat
-    
-    if is_basah:
-        fallback_content += "Karena termasuk pangan basah/beku, produk Anda memerlukan Izin Edar BPOM MD dan Sertifikat Halal Reguler."
-        checklist = [
-            {"title": "NIB", "status": "wajib"},
-            {"title": "Izin Edar BPOM MD", "status": "wajib"},
-            {"title": "Sertifikasi Halal Reguler", "status": "wajib"}
-        ]
-    else:
-        fallback_content += "Untuk produk kering, Anda cukup mendaftarkan SPP-IRT secara online dan mengajukan Halal Self-Declare (SEHATI) gratis."
-        checklist = [
-            {"title": "NIB", "status": "wajib"},
-            {"title": "SPP-IRT", "status": "wajib"},
-            {"title": "Sertifikasi Halal Self-Declare", "status": "wajib"}
-        ]
-        
-    return {
-        "components": [
-            {
-                "ui_type": "text",
-                "content": fallback_content,
-                "sources": ["Data Fallback internal APPA"]
-            },
-            {
-                "ui_type": "checklist",
-                "items": checklist,
-                "sources": ["data/regulatory_rules.json"]
-            }
-        ],
-        "profile_updated": True
-    }
+
+    return build_fallback_response(profile)
+
