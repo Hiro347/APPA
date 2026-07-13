@@ -11,7 +11,7 @@ interface TabBarProps {
 
 export function TabBar({ tabs, activeTabId, onTabClick }: TabBarProps) {
   return (
-    <div className="h-10 border-b border-gray-200 flex items-end px-2 gap-0 bg-white overflow-x-auto">
+    <div className="h-10 border-b border-gray-200 flex items-end px-2 gap-0 bg-white overflow-x-auto hide-scrollbar">
       {tabs.map((tab) => {
         const isActive = tab.id === activeTabId;
         return (
