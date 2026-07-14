@@ -73,7 +73,7 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
 
 **Adillah (Media, Submit & UI Bug Fixing):**
-- [x] Lakukan perbaikan *bug layout* (UI Fixing) di Next.js hasil dari *End-to-End Testing*.
+- [ ] Lakukan perbaikan *bug layout* (UI Fixing) di Next.js hasil dari *End-to-End Testing*.
 - [ ] Rekam layar (*screen record*) jalannya aplikasi untuk Video Proof of Work (Mendemonstrasikan Mock Profile).
 - [ ] Buat *Voice Over* dan selesaikan *editing* Video Promosi.
 - [ ] Periksa ulang format README di GitHub (Setup Guide, dll).
