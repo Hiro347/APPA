@@ -93,6 +93,7 @@ export interface MockCallbacks {
   onPipelineComplete: () => void;
   onArtifacts: (artifacts: Artifact[]) => void;
   onDone: () => void;
+  onGeneratingArtifact?: () => void;
 }
 
 export function simulateResponse(message: string, cb: MockCallbacks): () => void {
@@ -115,48 +116,48 @@ export function simulateResponse(message: string, cb: MockCallbacks): () => void
   // Group 1: Decompose (Sequential)
   timeline.push(
     { time: 0, action: () => update('d1', 'running') },
-    { time: 300, action: () => { update('d1', 'done'); update('d2', 'running'); } },
-    { time: 600, action: () => { update('d2', 'done'); update('d3', 'running'); } },
-    { time: 900, action: () => { update('d3', 'done'); } }
+    { time: 3000, action: () => { update('d1', 'done'); update('d2', 'running'); } },
+    { time: 6000, action: () => { update('d2', 'done'); update('d3', 'running'); } },
+    { time: 9000, action: () => { update('d3', 'done'); } }
   );
 
   if (isDeep) {
     // Group 2: Search (Parallel)
     timeline.push(
-      { time: 900, action: () => {
+      { time: 9000, action: () => {
         update('s1', 'running');
         update('s2', 'running');
         update('s3', 'running');
       }},
-      { time: 1300, action: () => update('s1', 'done') },
-      { time: 1550, action: () => update('s2', 'done') },
-      { time: 1800, action: () => update('s3', 'done') }
+      { time: 12000, action: () => update('s1', 'done') },
+      { time: 13500, action: () => update('s2', 'done') },
+      { time: 15000, action: () => update('s3', 'done') }
     );
 
     // Group 3: Process (Sequential)
     timeline.push(
-      { time: 1800, action: () => update('p1', 'running') },
-      { time: 2150, action: () => { update('p1', 'done'); update('p2', 'running'); } },
-      { time: 2500, action: () => update('p2', 'done') }
+      { time: 15000, action: () => update('p1', 'running') },
+      { time: 18000, action: () => { update('p1', 'done'); update('p2', 'running'); } },
+      { time: 21000, action: () => update('p2', 'done') }
     );
 
     // Group 4: Regulation (Sequential)
     timeline.push(
-      { time: 2500, action: () => update('r1', 'running') },
-      { time: 2900, action: () => { update('r1', 'done'); update('r2', 'running'); } },
-      { time: 3200, action: () => update('r2', 'done') }
+      { time: 21000, action: () => update('r1', 'running') },
+      { time: 24000, action: () => { update('r1', 'done'); update('r2', 'running'); } },
+      { time: 27000, action: () => update('r2', 'done') }
     );
 
     // Group 5: Synthesis
     timeline.push(
-      { time: 3200, action: () => update('syn1', 'running') },
-      { time: 3500, action: () => update('syn1', 'done') }
+      { time: 27000, action: () => update('syn1', 'running') },
+      { time: 30000, action: () => update('syn1', 'done') }
     );
   } else {
     // Non-deep synthesis starts right after decomposition
     timeline.push(
-      { time: 900, action: () => update('syn1', 'running') },
-      { time: 1200, action: () => update('syn1', 'done') }
+      { time: 9000, action: () => update('syn1', 'running') },
+      { time: 12000, action: () => update('syn1', 'done') }
     );
   }
 
@@ -167,7 +168,7 @@ export function simulateResponse(message: string, cb: MockCallbacks): () => void
       event.action();
 
       // Trigger completion and text streaming after the last pipeline step is done
-      const lastTime = isDeep ? 3500 : 1200;
+      const lastTime = isDeep ? 30000 : 12000;
       if (event.time === lastTime) {
         cb.onPipelineComplete();
 
@@ -181,7 +182,12 @@ export function simulateResponse(message: string, cb: MockCallbacks): () => void
           } else {
             clearInterval(streamInterval);
             if (isDeep) {
-              cb.onArtifacts([
+              if (cb.onGeneratingArtifact) cb.onGeneratingArtifact();
+              
+              // Simulate Claude's artifact writing delay
+              timeouts.push(setTimeout(() => {
+                if (cancelled) return;
+                cb.onArtifacts([
                 {
                   id: `artifact-consolidated-${Date.now()}`,
                   title: `Laporan Kelayakan Usaha ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}`,
@@ -232,8 +238,11 @@ export function simulateResponse(message: string, cb: MockCallbacks): () => void
                   ]
                 }
               ]);
+              cb.onDone();
+            }, 2500)); // 2.5 second delay for artifact generation
+            } else {
+              cb.onDone();
             }
-            cb.onDone();
           }
         }, 15);
         timeouts.push(streamInterval as unknown as ReturnType<typeof setTimeout>);

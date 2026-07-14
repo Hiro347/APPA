@@ -221,6 +221,7 @@ Digunakan oleh Frontend untuk mengirim pesan dan menerima balasan berupa *array*
           {
             "type": "chart",
             "data": {
+              "chartType": "bar",
               "xAxis": ["Tokopedia", "Shopee", "Rekomendasi"],
               "yAxis": [12000, 11500, 10000],
               "label": "Perbandingan Harga Pasar"
@@ -567,6 +568,8 @@ Setiap objek blok Artifact **WAJIB** memiliki key `"sources": []` di tingkat blo
 **Interaktivitas & Konteks:**
 - **Mode Edit (Agent-Edit):** Perubahan teks, status checklist, atau target angka di dalam blok dilakukan oleh AI Agent secara dinamis berdasarkan instruksi user lewat chat.
 - **Context Awareness:** State terbaru dari Artifact yang diperbarui oleh agent dikirimkan kembali ke backend sebagai bagian dari *system context* pada chat berikutnya, sehingga model terus sinkron dengan kondisi terkini dokumen.
+- **Dynamic Client:** Frontend me-render pipeline secara dinamis berdasar `pipeline_init`. Jika LLM menambah 3 langkah search ekstra, UI akan otomatis menampilkan 3 baris loading baru tanpa perlu mengubah kode `page.tsx`.
+- **Text Streaming:** Setelah sintesis selesai (`syn1: done`), backend memancarkan event `response_chunk` untuk men-stream teks `response` agar memberikan efek *typewriter* (token streaming) secara mulus sebelum payload JSON lengkap di-render.
 
 ### Panel Profile Persistence (Disarankan: Sidebar / Header)
 - Wajib secara *real-time* menampilkan indikator *Read-Only*: Kategori Bisnis, Modal/HPP, dan Status Checklist Legalitas (NIB: ✅/❌, SPP-IRT: ✅/❌). Profil ter-*update* murni lewat ekstraksi LLM di obrolan (di-*mock* via state untuk V1).

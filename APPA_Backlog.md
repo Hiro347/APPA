@@ -69,11 +69,11 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [ ] **Tuning Prompt Engineering:** Perbaiki prompt secara iteratif saat menemukan *edge cases* atau halusinasi JSON selama testing berjalan.
 - [ ] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) baik di *frontend* (`api.ts`) maupun *backend* agar tidak kena limit token HuggingFace.
 - [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
-- [ ] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
+- [x] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
 
 **Adillah (Media, Submit & UI Bug Fixing):**
-- [ ] Lakukan perbaikan *bug layout* (UI Fixing) di Next.js hasil dari *End-to-End Testing*.
+- [x] Lakukan perbaikan *bug layout* (UI Fixing) di Next.js hasil dari *End-to-End Testing*.
 - [ ] Rekam layar (*screen record*) jalannya aplikasi untuk Video Proof of Work (Mendemonstrasikan Mock Profile).
 - [ ] Buat *Voice Over* dan selesaikan *editing* Video Promosi.
 - [ ] Periksa ulang format README di GitHub (Setup Guide, dll).

@@ -12,6 +12,7 @@ import json
 import re
 import time
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -173,9 +174,10 @@ def mock_assessment(prompt: str) -> str:
                     {
                         "type": "chart",
                         "data": {
-                            "xAxis": ["Tokopedia", "Shopee", "Rekomendasi"],
-                            "yAxis": [12000, 11500, 10000],
-                            "label": "Analisis Komparasi Harga Jual",
+                            "chartType": "line",
+                            "xAxis": ["Produk 1", "Produk 2", "Produk 3", "Produk 4", "Produk 5", "Produk 6", "Produk 7", "Produk 8"],
+                            "yAxis": [8900, 14000, 26500, 28950, 30000, 32400, 34500, 36950],
+                            "label": "Distribusi Harga Kompetitor",
                         },
                         "sources": ["Google Shopping"],
                     },
@@ -227,13 +229,11 @@ def mock_condensation(prompt: str) -> str:
                     not t.startswith('!') and 
                     not t.startswith('*') and 
                     not t.startswith('Rp') and 
-                    '(' not in t and 
+                    not re.match(r'^[0-9,.]+(?:\([0-9]+\))?$', t) and
                     len(t) > 10 and 
                     'Jelajahi' not in t and 
                     'Lainnya' not in t and
-                    'Lazada' not in t and
-                    'Shopee' not in t and
-                    'Tokopedia' not in t and
+                    t not in ['Lazada Indonesia', 'Shopee', 'Tokopedia', 'Blibli', 'shopee.co.id', 'tokopedia.com'] and
                     'Ctrl' not in t):
                     title = t
                     break
@@ -241,12 +241,20 @@ def mock_condensation(prompt: str) -> str:
             # Find marketplace (look forwards up to 5 lines)
             market = "Unknown"
             for j in range(i+1, min(len(lines), i+5)):
-                t = lines[j].lower()
-                if 'shopee' in t:
-                    market = 'Shopee'
-                    break
-                elif 'tokopedia' in t:
-                    market = 'Tokopedia'
+                t = lines[j].strip()
+                # Ignore image tags, rating lines, and prices
+                if (not t.startswith('!') and 
+                    not t.startswith('[') and 
+                    not t.startswith('Rp') and 
+                    len(t) > 3 and
+                    not re.match(r'^[0-9,.]+(?:\([0-9]+\))?$', t)):
+                    
+                    if 'shopee' in t.lower(): market = 'Shopee'
+                    elif 'tokopedia' in t.lower(): market = 'Tokopedia'
+                    elif 'lazada' in t.lower(): market = 'Lazada'
+                    elif 'blibli' in t.lower(): market = 'Blibli'
+                    else: market = t.title()
+                    
                     break
                     
             if market != "Unknown" and title != "Unknown":
@@ -256,31 +264,23 @@ def mock_condensation(prompt: str) -> str:
                     "price": price
                 })
                 
-    # Filter top 5 for each (using a set to deduplicate exact same titles)
+    # Filter top 10 overall (using a set to deduplicate exact same titles)
     seen_t = set()
-    shopee_top = []
+    top_products = []
     for p in products:
-        if p['marketplace'] == 'Shopee' and p['title'].lower() not in seen_t:
-            shopee_top.append(p)
+        if p['title'].lower() not in seen_t:
+            top_products.append(p)
             seen_t.add(p['title'].lower())
-            if len(shopee_top) == 5: break
+            if len(top_products) == 10: break
             
-    seen_t = set()
-    tokped_top = []
-    for p in products:
-        if p['marketplace'] == 'Tokopedia' and p['title'].lower() not in seen_t:
-            tokped_top.append(p)
-            seen_t.add(p['title'].lower())
-            if len(tokped_top) == 5: break
-            
-    if not tokped_top and not shopee_top:
+    if not top_products:
         return json.dumps({
             "ringkasan_artikel": "Berhasil mengekstrak informasi regulasi dan tren pasar dari artikel web.",
             "insight_utama": ["Kewajiban NIB", "Potensi pasar yang stabil", "Pentingnya strategi pemasaran digital"]
         }, indent=2)
 
     return json.dumps({
-        "agregat": shopee_top + tokped_top
+        "agregat": top_products
     }, indent=2)
 
 
@@ -288,16 +288,31 @@ def get_mock_response(prompt: str, system_prompt: str) -> str:
     """
     Entry point for mock LLM dispatch.
     Routes to the correct mock function based on system_prompt content.
+    Only checks the first 300 characters to prevent false positives from search context.
     """
-    sp_lower = system_prompt.lower()
+    sp_lower = system_prompt[:300].lower()
 
-    if "extract" in sp_lower or "decomposition" in sp_lower:
+    if "ekstraksi" in sp_lower or "dekomposisi" in sp_lower or "orkestrator" in sp_lower:
         return mock_decomposition(prompt)
 
-    if "kondensasi" in sp_lower or "peringkas data riset" in sp_lower or "condensation" in sp_lower:
+    if "kondensasi" in sp_lower or "peringkas data" in sp_lower or "condensation" in sp_lower or "analis data" in sp_lower:
         return mock_condensation(prompt)
 
-    if "assessment" in sp_lower or "synthesis" in sp_lower or "analisis bisnis" in sp_lower or "laporan" in sp_lower:
-        return mock_assessment(prompt)
+    if "menyapa pengguna" in sp_lower or "chit-chat" in sp_lower:
+        return mock_clarification()
 
-    return mock_clarification()
+    # Default to assessment for deep dive
+    return mock_assessment(prompt)
+
+async def get_mock_response_stream(prompt: str, system_prompt: str):
+    """
+    Streaming version of get_mock_response.
+    Simulates token generation by yielding chunks of the string.
+    """
+    result = get_mock_response(prompt, system_prompt)
+    
+    # Chunk size of 3 characters, sleeping to simulate 20-30 tokens/sec
+    chunk_size = 5
+    for i in range(0, len(result), chunk_size):
+        yield result[i:i + chunk_size]
+        await asyncio.sleep(0.015)

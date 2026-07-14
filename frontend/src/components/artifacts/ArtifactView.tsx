@@ -3,7 +3,7 @@
 import { Artifact, ArtifactBlock, TextBlock, MetricBlock, ChecklistBlock, ChartBlock, TableBlock } from '@/lib/types';
 import { CheckCircle2, Circle, BarChart3, Info } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export function ArtifactView({
   artifact,
@@ -141,6 +141,7 @@ function MetricBlockRenderer({ block }: { block: MetricBlock }) {
 
 function ChartBlockRenderer({ block }: { block: ChartBlock }) {
   const chartData = block.data.xAxis.map((x, i) => ({ name: x, value: block.data.yAxis[i] }));
+  const isLine = block.data.chartType === 'line';
 
   return (
     <div className="flex flex-col flex-1 h-full justify-between">
@@ -149,16 +150,30 @@ function ChartBlockRenderer({ block }: { block: ChartBlock }) {
       </h3>
       <div className="flex-1 min-h-[220px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9ca3af' }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9ca3af' }} width={45} />
-            <Tooltip
-              cursor={{ fill: '#f9fafb' }}
-              contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: 'none', fontSize: '11px' }}
-            />
-            <Bar dataKey="value" fill="#111827" radius={[4, 4, 0, 0]} />
-          </BarChart>
+          {isLine ? (
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af' }} angle={-25} textAnchor="end" height={50} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9ca3af' }} width={55} tickFormatter={(v) => `Rp${(v/1000).toFixed(0)}k`} />
+              <Tooltip
+                cursor={{ stroke: '#d1d5db', strokeDasharray: '4 4' }}
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: 'none', fontSize: '11px' }}
+                formatter={(value) => [`Rp${Number(value).toLocaleString()}`, 'Harga']}
+              />
+              <Line type="monotone" dataKey="value" stroke="#111827" strokeWidth={2} dot={{ r: 4, fill: '#111827' }} activeDot={{ r: 6 }} />
+            </LineChart>
+          ) : (
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9ca3af' }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9ca3af' }} width={45} />
+              <Tooltip
+                cursor={{ fill: '#f9fafb' }}
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: 'none', fontSize: '11px' }}
+              />
+              <Bar dataKey="value" fill="#111827" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          )}
         </ResponsiveContainer>
       </div>
     </div>

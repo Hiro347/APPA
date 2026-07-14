@@ -55,6 +55,7 @@ export interface ChecklistBlock {
 export interface ChartBlock {
   type: 'chart';
   data: {
+    chartType?: 'bar' | 'line';
     xAxis: string[];
     yAxis: number[];
     label?: string;

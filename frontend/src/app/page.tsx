@@ -51,16 +51,17 @@ export default function Home() {
 
         {/* Content area */}
         <div className="flex-1 flex flex-col min-h-0">
-          {validActiveTab === 'chat' ? (
+          <div className={`flex-1 flex flex-col min-h-0 ${validActiveTab === 'chat' ? '' : 'opacity-0 pointer-events-none absolute inset-0 -z-10'}`}>
             <ChatView messages={messages} isProcessing={isProcessing} onSend={send} />
-          ) : activeArtifact ? (
-            <div className="flex-1 overflow-y-auto bg-gray-50">
+          </div>
+          {activeArtifact && (
+            <div className={`flex-1 overflow-y-auto bg-gray-50 ${validActiveTab !== 'chat' ? '' : 'opacity-0 pointer-events-none absolute inset-0 -z-10'}`}>
               <ArtifactView
                 artifact={activeArtifact}
                 onUpdate={(blocks) => updateArtifact(activeArtifact.id, blocks)}
               />
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

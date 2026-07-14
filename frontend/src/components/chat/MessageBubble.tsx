@@ -41,7 +41,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
           {/* Text content */}
           {message.content && (
-            <div className="leading-relaxed mt-1 text-sm text-gray-800">
+            <div className="leading-relaxed mt-1 text-sm text-gray-800 animate-slide-up-blur-fast">
               <ReactMarkdown
                 components={{
                   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -56,18 +56,6 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
               >
                 {message.content}
               </ReactMarkdown>
-              {message.isStreaming && (
-                <span className="inline-block w-0.5 h-3.5 bg-gray-950 ml-0.5 animate-pulse align-middle" />
-              )}
-            </div>
-          )}
-
-          {/* Loading dot when no content yet and pipeline not complete */}
-          {!message.content && !message.pipelineComplete && (
-            <div className="mt-2 flex gap-1">
-              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           )}
         </div>

@@ -24,6 +24,7 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -33,13 +34,50 @@ body {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+
+@keyframes slideUpTransform {
+  0% {
+    transform: translateY(6px);
+    filter: blur(6px);
+  }
+
+  100% {
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up-blur {
+  animation:
+    slideUpTransform 0.8s cubic-bezier(0.22, 1, 0.36, 1) both,
+    fadeInOpacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-up-blur-fast {
+  animation:
+    slideUpTransform 0.4s cubic-bezier(0.22, 1, 0.36, 1) both,
+    fadeInOpacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

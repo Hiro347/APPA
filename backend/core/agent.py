@@ -5,7 +5,7 @@ import re
 from core.profile_manager import get_profile, update_profile
 from core.fallback import build_fallback_response
 from ai.entity_extractor import extract_entities_and_queries
-from ai.inference import call_llm
+from ai.inference import call_llm, call_llm_stream
 from ai.prompts.synthesis import get_clarification_prompt
 from ai.prompts.assessment import get_assessment_prompt
 from core.agent_tool.web import web_search, scrape_google_shopping
@@ -60,10 +60,11 @@ async def handle_chat_stream(user_id: str, message: str):
         yield emit_update("syn1", "running")
         system_prompt = get_clarification_prompt(profile)
         
-        loop = asyncio.get_event_loop()
-        chat_response = await loop.run_in_executor(
-            None, call_llm, message, system_prompt
-        )
+        chat_response = ""
+        async for chunk in call_llm_stream(message, system_prompt):
+            chat_response += chunk
+            yield json.dumps({"type": "stream_chunk", "content": chunk}) + "\n"
+            
         yield emit_update("syn1", "done", chat_response)
         
         final_data = {
@@ -165,10 +166,18 @@ async def handle_chat_stream(user_id: str, message: str):
     
     full_market_data += f"\n\n=== GOOGLE SHOPPING DATA ===\n{gshop_results.get('condensed_json', '{}')}"
     
+    yield emit_update("p1", "running")
+    await asyncio.sleep(1.0)
     yield emit_update("p1", "done", "\n\n".join(combined_condensations))
+    
+    yield emit_update("p2", "running")
+    await asyncio.sleep(0.5)
     yield emit_update("p2", "done", "Validasi MarketDataSchema Sukses")
     
     yield emit_update("r1", "done", vector_results)
+    
+    yield emit_update("r2", "running")
+    await asyncio.sleep(0.5)
     yield emit_update("r2", "done", "Regex Matching Applied")
     
     # LLM Call 2: Assessment & Synthesis Report
@@ -182,13 +191,22 @@ async def handle_chat_stream(user_id: str, message: str):
         f"Balas dengan JSON format kaku sesuai contoh."
     )
     
-    loop = asyncio.get_event_loop()
-    llm_output = await loop.run_in_executor(
-        None, call_llm, user_prompt, system_prompt
-    )
+    llm_output = ""
+    async for chunk in call_llm_stream(user_prompt, system_prompt):
+        llm_output += chunk
+        yield json.dumps({"type": "stream_chunk", "content": chunk}) + "\n"
+        
     yield emit_update("syn1", "done")
     
     final_data = _parse_assessment_output(llm_output, profile)
+    
+    # Stream the response text for frontend typewriter effect
+    response_text = final_data.get("response", "")
+    chunk_size = 5
+    for i in range(0, len(response_text), chunk_size):
+        yield json.dumps({"type": "response_chunk", "content": response_text[i:i + chunk_size]}) + "\n"
+        await asyncio.sleep(0.02)
+    
     yield json.dumps({"type": "result", "data": final_data}) + "\n"
 
 def _parse_assessment_output(output: str, profile: dict) -> dict:
@@ -208,7 +226,9 @@ def _parse_assessment_output(output: str, profile: dict) -> dict:
         if "artifacts" in data and isinstance(data["artifacts"], list):
             return data
     except Exception as e:
-        logger.warning(f"Failed to parse LLM assessment JSON: {e}. Output was: {output}")
+        logger.error(f"Failed to parse LLM assessment JSON: {e}")
+        logger.error(f"Output length: {len(output)}. Content preview: {output[:200]}...{output[-200:]}")
+        logger.error(f"Cleaned output preview: {cleaned_output[:200]}...{cleaned_output[-200:]}")
 
     return build_fallback_response(profile)
 

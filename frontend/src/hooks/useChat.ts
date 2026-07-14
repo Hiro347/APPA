@@ -91,6 +91,8 @@ export function useChat() {
           const reader = res.body.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
+          let rawJsonBuffer = '';
+          let responseBuffer = '';
 
           while (true) {
             const { done, value } = await reader.read();
@@ -118,10 +120,40 @@ export function useChat() {
                     }));
                     return { ...msg, pipeline: newPipeline };
                   });
-                } else if (data.type === 'result') {
+                } else if (data.type === 'stream_chunk') {
+                  rawJsonBuffer += data.content;
+                  
+                  if (!rawJsonBuffer.trim().startsWith('{')) {
+                    // Plain text stream (e.g., clarification route) — show immediately
+                    updateLastAssistant(msg => ({
+                      ...msg,
+                      content: rawJsonBuffer,
+                      isStreaming: true,
+                    }));
+                  } else {
+                    // JSON stream (assessment route) — don't show text yet,
+                    // just track artifact generation state for UI feedback
+                    if (rawJsonBuffer.includes('"artifacts"')) {
+                      updateLastAssistant(msg => ({
+                        ...msg,
+                        isStreaming: true,
+                      }));
+                    }
+                  }
+                } else if (data.type === 'response_chunk') {
+                  responseBuffer += data.content;
                   updateLastAssistant(msg => ({
                     ...msg,
-                    content: data.data.response || '',
+                    content: responseBuffer,
+                    isStreaming: true,
+                    pipelineComplete: true,
+                  }));
+                } else if (data.type === 'result') {
+                  const artifactsToSet = data.data.artifacts || [];
+
+                  updateLastAssistant(msg => ({
+                    ...msg,
+                    content: data.data.response || msg.content,
                     isStreaming: false,
                     pipelineComplete: true,
                     pipeline: msg.pipeline?.map(group => ({
@@ -129,14 +161,15 @@ export function useChat() {
                       steps: group.steps.map(step => ({ ...step, status: 'done' }))
                     }))
                   }));
-
-                  if (data.data.artifacts && data.data.artifacts.length > 0) {
-                    setArtifacts(prev => [...prev, ...data.data.artifacts]);
+                  
+                  if (artifactsToSet.length > 0) {
+                    setArtifacts(prev => [...prev, ...artifactsToSet]);
                   }
                   
                   if (data.data.profile_updated) {
                     // Implicit update or trigger a refetch here if needed
                   }
+                  setIsProcessing(false);
                 }
               } catch (e) {
                 console.error("Failed to parse stream line:", line, e);
@@ -152,9 +185,6 @@ export function useChat() {
             isStreaming: false,
             pipelineComplete: true,
           }));
-        })
-        .finally(() => {
-          setIsProcessing(false);
         });
     }
   }, [isProcessing, updateLastAssistant, messages]);
