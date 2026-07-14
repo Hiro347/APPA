@@ -99,7 +99,9 @@ appa/
 │   ├── core/
 │   │   ├── agent.py            # Orchestrator: fan-out, routing, synthesis
 │   │   ├── profile_manager.py  # SQLite read/write, implicit update
-│   │   └── tool_executor.py    # Web search, Qdrant queries
+│   │   ├── agent_tool/         # Modular tools directory
+│   │   │   ├── web.py          # DDGS Search & Crawl4AI Google Shopping
+│   │   │   └── vector.py       # Qdrant Database interactions
 │   ├── ai/
 │   │   ├── inference.py        # HuggingFace API calls
 │   │   ├── entity_extractor.py # Extract entities dari user input → JSON
@@ -439,8 +441,8 @@ async def handle_chat(user_id: str, message: str) -> ChatResponse:
     profile_manager.update_profile(user_id, entities)
     
     # 5. Fan-out: search + vector DB (paralel)
-    search_task = tool_executor.web_search(call1_result.sub_queries)
-    qdrant_task = tool_executor.vector_search(call1_result.sub_queries)
+    search_task = web_search(call1_result.sub_queries)
+    qdrant_task = vector_search(call1_result.sub_queries)
     search_results, qdrant_results = await asyncio.gather(search_task, qdrant_task)
     
     # 6. LLM Call 2: assessment (Sintesis Laporan)

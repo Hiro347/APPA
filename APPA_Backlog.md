@@ -36,13 +36,15 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 
 ### 🛠️ Workstream A: Core Engine & Sinkronisasi (PIC: Gilang)
 - [x] **Sinkronisasi Backend:** *Refactor* Pydantic schema (`routes.py`), *mock response* (`inference.py`), dan *System Prompt* (`assessment.py`) agar me-*return* JSON dengan struktur Bento Grid `artifacts`/`blocks` terbaru.
-- [ ] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
+- [x] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
 - [x] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
+- [x] **Dynamic Search Pipeline:** Rombak `agent.py` dan `useChat.ts` agar *frontend* 100% patuh pada struktur `pipeline_init` dinamis dari LLM (tidak ada lagi *hardcode* `s1` dan `s2`).
+- [ ] **Condensation & Pydantic Validation:** Implementasi fungsi `condense_market_data` untuk meringkas *raw markdown* dari hasil *scraping* menggunakan Pydantic *Schema* agar struktur data top-5 pasar tervalidasi secara presisi sebelum masuk ke LLM Sintesis.
 - [x] Pastikan integrasi *database* ke endpoint API berjalan lancar (saat ini frontend masih pakai MOCK_PROFILE, backend sudah SQLite).
 
 ### 🧠 Workstream B: AI Training & Data (PIC: Arya)
 - [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
-- [ ] *Setup script* Web Scraper menggunakan kombinasi `duckduckgo-search` dan `Crawl4AI` untuk mengekstrak data harga pasar/kompetitor secara *open-source*.
+- [x] *Setup script* Web Scraper menggunakan kombinasi `duckduckgo-search` dan `Crawl4AI` untuk mengekstrak data harga pasar/kompetitor secara *open-source*.
 - [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
 - [ ] Selesaikan *training* QLoRA di Google Colab menggunakan *dataset* JSONL.
 - [ ] Evaluasi akurasi dan perbandingan respons model sebelum vs sesudah.
@@ -55,7 +57,7 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [ ] Tulis isi lengkap proposal (tekankan penggunaan Bapanas/SerpApi dan fokus Jawa Barat).
 - [ ] Bikin naskah/skrip untuk Video Proof of Work (7 menit), *setting* persona di Jawa Barat.
 - [ ] Bikin naskah/skrip untuk Video Promosi (5 menit).
-- [ ] **Pipeline Transparency (Frontend):** Koding integrasi *client-side* SSE/WebSockets di Next.js untuk merender *streaming* data dari backend.
+- [x] **Pipeline Transparency (Frontend):** Koding integrasi *client-side* SSE/WebSockets di Next.js untuk merender *streaming* data dari backend.
 
 ---
 

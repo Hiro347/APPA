@@ -20,6 +20,7 @@ def call_llm(prompt: str, system_prompt: str = "") -> str:
     """
     Call the LLM via HuggingFace Inference API.
     Falls back to ai/mock_llm.py when no token is set or the API call fails.
+    TODO: [MOCK REPLACEMENT] Remove fallback in production to enforce strict failure instead of hallucinating local mocks.
     """
     if client:
         try:
@@ -38,5 +39,6 @@ def call_llm(prompt: str, system_prompt: str = "") -> str:
         except Exception as e:
             logger.warning(f"HuggingFace API call failed: {e}. Delegating to mock_llm.")
 
+    # TODO: [MOCK REPLACEMENT] In production, return an explicit error string or raise an Exception instead of returning a mock response.
     return get_mock_response(prompt, system_prompt)
 

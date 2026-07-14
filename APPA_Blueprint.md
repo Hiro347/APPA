@@ -72,7 +72,7 @@ Gunakan tabel ini di slide proposal untuk menunjukkan bahwa setiap modul memetak
 | # | Modul | Deskripsi | Status |
 |---|---|---|---|
 | 1 | Analisis Peluang | Demografi & Studi Kasus UMKM + fan-out real-time | Sudah ada |
-| 2 | Analisis Kompetitor | Search API + Harga Acuan Komoditas | Sudah ada |
+| 2 | Analisis Kompetitor | Search API + Ekstraksi Top 5 Google Shopping via Crawl4AI | Sudah ada |
 | 3 | Rekomendasi Harga (Pricing) | Menghitung harga jual berdasar modal (HPP) vs harga kompetitor saat ini (Web Search) | **FITUR BARU** (Aman dari risiko prediksi) |
 | 4 | **Checklist Regulasi** | Panduan regulasi & perizinan (NIB, SPP-IRT, Halal) — *dihasilkan jika dibutuhkan* | Perlu pendalaman konten (Bagian 5) |
 | 5 | Rencana Aksi — **satu laporan konsolidasi** | Laporan analisa pasar terstruktur dikombinasikan dengan checklist kepatuhan hukum | Perluasan kecil di dataset |

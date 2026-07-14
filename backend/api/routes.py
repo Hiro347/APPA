@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from core.agent import handle_chat
+from core.agent import handle_chat_stream
 from core.profile_manager import get_profile
 # from data.seed.seed_qdrant import seed as seed_qdrant_db
 def seed_qdrant_db():
+    # TODO: [PRODUCTION-READY] Uncomment and implement the real Qdrant seed script to enable persistent Vector search.
     print("Warning: Qdrant seeding is not yet implemented.")
 
 router = APIRouter()
@@ -47,11 +49,11 @@ class UserProfileResponse(BaseModel):
 
 # --- API Routes ---
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     """
     Core chat endpoint. Evaluates input, updates SQLite profile, fetches Qdrant RAG + Web Search,
-    and returns a structured Generative UI JSON.
+    and returns a structured Generative UI JSON as an NDJSON stream.
     """
     if not request.user_id:
         raise HTTPException(status_code=400, detail="user_id is required")
@@ -59,8 +61,10 @@ async def chat_endpoint(request: ChatRequest):
         raise HTTPException(status_code=400, detail="message is required")
         
     try:
-        response_data = await handle_chat(request.user_id, request.message)
-        return response_data
+        return StreamingResponse(
+            handle_chat_stream(request.user_id, request.message),
+            media_type="application/x-ndjson"
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Agent error: {str(e)}")
 

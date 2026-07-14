@@ -38,8 +38,7 @@ export function createPipelineGroups(message: string): PipelineGroup[] {
         steps: [
           { id: 's1', label: `Google Search: 'regulasi perizinan ${keyword}'`, status: 'waiting' },
           { id: 's2', label: `Google Search: 'harga pasaran ${keyword}'`, status: 'waiting' },
-          { id: 's3', label: `Tokopedia Scraping: '${keyword}'`, status: 'waiting' },
-          { id: 's4', label: `Shopee Scraping: '${keyword}'`, status: 'waiting' },
+          { id: 's3', label: `Google Shopping: '${keyword}'`, status: 'waiting' },
         ],
       },
       {
@@ -128,32 +127,30 @@ export function simulateResponse(message: string, cb: MockCallbacks): () => void
         update('s1', 'running');
         update('s2', 'running');
         update('s3', 'running');
-        update('s4', 'running');
       }},
       { time: 1300, action: () => update('s1', 'done') },
-      { time: 1550, action: () => update('s3', 'done') },
-      { time: 1800, action: () => update('s2', 'done') },
-      { time: 2000, action: () => update('s4', 'done') }
+      { time: 1550, action: () => update('s2', 'done') },
+      { time: 1800, action: () => update('s3', 'done') }
     );
 
     // Group 3: Process (Sequential)
     timeline.push(
-      { time: 2000, action: () => update('p1', 'running') },
-      { time: 2350, action: () => { update('p1', 'done'); update('p2', 'running'); } },
-      { time: 2700, action: () => update('p2', 'done') }
+      { time: 1800, action: () => update('p1', 'running') },
+      { time: 2150, action: () => { update('p1', 'done'); update('p2', 'running'); } },
+      { time: 2500, action: () => update('p2', 'done') }
     );
 
     // Group 4: Regulation (Sequential)
     timeline.push(
-      { time: 2700, action: () => update('r1', 'running') },
-      { time: 3100, action: () => { update('r1', 'done'); update('r2', 'running'); } },
-      { time: 3400, action: () => update('r2', 'done') }
+      { time: 2500, action: () => update('r1', 'running') },
+      { time: 2900, action: () => { update('r1', 'done'); update('r2', 'running'); } },
+      { time: 3200, action: () => update('r2', 'done') }
     );
 
     // Group 5: Synthesis
     timeline.push(
-      { time: 3400, action: () => update('syn1', 'running') },
-      { time: 3700, action: () => update('syn1', 'done') }
+      { time: 3200, action: () => update('syn1', 'running') },
+      { time: 3500, action: () => update('syn1', 'done') }
     );
   } else {
     // Non-deep synthesis starts right after decomposition
@@ -170,7 +167,7 @@ export function simulateResponse(message: string, cb: MockCallbacks): () => void
       event.action();
 
       // Trigger completion and text streaming after the last pipeline step is done
-      const lastTime = isDeep ? 3700 : 1200;
+      const lastTime = isDeep ? 3500 : 1200;
       if (event.time === lastTime) {
         cb.onPipelineComplete();
 

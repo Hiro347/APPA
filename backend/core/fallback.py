@@ -22,8 +22,8 @@ def build_fallback_response(profile: dict) -> dict:
     Returns a dict conforming to the ChatResponse schema:
     { response, artifacts: [{ id, title, sources, blocks }], profile_updated }
     """
-    product_name = profile.get("product_category", "Produk")
-    location_name = profile.get("target_location", "Wilayah")
+    product_name = profile.get("product_category") or "Produk"
+    location_name = profile.get("target_location") or "Wilayah"
 
     text_content = (
         f"### Laporan Hasil Analisa Pasar & Regulasi: {product_name} ({location_name})\n\n"

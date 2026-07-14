@@ -203,6 +203,87 @@ def mock_clarification() -> str:
     )
 
 
+def mock_condensation(prompt: str) -> str:
+    """
+    Simulate LLM condensing raw markdown into MarketDataSchema JSON.
+    Uses robust heuristic parsing to extract Top 5 Shopee and Top 5 Tokopedia products directly!
+    """
+    lines = [line.strip() for line in prompt.split('\n') if line.strip()]
+    products = []
+    
+    for i, line in enumerate(lines):
+        if line.startswith('Rp '):
+            # Extract price integer
+            price_match = re.search(r'Rp\s?(\d{1,3}(?:\.\d{3})*|\d+)', line)
+            if not price_match: continue
+            price = int(price_match.group(1).replace('.', ''))
+            
+            # Find title (look backwards up to 7 lines)
+            title = "Unknown"
+            for j in range(i-1, max(-1, i-7), -1):
+                t = lines[j]
+                # Filter out garbage lines
+                if (not t.startswith('[') and 
+                    not t.startswith('!') and 
+                    not t.startswith('*') and 
+                    not t.startswith('Rp') and 
+                    '(' not in t and 
+                    len(t) > 10 and 
+                    'Jelajahi' not in t and 
+                    'Lainnya' not in t and
+                    'Lazada' not in t and
+                    'Shopee' not in t and
+                    'Tokopedia' not in t and
+                    'Ctrl' not in t):
+                    title = t
+                    break
+            
+            # Find marketplace (look forwards up to 5 lines)
+            market = "Unknown"
+            for j in range(i+1, min(len(lines), i+5)):
+                t = lines[j].lower()
+                if 'shopee' in t:
+                    market = 'Shopee'
+                    break
+                elif 'tokopedia' in t:
+                    market = 'Tokopedia'
+                    break
+                    
+            if market != "Unknown" and title != "Unknown":
+                products.append({
+                    "marketplace": market,
+                    "title": title,
+                    "price": price
+                })
+                
+    # Filter top 5 for each (using a set to deduplicate exact same titles)
+    seen_t = set()
+    shopee_top = []
+    for p in products:
+        if p['marketplace'] == 'Shopee' and p['title'].lower() not in seen_t:
+            shopee_top.append(p)
+            seen_t.add(p['title'].lower())
+            if len(shopee_top) == 5: break
+            
+    seen_t = set()
+    tokped_top = []
+    for p in products:
+        if p['marketplace'] == 'Tokopedia' and p['title'].lower() not in seen_t:
+            tokped_top.append(p)
+            seen_t.add(p['title'].lower())
+            if len(tokped_top) == 5: break
+            
+    if not tokped_top and not shopee_top:
+        return json.dumps({
+            "ringkasan_artikel": "Berhasil mengekstrak informasi regulasi dan tren pasar dari artikel web.",
+            "insight_utama": ["Kewajiban NIB", "Potensi pasar yang stabil", "Pentingnya strategi pemasaran digital"]
+        }, indent=2)
+
+    return json.dumps({
+        "agregat": shopee_top + tokped_top
+    }, indent=2)
+
+
 def get_mock_response(prompt: str, system_prompt: str) -> str:
     """
     Entry point for mock LLM dispatch.
@@ -213,7 +294,10 @@ def get_mock_response(prompt: str, system_prompt: str) -> str:
     if "extract" in sp_lower or "decomposition" in sp_lower:
         return mock_decomposition(prompt)
 
-    if "assessment" in sp_lower or "synthesis" in sp_lower:
+    if "kondensasi" in sp_lower or "peringkas data riset" in sp_lower or "condensation" in sp_lower:
+        return mock_condensation(prompt)
+
+    if "assessment" in sp_lower or "synthesis" in sp_lower or "analisis bisnis" in sp_lower or "laporan" in sp_lower:
         return mock_assessment(prompt)
 
     return mock_clarification()

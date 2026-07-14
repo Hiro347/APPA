@@ -5,6 +5,7 @@ export interface PipelineStep {
   id: string;
   label: string;
   status: StepStatus;
+  details?: string;
 }
 
 export interface PipelineGroup {

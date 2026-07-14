@@ -11,7 +11,7 @@ export async function sendChatMessage(
     body: JSON.stringify({ user_id: userId, message, chat_history: history.slice(-10) }),
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  return res;
 }
 
 export async function getProfile(userId: string) {

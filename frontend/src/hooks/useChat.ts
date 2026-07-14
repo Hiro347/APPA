@@ -5,12 +5,15 @@ import { ChatMessage, Artifact, UserProfile, PipelineGroup, ArtifactBlock } from
 import { MOCK_PROFILE, createPipelineGroups, simulateResponse } from '../lib/mock';
 import { sendChatMessage } from '../lib/api';
 
+// TODO: [MOCK REPLACEMENT] Remove this flag when moving to production API.
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
-const USER_ID = 'user_default'; // TODO: Replace with real auth when available
+// TODO: [MOCK REPLACEMENT] Connect to real authentication provider (e.g. NextAuth) to get actual USER_ID.
+const USER_ID = 'user_default'; 
 
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  // TODO: [MOCK REPLACEMENT] Fetch initial profile from database instead of MOCK_PROFILE
   const [profile, setProfile] = useState<UserProfile>(MOCK_PROFILE);
   const [isProcessing, setIsProcessing] = useState(false);
   const cancelRef = useRef<(() => void) | null>(null);
@@ -38,7 +41,7 @@ export function useChat() {
       role: 'assistant',
       content: '',
       isStreaming: true,
-      pipeline: createPipelineGroups(content),
+      pipeline: USE_MOCK ? createPipelineGroups(content) : [],
       pipelineComplete: false,
     };
     setMessages(prev => [...prev, userMsg, assistantMsg]);
@@ -83,28 +86,62 @@ export function useChat() {
       const history = messages.map(m => ({ role: m.role, content: m.content }));
       
       sendChatMessage(USER_ID, content, history)
-        .then((data) => {
-          // Update assistant message with response text and mark pipeline done
-          updateLastAssistant(msg => ({
-            ...msg,
-            content: data.response || '',
-            isStreaming: false,
-            pipelineComplete: true,
-            pipeline: msg.pipeline?.map(group => ({
-              ...group,
-              steps: group.steps.map(step => ({ ...step, status: 'done' }))
-            }))
-          }));
+        .then(async (res) => {
+          if (!res.body) throw new Error("ReadableStream not supported in this browser.");
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
 
-          // Add artifacts if present
-          if (data.artifacts && data.artifacts.length > 0) {
-            setArtifacts(prev => [...prev, ...data.artifacts]);
-          }
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep the incomplete line in the buffer
+            
+            for (const line of lines) {
+              if (!line.trim()) continue;
+              try {
+                const data = JSON.parse(line);
+                
+                if (data.type === 'pipeline_init') {
+                  updateLastAssistant(msg => ({ ...msg, pipeline: data.pipeline }));
+                } else if (data.type === 'pipeline_update') {
+                  updateLastAssistant(msg => {
+                    if (!msg.pipeline) return msg;
+                    const newPipeline = msg.pipeline.map(group => ({
+                      ...group,
+                      steps: group.steps.map(step => 
+                        step.id === data.step_id ? { ...step, status: data.status, details: data.details, label: data.label || step.label } : step
+                      )
+                    }));
+                    return { ...msg, pipeline: newPipeline };
+                  });
+                } else if (data.type === 'result') {
+                  updateLastAssistant(msg => ({
+                    ...msg,
+                    content: data.data.response || '',
+                    isStreaming: false,
+                    pipelineComplete: true,
+                    pipeline: msg.pipeline?.map(group => ({
+                      ...group,
+                      steps: group.steps.map(step => ({ ...step, status: 'done' }))
+                    }))
+                  }));
 
-          // Update profile if backend says it was updated
-          if (data.profile_updated) {
-            // Re-fetch profile from backend could be done here
-            // For now, we trust the implicit updates in SQLite
+                  if (data.data.artifacts && data.data.artifacts.length > 0) {
+                    setArtifacts(prev => [...prev, ...data.data.artifacts]);
+                  }
+                  
+                  if (data.data.profile_updated) {
+                    // Implicit update or trigger a refetch here if needed
+                  }
+                }
+              } catch (e) {
+                console.error("Failed to parse stream line:", line, e);
+              }
+            }
           }
         })
         .catch((err) => {
