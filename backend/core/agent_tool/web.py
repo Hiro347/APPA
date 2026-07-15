@@ -57,20 +57,20 @@ async def web_search(queries: list, visited_urls: set = None) -> dict:
             # Scrape up to top 3 results for more comprehensive data
             scraped_text = await scrape_pages(urls_to_scrape[:3])
             
-        # 3. CONDENSE: Summarize scraped markdown via LLM + Pydantic
-        condensed_json = "{}"
+        # 3. CONDENSE: Summarize scraped markdown via LLM -> Markdown (Not JSON)
+        condensed_markdown = ""
         if scraped_text:
-            condensed_json = await condense_market_data(scraped_text)
+            condensed_markdown = await condense_market_data(scraped_text)
             
         results_text = "=== HASIL PENCARIAN GOOGLE (DUCKDUCKGO) ===\n" + "\n\n".join(snippets)
-        if condensed_json != "{}":
-            results_text += f"\n\n=== INSIGHT TERKONDENSASI DARI {urls_to_scrape[0]} ===\n{condensed_json}"
+        if condensed_markdown != "":
+            results_text += f"\n\n=== INSIGHT TERKONDENSASI DARI {urls_to_scrape[0]} ===\n{condensed_markdown}"
             
         return {
             "snippets": snippets,
             "url_scraped": ", ".join(urls_to_scrape[:3]) if urls_to_scrape else None,
             "raw_markdown": scraped_text,
-            "condensed_json": condensed_json,
+            "condensed_markdown": condensed_markdown,
             "combined_text": results_text
         }
     except Exception as e:
@@ -82,14 +82,14 @@ async def web_search(queries: list, visited_urls: set = None) -> dict:
         "snippets": ["Offline Fallback Activated"],
         "url_scraped": None,
         "raw_markdown": fallback_data,
-        "condensed_json": "{}",
+        "condensed_markdown": "",
         "combined_text": fallback_data
     }
 
 async def scrape_google_shopping(keyword: str) -> dict:
     """
     Scrapes Google Shopping for the given keyword using Crawl4AI.
-    Returns the extracted markdown and the condensed JSON.
+    Returns the extracted markdown and the condensed Markdown.
     """
     url = f"https://www.google.com/search?tbm=shop&q={keyword.replace(' ', '+')}"
     logger.info(f"Scraping Google Shopping: {url}")
@@ -102,14 +102,14 @@ async def scrape_google_shopping(keyword: str) -> dict:
             
             if result.success and result.markdown:
                 condensed = await condense_market_data(result.markdown)
-                return {"condensed_json": condensed, "raw_markdown": result.markdown, "url": url}
+                return {"condensed_markdown": condensed, "raw_markdown": result.markdown, "url": url}
             else:
                 logger.warning(f"Failed to scrape Google Shopping for {keyword}: {result.error_message}")
                 
     except Exception as e:
         logger.error(f"Error executing Crawl4AI on Google Shopping: {e}")
         
-    return {"condensed_json": "{}", "raw_markdown": "", "url": url}
+    return {"condensed_markdown": "", "raw_markdown": "", "url": url}
 
 async def scrape_pages(urls: list) -> str:
     """
@@ -136,9 +136,9 @@ async def scrape_pages(urls: list) -> str:
 
 async def condense_market_data(markdown_text: str) -> str:
     """
-    Condenses the raw Markdown using LLM and Pydantic schema to prevent info loss.
-    TODO: [PRODUCTION-READY] Implement Pydantic `MarketDataSchema.validate_json(response)` 
-    to enforce structural integrity and trigger LLM retries on hallucination instead of returning raw text.
+    Condenses the raw Markdown using LLM into a concise Markdown summary.
+    TODO: [PRODUCTION-READY] Ensure BM25ContentFilter is applied before this step to reduce token usage. 
+    The output should be Markdown prose, NOT JSON, as it will be consumed by the Assessment LLM later.
     """
     # Truncate markdown to prevent hitting token limits (expanded for 3 URLs)
     markdown_text = markdown_text[:15000]
@@ -152,7 +152,7 @@ async def condense_market_data(markdown_text: str) -> str:
         return response
     except Exception as e:
         logger.error(f"Condensation failed: {e}")
-        return "{}"
+        return ""
 
 def get_local_fallback_data(queries: str) -> str:
     """

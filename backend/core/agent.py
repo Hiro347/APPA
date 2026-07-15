@@ -103,8 +103,7 @@ async def handle_chat_stream(user_id: str, message: str):
         {
             "id": "process", "icon": "", "label": "Pemrosesan Data",
             "steps": [
-                {"id": "p1", "label": "Kondensasi hasil scraping ke JSON", "status": "waiting"},
-                {"id": "p2", "label": "Validasi data dengan Pydantic", "status": "waiting"},
+                {"id": "p1", "label": "Kondensasi Hasil Scraping", "status": "waiting"},
             ]
         },
         {
@@ -157,22 +156,18 @@ async def handle_chat_stream(user_id: str, message: str):
         yield emit_update(f"s{i+1}", "done", details)
         
         full_market_data += res.get("combined_text", "") + "\n\n"
-        condensed = res.get("condensed_json", "{}")
+        condensed = res.get("condensed_markdown", "")
         combined_condensations.append(f"=== CONDENSED Q{i+1} ===\n{condensed}")
 
     # Emit done for gshop
-    gshop_details = f"=== URL: {gshop_results.get('url')} ===\n\nCONDENSED:\n{gshop_results.get('condensed_json', '{}')}\n\nRAW MARKDOWN:\n{gshop_results.get('raw_markdown', '')[:10000]}"
+    gshop_details = f"=== URL: {gshop_results.get('url')} ===\n\nCONDENSED:\n{gshop_results.get('condensed_markdown', '')}\n\nRAW MARKDOWN:\n{gshop_results.get('raw_markdown', '')[:10000]}"
     yield emit_update("gshop", "done", gshop_details)
     
-    full_market_data += f"\n\n=== GOOGLE SHOPPING DATA ===\n{gshop_results.get('condensed_json', '{}')}"
+    full_market_data += f"\n\n=== GOOGLE SHOPPING DATA ===\n{gshop_results.get('condensed_markdown', '')}"
     
     yield emit_update("p1", "running")
     await asyncio.sleep(1.0)
     yield emit_update("p1", "done", "\n\n".join(combined_condensations))
-    
-    yield emit_update("p2", "running")
-    await asyncio.sleep(0.5)
-    yield emit_update("p2", "done", "Validasi MarketDataSchema Sukses")
     
     yield emit_update("r1", "done", vector_results)
     

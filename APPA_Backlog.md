@@ -39,7 +39,13 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [x] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
 - [x] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
 - [x] **Dynamic Search Pipeline:** Rombak `agent.py` dan `useChat.ts` agar *frontend* 100% patuh pada struktur `pipeline_init` dinamis dari LLM (tidak ada lagi *hardcode* `s1` dan `s2`).
-- [ ] **Condensation & Pydantic Validation:** Implementasi fungsi `condense_market_data` untuk meringkas *raw markdown* dari hasil *scraping* menggunakan Pydantic *Schema* agar struktur data top-5 pasar tervalidasi secara presisi sebelum masuk ke LLM Sintesis.
+- [ ] **Condensation Pipeline (Menunggu LLM Ini):**
+  - [ ] Ubah output `condense_market_data` dari JSON (`MarketDataSchema`) menjadi **ringkasan Markdown** — karena konsumer satu-satunya adalah LLM Sintesis (Call 2) yang membaca *natural language*, bukan mesin parser.
+  - [ ] Refactor `condensation.py`: Hapus `MarketDataSchema` Pydantic, ganti system prompt menjadi instruksi ringkas Markdown (ekstrak harga, kompetitor, insight kualitatif dalam format *bullet points*).
+  - [ ] Tambahkan **BM25ContentFilter** dari Crawl4AI di `scrape_pages()` dan `scrape_google_shopping()` untuk memfilter noise sebelum masuk LLM (`result.markdown.fit_markdown`).
+  - [ ] Ganti `mock_llm.py` dengan panggilan HuggingFace asli (`call_llm`) untuk fungsi `condense_market_data`.
+  - [ ] Hapus `asyncio.sleep` mock di `agent.py` untuk step `p1`/`p2` dan sambungkan ke eksekusi pipeline asli.
+  - [ ] Update label pipeline UI: `p1` → "Kondensasi Hasil Scraping" (tanpa "ke JSON"), hapus `p2` (Validasi Pydantic) karena tidak lagi relevan.
 - [x] Pastikan integrasi *database* ke endpoint API berjalan lancar (saat ini frontend masih pakai MOCK_PROFILE, backend sudah SQLite).
 
 ### 🧠 Workstream B: AI Training & Data (PIC: Arya)
@@ -67,7 +73,10 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 **Gilang & Arya (Testing & Bug Fixing):**
 - [ ] *End-to-End Testing*: Coba jalankan aplikasi dengan *use case* yang ekstrem/rumit.
 - [ ] **Tuning Prompt Engineering:** Perbaiki prompt secara iteratif saat menemukan *edge cases* atau halusinasi JSON selama testing berjalan.
-- [ ] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) baik di *frontend* (`api.ts`) maupun *backend* agar tidak kena limit token HuggingFace.
+- [ ] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) agar tidak kena limit token HuggingFace.
+  - [x] Frontend (`api.ts`): Memastikan `chat_history.slice(-10)` sudah terkirim di body *request*.
+  - [ ] Backend (`routes.py`): Meneruskan parameter `request.chat_history` ke dalam fungsi orchestrator `handle_chat_stream`.
+  - [ ] Backend (`agent.py` & `inference.py`): Menginjeksikan `chat_history` ke dalam prompt LLM agar agen memiliki kesadaran konteks percakapan sebelumnya.
 - [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
 - [x] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
 - [x] **Polishing & UX (Tambahan):** Selesaikan animasi FLIP *smooth-resize* untuk *chat input*, indikator *gradient scroll*, dan perbaiki *bug* agresif pada *auto-scroll* chat.

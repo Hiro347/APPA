@@ -274,14 +274,17 @@ def mock_condensation(prompt: str) -> str:
             if len(top_products) == 10: break
             
     if not top_products:
-        return json.dumps({
-            "ringkasan_artikel": "Berhasil mengekstrak informasi regulasi dan tren pasar dari artikel web.",
-            "insight_utama": ["Kewajiban NIB", "Potensi pasar yang stabil", "Pentingnya strategi pemasaran digital"]
-        }, indent=2)
+        return (
+            "- Berhasil mengekstrak informasi regulasi dan tren pasar dari artikel web.\n"
+            "- **Kewajiban NIB** sangat penting untuk legalitas awal.\n"
+            "- Potensi pasar terlihat stabil dengan pentingnya strategi pemasaran digital."
+        )
 
-    return json.dumps({
-        "agregat": top_products
-    }, indent=2)
+    md_output = "### Ringkasan Produk Teratas\n"
+    for p in top_products:
+        md_output += f"- **{p['title']}** (di {p['marketplace']}): Rp {p['price']:,}\n"
+    
+    return md_output
 
 
 def get_mock_response(prompt: str, system_prompt: str) -> str:

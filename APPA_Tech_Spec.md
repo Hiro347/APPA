@@ -155,7 +155,8 @@ flowchart TD
     
     %% Filter & Condense Pipeline
     F -->|URLs| H[Crawl4AI: Headless Scraping HTML -> Markdown]
-    H --> I[Pydantic + LLM: Condense Markdown Jadi JSON Fakta]
+    H --> H2[BM25ContentFilter: Buang Noise, Ambil Konten Relevan]
+    H2 --> I[LLM: Kondensasi Markdown Jadi Ringkasan Padat]
     
     %% Otak Analisis & Komunikasi
     I --> J[LLM Call 2: Assess + Deteksi Anomali + Sintesis]
@@ -175,7 +176,7 @@ flowchart TD
 | Call | Input | Output | Catatan |
 |---|---|---|---|
 | **LLM Call 1 (Riset)** | User message + user profile | `{route, sub_queries[], extracted_entities}` | Entity extraction & Query Generation terjadi di sini |
-| **LLM Call 2 (Analisis)** | Condensed Search + Qdrant results + profile | `{assessment, anomaly_flag, need_deep_dive}` | Jika `need_deep_dive=false`, langsung ke sintesis UI |
+| **LLM Call 2 (Analisis)** | Condensed Markdown + Qdrant results + profile | `{assessment, anomaly_flag, need_deep_dive}` | Jika `need_deep_dive=false`, langsung ke sintesis UI |
 | **LLM Call 3** | Semua konteks + deep-dive results (opsional) | Final response (laporan konsolidasi) | Output terformat sesuai Klaster B dataset |
 
 ### API Endpoints (Kontrak Data Frontend & Backend)
@@ -410,7 +411,7 @@ Jika waktu makin sempit, **fine-tuning adalah lapisan paling mudah dipangkas** â
 Selain *Tone of Voice* yang wajib menggunakan bahasa ramah (Bapak/Ibu) dan menerjemahkan jargon perdagangan lokal, **kepribadian sejati AI APPA terletak pada alur kognitifnya** yang menyeimbangkan analisa pasar dan regulasi. System Prompt *Agent Orchestrator* memaksa LLM untuk berpikir dalam 3 pilar:
 
 1. **Otak Riset & Deteksi Regulasi (WHAT to search/fetch):** Menerjemahkan kebutuhan pengguna menjadi kueri pencarian harga pasar/kompetitor (SerpApi) serta mendeteksi apakah diperlukan pengecekan regulasi dari Qdrant.
-2. **Otak Analisis Kelayakan (HOW to process):** Menganalisis data pasar dari Crawl4AI/SerpApi secara dinamis, mengekstrak parameter (modal, HPP, kompetitor) dengan **Pydantic Models**, dan memadukannya dengan aturan regulasi lokal jika terdeteksi bidang F&B.
+2. **Otak Analisis Kelayakan (HOW to process):** Menganalisis data pasar dari Crawl4AI/SerpApi secara dinamis, mengekstrak parameter (modal, HPP, kompetitor) melalui **kondensasi Markdown** (bukan JSON Pydantic â€” karena konsumer adalah LLM berikutnya), dan memadukannya dengan aturan regulasi lokal jika terdeteksi bidang F&B.
 3. **Otak Komunikasi (HOW to convey):** Menyajikan gabungan data riset pasar dan rekomendasi legalitas secara ramah, terstruktur, dan siap dieksekusi melalui *Generative UI*.
 
 ### Agent Orchestrator (`core/agent.py`)
@@ -628,7 +629,7 @@ Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke sumber eksternal untu
 
 | Jenis Data | Sumber Eksternal | Format / Metode Akses | Fungsi |
 |---|---|---|---|
-| **Semua Data Pasar & Harga (Prioritas Utama)** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> **Markdown**) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapat URL, lalu melakukan *scraping* menggunakan **`Crawl4AI`** (berbasis Playwright) untuk menembus JS/Cloudflare. Teks *Markdown* kemudian diproses oleh LLM dengan **Pydantic** untuk memastikan *output* berupa JSON angka metrik yang 100% kaku. |
+| **Semua Data Pasar & Harga (Prioritas Utama)** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> **Markdown**) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapat URL, lalu melakukan *scraping* menggunakan **`Crawl4AI`** (berbasis Playwright) dengan **BM25ContentFilter** untuk membuang noise. Teks *Markdown* relevan kemudian dikondensasi oleh LLM menjadi **ringkasan Markdown padat** (bukan JSON) agar siap dikonsumsi oleh LLM Sintesis pada Call 2. |
 | **Data Cadangan (Bonus/Fallback)** | Open Data Bapanas (Jawa Barat) | REST API / CSV | Hanya sebagai pembanding jika AI butuh kepastian harga pokok (HPP) pemerintah. |
 
 **Strategi Resiliensi (Live Demo Fallback):**
