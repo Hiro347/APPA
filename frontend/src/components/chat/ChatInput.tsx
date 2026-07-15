@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, FormEvent, KeyboardEvent } from 'react';
 import { ArrowUp, Paperclip, ChevronDown } from 'lucide-react';
 
 interface ChatInputProps {
@@ -15,6 +15,94 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
   onSubmit: () => void;
   disabled?: boolean;
 }) {
+  const [isFocused, setIsFocused] = useState(false);
+  const [canScrollTop, setCanScrollTop] = useState(false);
+  const [canScrollBottom, setCanScrollBottom] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const checkScroll = () => {
+    if (textareaRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = textareaRef.current;
+      
+      let effectiveClientHeight = clientHeight;
+      if (isFocused) {
+        // When focused, the textarea is trying to fit the scrollHeight,
+        // but it is constrained by max-height (33vh).
+        // By reading the computed max-height, we can predict the final clientHeight
+        // and avoid flashing the gradient while the CSS transition is still animating.
+        const computedStyle = window.getComputedStyle(textareaRef.current);
+        const maxHeightStr = computedStyle.maxHeight;
+        if (maxHeightStr && maxHeightStr !== 'none') {
+          const maxH = parseFloat(maxHeightStr);
+          if (!isNaN(maxH)) {
+            effectiveClientHeight = Math.min(scrollHeight, maxH);
+          }
+        }
+      }
+
+      setCanScrollTop(scrollTop > 0);
+      setCanScrollBottom(scrollHeight - effectiveClientHeight - Math.ceil(scrollTop) > 1);
+    }
+  };
+
+  const prevIsFocused = useRef(isFocused);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const isFocusChange = prevIsFocused.current !== isFocused;
+    prevIsFocused.current = isFocused;
+
+    if (isFocused) {
+      const currentHeight = textarea.style.height || `${textarea.offsetHeight}px`;
+      const currentScrollTop = textarea.scrollTop;
+      
+      // Measure the new target height
+      textarea.style.transition = 'none';
+      textarea.style.height = 'auto';
+      const targetHeight = textarea.scrollHeight;
+      
+      // If the height is already correct, don't trigger an animation
+      if (currentHeight === `${targetHeight}px`) {
+        textarea.style.height = currentHeight;
+        textarea.scrollTop = currentScrollTop;
+      } else {
+        // Restore previous state
+        textarea.style.height = currentHeight;
+        textarea.scrollTop = currentScrollTop;
+        void textarea.offsetHeight; // Force reflow
+        
+        // Use a faster, snappy animation for typing and resizing
+        textarea.style.transition = 'height 150ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+        textarea.style.height = `${targetHeight}px`;
+      }
+    } else {
+      if (isFocusChange) {
+        // Animate collapse
+        const currentHeight = textarea.style.height || `${textarea.offsetHeight}px`;
+        const currentScrollTop = textarea.scrollTop;
+        
+        textarea.style.transition = 'none';
+        textarea.style.height = ''; 
+        const targetHeight = textarea.offsetHeight;
+        
+        textarea.style.height = currentHeight;
+        textarea.scrollTop = currentScrollTop;
+        void textarea.offsetHeight;
+        
+        textarea.style.transition = 'height 300ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+        textarea.style.height = `${targetHeight}px`;
+      } else {
+        textarea.style.transition = 'none';
+        textarea.style.height = ''; 
+      }
+    }
+    
+    // Check scroll state after adjusting height
+    requestAnimationFrame(checkScroll);
+  }, [value, isFocused]);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -25,18 +113,34 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
   return (
     <div 
       id="chat-input-panel"
-      className="border border-gray-200 rounded-2xl bg-white hover:border-gray-300 transition-colors focus-within:ring-1 focus-within:ring-gray-400"
+      className="border border-gray-200 rounded-2xl bg-white hover:border-gray-300 transition-colors focus-within:ring-1 focus-within:ring-gray-400 overflow-hidden"
     >
-      {/* Top row: textarea */}
-      <textarea
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ceritakan tentang bisnis Anda..."
-        rows={2}
-        className="w-full px-4 pt-3 pb-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none resize-none"
-        disabled={disabled}
-      />
+      {/* Top row: textarea wrapper */}
+      <div className="relative w-full">
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            checkScroll();
+          }}
+          onScroll={checkScroll}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder="Ceritakan tentang bisnis Anda..."
+          rows={2}
+          className={`w-full px-4 pt-3 pb-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none resize-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFocused ? 'max-h-[33vh] overflow-y-auto' : 'overflow-hidden'}`}
+          disabled={disabled}
+        />
+        {/* Scroll gradients */}
+        <div 
+          className={`absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white to-transparent pointer-events-none transition-opacity duration-200 ${canScrollTop && isFocused ? 'opacity-100' : 'opacity-0'}`} 
+        />
+        <div 
+          className={`absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-white to-transparent pointer-events-none transition-opacity duration-200 ${canScrollBottom && isFocused ? 'opacity-100' : 'opacity-0'}`} 
+        />
+      </div>
 
       {/* Bottom row: actions */}
       <div className="flex items-center justify-between px-3 pb-2.5">
