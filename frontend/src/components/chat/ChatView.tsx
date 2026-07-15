@@ -14,11 +14,11 @@ interface ChatViewProps {
 export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastRectRef = useRef<DOMRect | null>(null);
-  const isEmpty = messages.length === 0;
+  const isInitialState = messages.length <= 1;
 
   // Keep track of the centered input rect
   useEffect(() => {
-    if (isEmpty) {
+    if (isInitialState) {
       const panel = document.getElementById('chat-input-panel');
       if (panel) {
         lastRectRef.current = panel.getBoundingClientRect();
@@ -27,7 +27,7 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
   });
 
   useLayoutEffect(() => {
-    if (!isEmpty && lastRectRef.current) {
+    if (!isInitialState && lastRectRef.current) {
       const panel = document.getElementById('chat-input-panel');
       if (!panel) return;
 
@@ -81,7 +81,7 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
         panel.style.filter = '';
       };
     }
-  }, [isEmpty]);
+  }, [isInitialState]);
 
   const isAtBottomRef = useRef(true);
 
@@ -93,7 +93,7 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
   };
 
   useEffect(() => {
-    if (!scrollRef.current || isEmpty) return;
+    if (!scrollRef.current || isInitialState) return;
     
     // If the AI is not generating, disable the smooth auto-scroll completely.
     // We just snap to the bottom instantly if they were already there.
@@ -139,17 +139,17 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [messages, isEmpty, isProcessing]);
+  }, [messages, isInitialState, isProcessing]);
 
   const WINDOW_SIZE = 10;
   const cutoffIndex = messages.length > WINDOW_SIZE ? messages.length - WINDOW_SIZE : -1;
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className={`flex-1 flex flex-col h-full ${isInitialState ? 'justify-center' : ''}`}>
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`overflow-y-auto px-6 py-4 ${isEmpty ? 'hidden' : 'flex-1'}`}
+        className={`overflow-y-auto px-6 py-4 w-full ${isInitialState ? 'h-[180px]' : 'flex-1'}`}
       >
         <div className="max-w-3xl mx-auto">
           {messages.map((msg, idx) => (
@@ -168,7 +168,7 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
           ))}
         </div>
       </div>
-      <ChatInput onSend={onSend} disabled={isProcessing} centered={isEmpty} />
+      <ChatInput onSend={onSend} disabled={isProcessing} centered={false} />
     </div>
   );
 }

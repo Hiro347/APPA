@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChatMessage, Artifact, UserProfile, PipelineGroup, ArtifactBlock } from '../lib/types';
 import { MOCK_PROFILE, createPipelineGroups, simulateResponse } from '../lib/mock';
 import { sendChatMessage } from '../lib/api';
@@ -11,7 +11,16 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
 const USER_ID = 'user_default'; 
 
 export function useChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 'initial-greeting',
+      role: 'assistant',
+      content: 'Halo! Saya APPA 👋\n\nSaya dapat membantu Anda melakukan analisa pasar, riset kompetitor, hingga menyusun strategi untuk bisnis Anda. Ceritakan tentang bisnis Anda untuk memulai!',
+      isStreaming: false,
+      pipelineComplete: true
+    }
+  ]);
+
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   // TODO: [MOCK REPLACEMENT] Fetch initial profile from database instead of MOCK_PROFILE
   const [profile, setProfile] = useState<UserProfile>(MOCK_PROFILE);

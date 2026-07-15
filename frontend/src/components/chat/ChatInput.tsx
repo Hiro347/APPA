@@ -23,7 +23,7 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
   const checkScroll = () => {
     if (textareaRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = textareaRef.current;
-      
+
       let effectiveClientHeight = clientHeight;
       if (isFocused) {
         // When focused, the textarea is trying to fit the scrollHeight,
@@ -57,12 +57,12 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
     if (isFocused) {
       const currentHeight = textarea.style.height || `${textarea.offsetHeight}px`;
       const currentScrollTop = textarea.scrollTop;
-      
+
       // Measure the new target height
       textarea.style.transition = 'none';
       textarea.style.height = 'auto';
       const targetHeight = textarea.scrollHeight;
-      
+
       // If the height is already correct, don't trigger an animation
       if (currentHeight === `${targetHeight}px`) {
         textarea.style.height = currentHeight;
@@ -72,7 +72,7 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
         textarea.style.height = currentHeight;
         textarea.scrollTop = currentScrollTop;
         void textarea.offsetHeight; // Force reflow
-        
+
         // Use a faster, snappy animation for typing and resizing
         textarea.style.transition = 'height 150ms cubic-bezier(0.2, 0.8, 0.2, 1)';
         textarea.style.height = `${targetHeight}px`;
@@ -82,23 +82,23 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
         // Animate collapse
         const currentHeight = textarea.style.height || `${textarea.offsetHeight}px`;
         const currentScrollTop = textarea.scrollTop;
-        
+
         textarea.style.transition = 'none';
-        textarea.style.height = ''; 
+        textarea.style.height = '';
         const targetHeight = textarea.offsetHeight;
-        
+
         textarea.style.height = currentHeight;
         textarea.scrollTop = currentScrollTop;
         void textarea.offsetHeight;
-        
+
         textarea.style.transition = 'height 300ms cubic-bezier(0.2, 0.8, 0.2, 1)';
         textarea.style.height = `${targetHeight}px`;
       } else {
         textarea.style.transition = 'none';
-        textarea.style.height = ''; 
+        textarea.style.height = '';
       }
     }
-    
+
     // Check scroll state after adjusting height
     requestAnimationFrame(checkScroll);
   }, [value, isFocused]);
@@ -114,7 +114,7 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         return;
       }
-      
+
       // Ignore purely functional keys (F1-F12, Arrows, etc.) but allow Backspace and Enter
       if (e.key.length > 1 && e.key !== 'Backspace' && e.key !== 'Enter') return;
 
@@ -136,9 +136,9 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
   };
 
   return (
-    <div 
+    <div
       id="chat-input-panel"
-      className="border border-gray-200 rounded-2xl bg-white hover:border-gray-300 transition-colors focus-within:ring-1 focus-within:ring-gray-400 overflow-hidden"
+      className="border border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-colors focus-within:ring-1 focus-within:ring-gray-400 overflow-hidden"
     >
       {/* Top row: textarea wrapper */}
       <div className="relative w-full">
@@ -159,11 +159,11 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
           disabled={disabled}
         />
         {/* Scroll gradients */}
-        <div 
-          className={`absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white to-transparent pointer-events-none transition-opacity duration-200 ${canScrollTop && isFocused ? 'opacity-100' : 'opacity-0'}`} 
+        <div
+          className={`absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white to-transparent pointer-events-none transition-opacity duration-200 ${canScrollTop && isFocused ? 'opacity-100' : 'opacity-0'}`}
         />
-        <div 
-          className={`absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-white to-transparent pointer-events-none transition-opacity duration-200 ${canScrollBottom && isFocused ? 'opacity-100' : 'opacity-0'}`} 
+        <div
+          className={`absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-white to-transparent pointer-events-none transition-opacity duration-200 ${canScrollBottom && isFocused ? 'opacity-100' : 'opacity-0'}`}
         />
       </div>
 
@@ -221,8 +221,7 @@ export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
   if (centered) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-1">APPA</h2>
-        <p className="text-sm text-gray-400 mb-8">Analisa Pasar Pintar & Akurat</p>
+
         <div className="w-full max-w-3xl">
           <InputPanel value={value} setValue={setValue} onSubmit={handleSubmit} disabled={disabled} />
           {DISCLAIMER}
