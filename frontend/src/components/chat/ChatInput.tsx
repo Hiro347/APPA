@@ -23,7 +23,10 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
   };
 
   return (
-    <div className="border border-gray-200 rounded-2xl bg-white hover:border-gray-300 transition-colors focus-within:ring-1 focus-within:ring-gray-400">
+    <div 
+      id="chat-input-panel"
+      className="border border-gray-200 rounded-2xl bg-white hover:border-gray-300 transition-colors focus-within:ring-1 focus-within:ring-gray-400"
+    >
       {/* Top row: textarea */}
       <textarea
         value={value}
@@ -91,7 +94,7 @@ export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-1">APPA</h2>
         <p className="text-sm text-gray-400 mb-8">Analisa Pasar Pintar & Akurat</p>
-        <div className="w-full max-w-xl">
+        <div className="w-full max-w-3xl">
           <InputPanel value={value} setValue={setValue} onSubmit={handleSubmit} disabled={disabled} />
           {DISCLAIMER}
         </div>
