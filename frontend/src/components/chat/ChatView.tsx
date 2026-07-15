@@ -83,15 +83,33 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
     }
   }, [isEmpty]);
 
+  const isAtBottomRef = useRef(true);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    // Consider them at the bottom if within a 200px trigger zone
+    isAtBottomRef.current = scrollHeight - clientHeight - scrollTop < 200;
+  };
+
   useEffect(() => {
     if (!scrollRef.current || isEmpty) return;
+    
+    // If the user has manually scrolled up to read history, DO NOT auto-scroll and interrupt them!
+    if (!isAtBottomRef.current) return;
 
     const container = scrollRef.current;
     let animationFrameId: number;
+    let lastExpectedScrollTop = container.scrollTop;
 
     const animate = () => {
       const targetScroll = container.scrollHeight - container.clientHeight;
       const diff = targetScroll - container.scrollTop;
+
+      // Detect if the user interrupted the smooth scroll by manually scrolling with their mouse/finger
+      if (Math.abs(container.scrollTop - lastExpectedScrollTop) > 5) {
+        return; // Abort!
+      }
 
       if (Math.abs(diff) < 1) {
         container.scrollTop = targetScroll;
@@ -100,6 +118,7 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
 
       const speed = diff * 0.15;
       container.scrollTop += speed;
+      lastExpectedScrollTop = container.scrollTop;
 
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -118,6 +137,7 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
     <div className="flex-1 flex flex-col h-full">
       <div
         ref={scrollRef}
+        onScroll={handleScroll}
         className={`overflow-y-auto px-6 py-4 ${isEmpty ? 'hidden' : 'flex-1'}`}
       >
         <div className="max-w-3xl mx-auto">
