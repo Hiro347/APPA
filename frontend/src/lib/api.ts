@@ -5,20 +5,28 @@ export async function sendChatMessage(
   message: string,
   history: Array<{ role: string; content: string }>
 ) {
-  const res = await fetch(`${API_URL}/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: userId, message, chat_history: history.slice(-10) }),
-  });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res;
+  try {
+    const res = await fetch(`${API_URL}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, message, chat_history: history.slice(-10) }),
+    });
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return res;
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Failed to fetch');
+  }
 }
 
 export async function getProfile(userId: string) {
-  const res = await fetch(`${API_URL}/profile/${userId}`);
-  if (!res.ok) {
-    if (res.status === 404) return null;
-    throw new Error(`API error: ${res.status}`);
+  try {
+    const res = await fetch(`${API_URL}/profile/${userId}`);
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`API error: ${res.status}`);
+    }
+    return res.json();
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Failed to fetch profile');
   }
-  return res.json();
 }
