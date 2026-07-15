@@ -70,6 +70,7 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [ ] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) baik di *frontend* (`api.ts`) maupun *backend* agar tidak kena limit token HuggingFace.
 - [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
 - [x] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
+- [x] **Polishing & UX (Tambahan):** Selesaikan animasi FLIP *smooth-resize* untuk *chat input*, indikator *gradient scroll*, dan perbaiki *bug* agresif pada *auto-scroll* chat.
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
 
 **Adillah (Media, Submit & UI Bug Fixing):**

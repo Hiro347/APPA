@@ -95,6 +95,15 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
   useEffect(() => {
     if (!scrollRef.current || isEmpty) return;
     
+    // If the AI is not generating, disable the smooth auto-scroll completely.
+    // We just snap to the bottom instantly if they were already there.
+    if (!isProcessing) {
+      if (isAtBottomRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight - scrollRef.current.clientHeight;
+      }
+      return;
+    }
+
     // If the user has manually scrolled up to read history, DO NOT auto-scroll and interrupt them!
     if (!isAtBottomRef.current) return;
 
@@ -111,7 +120,9 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
         return; // Abort!
       }
 
-      if (Math.abs(diff) < 1) {
+      // Fix Zeno's paradox: browsers ignore fractional scroll adjustments < 1px, 
+      // causing the loop to run endlessly in the background. Use 5px threshold.
+      if (Math.abs(diff) < 5) {
         container.scrollTop = targetScroll;
         return;
       }
@@ -128,7 +139,7 @@ export function ChatView({ messages, isProcessing, onSend }: ChatViewProps) {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [messages, isEmpty]);
+  }, [messages, isEmpty, isProcessing]);
 
   const WINDOW_SIZE = 10;
   const cutoffIndex = messages.length > WINDOW_SIZE ? messages.length - WINDOW_SIZE : -1;

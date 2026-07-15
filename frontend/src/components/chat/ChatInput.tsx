@@ -103,6 +103,31 @@ function InputPanel({ value, setValue, onSubmit, disabled }: {
     requestAnimationFrame(checkScroll);
   }, [value, isFocused]);
 
+  // Global auto-focus: focus the input field if the user starts typing anywhere on the page
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
+      // Ignore if holding modifiers (Ctrl, Cmd, Alt) or pressing Escape
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key === 'Escape') return;
+
+      // Ignore if already typing in another input, textarea, or contenteditable
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+      
+      // Ignore purely functional keys (F1-F12, Arrows, etc.) but allow Backspace and Enter
+      if (e.key.length > 1 && e.key !== 'Backspace' && e.key !== 'Enter') return;
+
+      if (textareaRef.current && document.activeElement !== textareaRef.current) {
+        textareaRef.current.focus();
+        // The typed character will naturally be inserted into the textarea by the browser
+      }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
