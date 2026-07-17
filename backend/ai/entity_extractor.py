@@ -110,7 +110,7 @@ def _generate_fallback_data(message: str) -> dict:
             "compliance_status": []
         },
         "sub_queries": [
-            f"harga {product if product else 'camilan'} terbaru",
-            f"kompetitor {product if product else 'makanan'} di {location if location else 'pasar'}"
+            f"harga menu {product if product else 'camilan'} gofood",
+            f"daftar toko kompetitor {product if product else 'makanan'} di {location if location else 'pasar'}"
         ] if not is_clarification else []
     }

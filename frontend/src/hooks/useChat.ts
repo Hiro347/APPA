@@ -1,14 +1,19 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { ChatMessage, Artifact, UserProfile, PipelineGroup, ArtifactBlock } from '../lib/types';
-import { MOCK_PROFILE, createPipelineGroups, simulateResponse } from '../lib/mock';
+import { useState, useCallback, useRef } from 'react';
+import { ChatMessage, Artifact, UserProfile, ArtifactBlock } from '../lib/types';
 import { sendChatMessage } from '../lib/api';
 
-// TODO: [MOCK REPLACEMENT] Remove this flag when moving to production API.
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
+const MOCK_PROFILE: UserProfile = {
+  compliance_status: [
+    { item: 'NIB', status: 'not_started' },
+    { item: 'SPP-IRT', status: 'not_started' },
+    { item: 'Sertifikat Halal', status: 'not_started' },
+  ],
+};
+
 // TODO: [MOCK REPLACEMENT] Connect to real authentication provider (e.g. NextAuth) to get actual USER_ID.
-const USER_ID = 'user_default'; 
+const USER_ID = 'user_default';  
 
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -50,57 +55,22 @@ export function useChat() {
       role: 'assistant',
       content: '',
       isStreaming: true,
-      pipeline: USE_MOCK ? createPipelineGroups(content) : [],
+      pipeline: [],
       pipelineComplete: false,
     };
     setMessages(prev => [...prev, userMsg, assistantMsg]);
     setIsProcessing(true);
 
-    if (USE_MOCK) {
-      // === MOCK MODE (original behavior) ===
-      const cancel = simulateResponse(content, {
-        onPipelineUpdate: (groups: PipelineGroup[]) => {
-          updateLastAssistant(msg => ({ ...msg, pipeline: groups }));
-        },
-        onPipelineComplete: () => {
-          updateLastAssistant(msg => ({ ...msg, pipelineComplete: true }));
-        },
-        onStreamChar: (char: string) => {
-          updateLastAssistant(msg => ({ ...msg, content: msg.content + char }));
-        },
-        onArtifacts: (newArtifacts: Artifact[]) => {
-          setArtifacts(prev => [...prev, ...newArtifacts]);
-          // Update mock profile after research
-          setProfile(p => ({
-            ...p,
-            business_type: 'F&B Mikro',
-            product_category: 'Keripik Singkong',
-            capital_hpp: 5000,
-            compliance_status: [
-              { item: 'NIB', status: 'pending' },
-              { item: 'SPP-IRT', status: 'not_started' },
-              { item: 'Sertifikat Halal', status: 'not_started' },
-            ],
-          }));
-        },
-        onDone: () => {
-          updateLastAssistant(msg => ({ ...msg, isStreaming: false }));
-          setIsProcessing(false);
-        },
-      });
-
-      cancelRef.current = cancel;
-    } else {
-      // === API MODE (real backend) ===
-      const history = messages.map(m => ({ role: m.role, content: m.content }));
-      
-      sendChatMessage(USER_ID, content, history)
-        .then(async (res) => {
-          if (!res.body) throw new Error("ReadableStream not supported in this browser.");
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-          let rawJsonBuffer = '';
+    // === API MODE (real backend) ===
+    const history = messages.map(m => ({ role: m.role, content: m.content }));
+    
+    sendChatMessage(USER_ID, content, history)
+      .then(async (res) => {
+        if (!res.body) throw new Error("ReadableStream not supported in this browser.");
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let rawJsonBuffer = '';
           let responseBuffer = '';
 
           while (true) {
@@ -185,17 +155,16 @@ export function useChat() {
               }
             }
           }
-        })
-        .catch((err) => {
-          console.error('Backend API error:', err);
-          updateLastAssistant(msg => ({
-            ...msg,
-            content: 'Maaf, terjadi kesalahan koneksi ke server. Silakan coba lagi.',
-            isStreaming: false,
-            pipelineComplete: true,
-          }));
-        });
-    }
+      })
+      .catch((err) => {
+        console.error('Backend API error:', err);
+        updateLastAssistant(msg => ({
+          ...msg,
+          content: 'Maaf, terjadi kesalahan koneksi ke server. Silakan coba lagi.',
+          isStreaming: false,
+          pipelineComplete: true,
+        }));
+      });
   }, [isProcessing, updateLastAssistant, messages]);
 
   const updateArtifact = useCallback((id: string, blocks: ArtifactBlock[]) => {

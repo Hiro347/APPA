@@ -1,7 +1,6 @@
 import logging
 from huggingface_hub import InferenceClient, AsyncInferenceClient
 from config import settings
-from ai.mock_llm import get_mock_response, get_mock_response_stream
 
 logger = logging.getLogger(__name__)
 
@@ -32,14 +31,28 @@ def call_llm(prompt: str, system_prompt: str = "") -> str:
             response = client.chat.completions.create(
                 model=settings.HF_MODEL_ID,
                 messages=messages,
-                max_tokens=1024,
+                max_tokens=4096,
                 temperature=0.3,
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
-            logger.warning(f"HuggingFace API call failed: {e}. Delegating to mock_llm.")
+            logger.error(f"HuggingFace API call failed: {e}")
+            raise e
+    
+    raise ValueError("HuggingFace API token or client not initialized.")
 
-    return get_mock_response(prompt, system_prompt)
+import asyncio
+# Global lock to prevent slamming the free HuggingFace API with concurrent requests
+hf_api_lock = asyncio.Lock()
+
+async def async_call_llm(prompt: str, system_prompt: str = "") -> str:
+    """
+    Async wrapper for call_llm with a strict concurrency lock.
+    Prevents 429 Rate Limit errors when multiple search pipelines condense data simultaneously.
+    """
+    async with hf_api_lock:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, call_llm, prompt, system_prompt)
 
 async def call_llm_stream(prompt: str, system_prompt: str = ""):
     """
@@ -48,23 +61,23 @@ async def call_llm_stream(prompt: str, system_prompt: str = ""):
     """
     if async_client:
         try:
-            full_prompt = ""
+            messages = []
             if system_prompt:
-                full_prompt += f"<|system|>\n{system_prompt}\n"
-            full_prompt += f"<|user|>\n{prompt}\n<|assistant|>\n"
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
 
-            async for chunk in await async_client.text_generation(
-                prompt=full_prompt,
-                max_new_tokens=1024,
+            stream = await async_client.chat_completion(
+                messages=messages,
+                max_tokens=4096,
                 temperature=0.3,
-                repetition_penalty=1.1,
                 stream=True,
-            ):
-                yield chunk
+            )
+            async for chunk in stream:
+                yield chunk.choices[0].delta.content or ""
             return
         except Exception as e:
-            logger.warning(f"HuggingFace API stream failed: {e}. Delegating to mock_llm stream.")
+            logger.error(f"HuggingFace API stream failed: {e}")
+            raise e
 
-    async for chunk in get_mock_response_stream(prompt, system_prompt):
-        yield chunk
+    raise ValueError("HuggingFace API async client not initialized.")
 

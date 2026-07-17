@@ -147,19 +147,24 @@ flowchart TD
     A[User input via Next.js] -->|POST /chat| B[FastAPI Backend]
     B --> C[Ambil profil dari SQLite]
     
-    %% Otak Riset
-    C --> D[LLM Call 1: Dekomposisi + Entity Extraction + Generate Queries]
+    %% Otak Riset (Dynamic Routing)
+    C --> D[LLM Call 1: Dekomposisi + Kueri + Tool Routing]
     D --> E[profile_updater: update SQLite]
-    D -->|search queries| F[Google Search API]
-    D -->|vector_db| G[Qdrant RAG]
+    
+    %% Conditional Fan-out
+    D -- if needs_search --> F[DuckDuckGo Search]
+    D -- if needs_shopping --> F2[Google Shopping API]
+    D -- if needs_regulation --> G[Qdrant RAG]
     
     %% Filter & Condense Pipeline
     F -->|URLs| H[Crawl4AI: Headless Scraping HTML -> Markdown]
-    H --> H2[BM25ContentFilter: Buang Noise, Ambil Konten Relevan]
-    H2 --> I[LLM: Kondensasi Markdown Jadi Ringkasan Padat]
+    H --> H2[GIGO Filter Dinamis & BM25ContentFilter]
+    H2 --> I[LLM: Kondensasi & Math Reasoning]
+    F2 --> I2[JSON Condensation]
     
     %% Otak Analisis & Komunikasi
-    I --> J[LLM Call 2: Assess + Deteksi Anomali + Sintesis]
+    I --> J[LLM Call 2: Dynamic UI Synthesis]
+    I2 --> J
     G --> J
     J --> K{Perlu deep-dive?}
     K -- ya, maks 1x --> L[Deep-dive search]
@@ -175,8 +180,8 @@ flowchart TD
 
 | Call | Input | Output | Catatan |
 |---|---|---|---|
-| **LLM Call 1 (Riset)** | User message + user profile | `{route, sub_queries[], extracted_entities}` | Entity extraction & Query Generation terjadi di sini |
-| **LLM Call 2 (Analisis)** | Condensed Markdown + Qdrant results + profile | `{assessment, anomaly_flag, need_deep_dive}` | Jika `need_deep_dive=false`, langsung ke sintesis UI |
+| **LLM Call 1 (Riset)** | User message + user profile | `{route, sub_queries[], needs_regulation_check, needs_shopping_api}` | Intent extraction, Query Generation, dan Tool Routing (Dynamic ReAct). |
+| **LLM Call 2 (Analisis)** | Data pasar terkondensasi + Qdrant (opsional) | `{assessment, anomaly_flag, need_deep_dive}` | Memilih komponen Bento Grid secara dinamis sesuai konteks. Jika `need_deep_dive=false`, langsung ke sintesis UI |
 | **LLM Call 3** | Semua konteks + deep-dive results (opsional) | Final response (laporan konsolidasi) | Output terformat sesuai Klaster B dataset |
 
 ### API Endpoints (Kontrak Data Frontend & Backend)
@@ -422,32 +427,37 @@ async def handle_chat(user_id: str, message: str) -> ChatResponse:
     # 1. Ambil profil
     profile = profile_manager.get_profile(user_id)
     
-    # 2. LLM Call 1: dekomposisi + entity extraction
+    # 2. LLM Call 1: Intent Routing + Query Generation
     call1_result = await inference.call_llm(
         prompt=message,
         system_prompt=prompts.decomposition(profile)
     )
     route = call1_result.route
     entities = call1_result.extracted_entities
+    needs_reg = call1_result.needs_regulation_check
+    needs_shop = call1_result.needs_shopping_api
     
     # 3. Cek Kelengkapan Entitas (Fase Klarifikasi)
     if not entities.get("tingkat_risiko") or not entities.get("kategori"):
         # Konteks ambigu/santai (misal: "hi"), skip Deep Research
-        chat_response = await inference.call_llm(
-            prompt=message,
-            system_prompt=prompts.clarification(profile)
-        )
+        chat_response = await inference.call_llm(...)
         return ChatResponse(response=chat_response, profile_summary=profile)
         
-    # 4. Update profil (implicit, sebelum call 2)
+    # 4. Update profil
     profile_manager.update_profile(user_id, entities)
     
-    # 5. Fan-out: search + vector DB (paralel)
-    search_task = web_search(call1_result.sub_queries)
-    qdrant_task = vector_search(call1_result.sub_queries)
-    search_results, qdrant_results = await asyncio.gather(search_task, qdrant_task)
+    # 5. Dynamic Fan-out: Jalankan tool sesuai permintaan agen
+    tasks = []
+    if call1_result.sub_queries:
+        tasks.append(web_search(call1_result.sub_queries))
+    if needs_shop:
+        tasks.append(scrape_ecommerce_pricing(entities))
+    if needs_reg:
+        tasks.append(vector_search(call1_result.sub_queries))
+        
+    results = await asyncio.gather(*tasks)
     
-    # 6. LLM Call 2: assessment (Sintesis Laporan)
+    # 6. LLM Call 2: Dynamic UI Synthesis
     call2_result = await inference.call_llm(
         prompt=build_context(search_results, qdrant_results, profile),
         system_prompt=prompts.assessment()
@@ -629,8 +639,8 @@ Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke sumber eksternal untu
 
 | Jenis Data | Sumber Eksternal | Format / Metode Akses | Fungsi |
 |---|---|---|---|
-| **Semua Data Pasar & Harga (Prioritas Utama)** | Google Search API + *Full Page Scraping* | Web Scraping (HTML -> **Markdown**) | **Strategi Agentic Web Search:** Agent mencari *query* di Google, mendapat URL, lalu melakukan *scraping* menggunakan **`Crawl4AI`** (berbasis Playwright) dengan **BM25ContentFilter** untuk membuang noise. Teks *Markdown* relevan kemudian dikondensasi oleh LLM menjadi **ringkasan Markdown padat** (bukan JSON) agar siap dikonsumsi oleh LLM Sintesis pada Call 2. |
-| **[V2 BONUS] Pencarian Supplier Grosir** | **SerpApi Google Shopping API** (`gl=id`) | REST API → JSON terstruktur | Agent men-*generate* query seperti `"Grosir Singkong Surabaya"` via Google Shopping API. Hasilnya berupa JSON terstruktur (nama toko, harga, platform asal — termasuk Tokopedia/Shopee, link langsung). Di-render ke `<TableBlock />` yang sudah ada. **Alasan teknis tidak menggunakan *direct scraping* Tokopedia/Shopee:** anti-bot Tier-1 (Cloudflare, CAPTCHA, IP blocking) — Crawl4AI *stealth mode* tidak cukup untuk bypass behavioral analysis mereka, berisiko tinggi gagal saat demo *live*. SerpApi menangani semua proxy/CAPTCHA di sisi mereka dan mengembalikan data 100% reliabel. **Komponen `<MapBlock />` sengaja di-*drop*:** Google Shopping tidak mengembalikan alamat fisik penjual secara konsisten. |
+| **Semua Data Pasar & Harga (Prioritas Utama)** | DuckDuckGo Search (dorking) + Web Scraping | Web Scraping (HTML -> **Markdown**) | **Strategi Agentic Web Search:** Agent mencari *query* di DuckDuckGo dengan *dorking* khusus (contoh: `"harga keripik singkong" "pcs" OR "rp"`). Hasil *snippet* kemudian disaring secara berlapis:<br/>1. **GIGO (Garbage In, Garbage Out) Filter**: Hanya meloloskan data yang memiliki kata kunci kuantitas dinamis (misal: *pcs, gram, liter, kodi, ukuran*).<br/>2. **LLM Chain-of-Thought Math**: Pada `condensation.py`, LLM dipaksa untuk menghitung secara matematis (misal: Rp 40.000 / 10 pcs = Rp 4.000 per pcs) sebelum memberikan hasil rata-rata, untuk mencegah halusinasi kalkulasi.<br/>3. **Concurrency Lock**: Pemrosesan LLM dibungkus dengan `asyncio.Lock()` untuk mencegah API *Rate Limit* saat melakukan *scraping* paralel. |
+| **Pencarian E-Commerce & Supplier Grosir** | **DuckDuckGo Search (Dorking khusus Tokopedia/Shopee)** | Web Scraping -> Snippet | Menggunakan dorking khusus (contoh: `site:tokopedia.com "Grosir Singkong Surabaya" "Rp"`) untuk mendapatkan harga langsung dari DuckDuckGo tanpa memicu anti-bot E-Commerce. Ini menggantikan Google Shopping API yang mahal dan terkena limit. |
 | **Data Cadangan (Bonus/Fallback)** | Open Data Bapanas (Jawa Barat) | REST API / CSV | Hanya sebagai pembanding jika AI butuh kepastian harga pokok (HPP) pemerintah. |
 
 **Strategi Resiliensi (Live Demo Fallback):**

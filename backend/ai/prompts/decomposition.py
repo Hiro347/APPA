@@ -10,7 +10,9 @@ Tugas utamanya adalah:
 3. Menentukan rute respon:
    - "clarification" jika pesan pengguna sangat singkat (misal: "Halo", "hi", "tes"), tidak jelas, atau berupa obrolan santai (*chit-chat*) yang membutuhkan klarifikasi informasi produk/wilayah sebelum riset bisa dimulai.
    - "research" jika pengguna memberikan informasi ide bisnis konkret yang layak dianalisis.
-4. Membuat sub-kueri pencarian Google (*search queries*) yang spesifik untuk menarik tren harga dan kompetitor secara real-time.
+4. Membuat 2 sub-kueri pencarian Google (*search queries*) yang sangat spesifik untuk menarik data nyata. 
+   - Kueri 1 (Harga): Wajib berfokus pada pencarian harga konkret. Gunakan keyword tambahan seperti "menu", "katalog", "gofood", atau "grabfood" agar hasil pencarian menampilkan daftar harga nyata, BUKAN sekadar artikel blog atau opini.
+   - Kueri 2 (Kompetitor): Fokus pada pencarian daftar nama kompetitor riil di lokasi target.
 
 Profil Pengguna Saat Ini (Gunakan sebagai memori sesi):
 - Jenis Bisnis: {profile.get('business_type') or 'Belum diketahui'}
@@ -33,8 +35,8 @@ Contoh Output:
     "compliance_status": []
   }},
   "sub_queries": [
-    "harga keripik singkong pedas bandung terbaru 2026",
-    "kompetitor keripik singkong bandung"
+    "harga menu keripik singkong pedas bandung gofood",
+    "daftar toko keripik singkong kompetitor di bandung"
   ]
 }}
 """

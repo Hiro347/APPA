@@ -39,16 +39,17 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [x] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
 - [x] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
 - [x] **Dynamic Search Pipeline:** Rombak `agent.py` dan `useChat.ts` agar *frontend* 100% patuh pada struktur `pipeline_init` dinamis dari LLM (tidak ada lagi *hardcode* `s1` dan `s2`).
-- [ ] **Condensation Pipeline (Menunggu LLM Ini):**
-  - [ ] Ubah output `condense_market_data` dari JSON (`MarketDataSchema`) menjadi **ringkasan Markdown** — karena konsumer satu-satunya adalah LLM Sintesis (Call 2) yang membaca *natural language*, bukan mesin parser.
-  - [ ] Refactor `condensation.py`: Hapus `MarketDataSchema` Pydantic, ganti system prompt menjadi instruksi ringkas Markdown (ekstrak harga, kompetitor, insight kualitatif dalam format *bullet points*).
-  - [ ] Tambahkan **BM25ContentFilter** dari Crawl4AI di `scrape_pages()` dan `scrape_google_shopping()` untuk memfilter noise sebelum masuk LLM (`result.markdown.fit_markdown`).
-  - [ ] Ganti `mock_llm.py` dengan panggilan HuggingFace asli (`call_llm`) untuk fungsi `condense_market_data`.
-  - [ ] Hapus `asyncio.sleep` mock di `agent.py` untuk step `p1`/`p2` dan sambungkan ke eksekusi pipeline asli.
-  - [ ] Update label pipeline UI: `p1` → "Kondensasi Hasil Scraping" (tanpa "ke JSON"), hapus `p2` (Validasi Pydantic) karena tidak lagi relevan.
+- [x] **Condensation Pipeline (Menunggu LLM Ini):**
+  - [x] Ubah output `condense_market_data` dari JSON (`MarketDataSchema`) menjadi **ringkasan Markdown** — karena konsumer satu-satunya adalah LLM Sintesis (Call 2) yang membaca *natural language*, bukan mesin parser.
+  - [x] Refactor `condensation.py`: Hapus `MarketDataSchema` Pydantic, ganti system prompt menjadi instruksi ringkas Markdown (ekstrak harga, kompetitor, insight kualitatif dalam format *bullet points*).
+  - [x] Tambahkan **BM25ContentFilter** dari Crawl4AI di `scrape_pages()` dan `scrape_google_shopping()` untuk memfilter noise sebelum masuk LLM (`result.markdown.fit_markdown`).
+  - [x] Ganti `mock_llm.py` dengan panggilan HuggingFace asli (`call_llm`) untuk fungsi `condense_market_data`.
+  - [x] Hapus `asyncio.sleep` mock di `agent.py` untuk step `p1`/`p2` dan sambungkan ke eksekusi pipeline asli.
+  - [x] Update label pipeline UI: `p1` → "Kondensasi Hasil Scraping" (tanpa "ke JSON"), hapus `p2` (Validasi Pydantic) karena tidak lagi relevan.
 - [x] Pastikan integrasi *database* ke endpoint API berjalan lancar (saat ini frontend masih pakai MOCK_PROFILE, backend sudah SQLite).
 
 ### 🧠 Workstream B: AI Training & Data (PIC: Arya)
+- [ ] **Riset Entity Extractor:** Evaluasi apakah akan menggunakan direct API call ke model utama atau menggunakan model NER terpisah untuk ekstraksi entitas yang lebih optimal.
 - [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
 - [x] *Setup script* Web Scraper menggunakan kombinasi `duckduckgo-search` dan `Crawl4AI` untuk mengekstrak data harga pasar/kompetitor secara *open-source*.
 - [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
@@ -64,6 +65,20 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [ ] Bikin naskah/skrip untuk Video Proof of Work (7 menit), *setting* persona di Jawa Barat.
 - [ ] Bikin naskah/skrip untuk Video Promosi (5 menit).
 - [x] **Pipeline Transparency (Frontend):** Koding integrasi *client-side* SSE/WebSockets di Next.js untuk merender *streaming* data dari backend.
+
+### 🔄 Workstream D: Architectural Refactor (Dynamic Agent) (PIC: Gilang)
+- [ ] **Dynamic Regulation Query:** Buat pemanggilan `vector_search` (Qdrant) bersifat opsional/dinamis. LLM hanya akan memanggilnya jika pertanyaan user membutuhkan informasi regulasi atau hukum.
+- [ ] **Prompt Engineering (Dynamic Architecture):**
+  - [ ] **Intent-Driven Queries (`decomposition.py`):** Rombak sistem prompt. Kueri pencarian tidak boleh lagi statis/kaku ("harga menu", "kompetitor"). Biarkan agen secara bebas merumuskan list of `sub_queries` beserta *intent* (`price_fetch` vs `general`) berdasarkan apa yang ditanyakan user.
+  - [ ] **Bento Synthesis (`assessment.py`):** Sesuaikan prompt agar LLM memahami format JSON baru yang lebih bebas, memungkinkannya memilih komponen visual mana yang akan di-render.
+- [ ] **Modular Web Search (with Guardrails):** Modifikasi web search tool agar berfungsi selayaknya chatbot web search umum namun tetap terkontrol. Pisahkan *scraping pipeline* berdasarkan *intent*:
+  - Jika agen mencari harga (`price_fetch`), gunakan *pipeline* GIGO saat ini yang sangat teroptimasi.
+  - Jika agen mencari hal lain, gunakan *pipeline* umum (*general search*) tanpa GIGO filter ketat.
+- [ ] **Dynamic E-Commerce Dorking:** Buat pemanggilan `scrape_ecommerce_pricing` (DuckDuckGo Dorking spesifik Tokopedia/Shopee) menjadi opsional di `agent.py`. Hanya dipanggil jika `decomposition.py` mengeluarkan *flag* `needs_price_fetching`.
+- [ ] **Bento UI Overhaul:**
+  - [ ] Pecah Markdown component agar tidak terlalu penuh (maksimal 1 topik per 1 block komponen).
+  - [ ] Ganti default `bar chart` menjadi `line chart` agar lebih masuk akal untuk memvisualisasikan tren pasar/harga.
+  - [ ] Biarkan LLM (`assessment.py`) secara bebas dan dinamis menyusun komponen Bento grid yang benar-benar relevan dengan *intent* pengguna, bukan memaksakan format kaku.
 
 ---
 
@@ -99,10 +114,9 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [x] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya. (Selesai lebih awal di Foundation!)
 - [ ] **[BONUS] Pencarian Supplier Bahan Baku Grosir:**
   - [ ] Tambahkan *prompt variant* baru di `decomposition.py` agar LLM Call 1 men-*generate* query pencarian supplier (misal: `"Grosir Singkong Surabaya"`) ketika user bertanya soal sumber bahan baku.
-  - [ ] Gunakan **SerpApi Google Shopping API** (`gl=id`, location sesuai kota user) yang sudah ada di `.env` (`SEARCH_API_KEY`) — **BUKAN** *direct scraping* Tokopedia/Shopee (anti-bot terlalu kuat, risiko gagal saat demo *live*).
+  - [ ] Gunakan fungsi **DuckDuckGo Dorking khusus E-Commerce** (seperti `site:tokopedia.com`) di `web.py` — **BUKAN** SerpApi atau Google Shopping API (untuk menghindari *rate limit* dan biaya).
   - [ ] Render hasil pencarian supplier ke dalam komponen `<TableBlock />` yang sudah ada (kolom: Nama Toko, Harga Grosir, Platform, Link Langsung).
-  - [ ] LLM Call 2 (Sintesis) menghitung estimasi HPP berdasarkan harga grosir terverifikasi dari Google Shopping, dan menyarankan user untuk negosiasi langsung ke Pasar Induk jika volume sudah besar.
-  - *Catatan: Komponen `<MapBlock />` untuk lokasi fisik supplier sengaja di-DROP karena Google Shopping tidak mengembalikan alamat fisik penjual secara reliabel. Cukup `<TableBlock />`.*
+  - [ ] LLM Call 2 (Sintesis) menghitung estimasi HPP berdasarkan harga grosir terverifikasi.
 
 **Arya**
 - [ ] *Tuning* ulang latensi Qdrant dan respons `Qwen3-8B` agar stabil saat didemokan langsung di depan juri.

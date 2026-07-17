@@ -8,7 +8,7 @@ from ai.entity_extractor import extract_entities_and_queries
 from ai.inference import call_llm, call_llm_stream
 from ai.prompts.synthesis import get_clarification_prompt
 from ai.prompts.assessment import get_assessment_prompt
-from core.agent_tool.web import web_search, scrape_google_shopping
+from core.agent_tool.web import web_search, scrape_ecommerce_pricing
 from core.agent_tool.vector import vector_search
 
 
@@ -92,8 +92,8 @@ async def handle_chat_stream(user_id: str, message: str):
     for i, q in enumerate(sub_queries):
         search_steps.append({"id": f"s{i+1}", "label": f"Google Search: '{q}'", "status": "waiting"})
     
-    # Add Google Shopping as the last step in the search group
-    search_steps.append({"id": "gshop", "label": f"Google Shopping: '{keyword}'", "status": "waiting"})
+    # Add Marketplace Pricing as the last step in the search group
+    search_steps.append({"id": "gshop", "label": f"Marketplace Pricing: '{keyword}'", "status": "waiting"})
     
     pipeline_groups = [
         {
@@ -134,7 +134,7 @@ async def handle_chat_stream(user_id: str, message: str):
     for q in sub_queries:
         search_tasks.append(web_search([q], visited_urls=shared_visited))
         
-    gshop_task = scrape_google_shopping(keyword)
+    gshop_task = scrape_ecommerce_pricing(keyword)
     vector_task = vector_search(sub_queries)
     
     # Gather all tasks dynamically
@@ -152,21 +152,33 @@ async def handle_chat_stream(user_id: str, message: str):
     
     for i, res in enumerate(search_results):
         q = sub_queries[i]
-        details = f"=== QUERY: {q} ===\n\nSnippets:\n{json.dumps(res.get('snippets', []), indent=2)}\n\nRAW MARKDOWN:\n{res.get('raw_markdown', '')[:15000]}"
+        
+        if not res.get('snippets'):
+            details = f"=== QUERY: {q} ===\n\n(No results found or search skipped)"
+        else:
+            details = f"=== QUERY: {q} ===\n\nSnippets:\n{json.dumps(res.get('snippets', []), indent=2)}\n\nRAW MARKDOWN:\n{res.get('raw_markdown', '')[:15000]}"
+            
         yield emit_update(f"s{i+1}", "done", details)
         
         full_market_data += res.get("combined_text", "") + "\n\n"
         condensed = res.get("condensed_markdown", "")
-        combined_condensations.append(f"=== CONDENSED Q{i+1} ===\n{condensed}")
+        combined_condensations.append(f"=== Hasil Analisis: '{q}' ===\n{condensed}")
 
-    # Emit done for gshop
-    gshop_details = f"=== URL: {gshop_results.get('url')} ===\n\nCONDENSED:\n{gshop_results.get('condensed_markdown', '')}\n\nRAW MARKDOWN:\n{gshop_results.get('raw_markdown', '')[:10000]}"
+    # Emit done for marketplace pricing
+    if not gshop_results.get('raw_markdown'):
+        gshop_details = f"=== Sumber: {gshop_results.get('url', 'N/A')} ===\n\n(Tidak ada data harga marketplace ditemukan)"
+    else:
+        gshop_details = f"=== Sumber: {gshop_results.get('url')} ===\n\nCONDENSED:\n{gshop_results.get('condensed_markdown', '')}\n\nRAW MARKDOWN:\n{gshop_results.get('raw_markdown', '')[:10000]}"
+        
     yield emit_update("gshop", "done", gshop_details)
     
-    full_market_data += f"\n\n=== GOOGLE SHOPPING DATA ===\n{gshop_results.get('condensed_markdown', '')}"
+    full_market_data += f"\n\n=== MARKETPLACE PRICING DATA ===\n{gshop_results.get('condensed_markdown', '')}"
+    
+    # Add marketplace data to combined_condensations so the UI shows it in step p1
+    if gshop_results.get('condensed_markdown'):
+        combined_condensations.append(f"=== Hasil Analisis Marketplace: '{keyword}' ===\n{gshop_results.get('condensed_markdown')}")
     
     yield emit_update("p1", "running")
-    await asyncio.sleep(1.0)
     yield emit_update("p1", "done", "\n\n".join(combined_condensations))
     
     yield emit_update("r1", "done", vector_results)
@@ -187,9 +199,14 @@ async def handle_chat_stream(user_id: str, message: str):
     )
     
     llm_output = ""
-    async for chunk in call_llm_stream(user_prompt, system_prompt):
-        llm_output += chunk
-        yield json.dumps({"type": "stream_chunk", "content": chunk}) + "\n"
+    try:
+        async for chunk in call_llm_stream(user_prompt, system_prompt):
+            llm_output += chunk
+            # Keep the HTTP connection alive to prevent 'Network Error' browser timeouts
+            yield json.dumps({"type": "ping"}) + "\n"
+    except Exception as e:
+        logger.error(f"LLM synthesis stream failed or timed out: {e}")
+        # llm_output will be incomplete, so _parse_assessment_output will safely catch it and use fallback
         
     yield emit_update("syn1", "done")
     
