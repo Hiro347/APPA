@@ -14,7 +14,7 @@ class Settings:
     QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", 6333))
     QDRANT_COLLECTION: str = "regulations"
     
-    # Hugging Face Settings
+    # LLM Settings
     HF_MODEL_ID: str = os.getenv("HF_MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
     HF_API_TOKEN: str = os.getenv("HF_API_TOKEN", "")
     

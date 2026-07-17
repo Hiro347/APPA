@@ -52,6 +52,7 @@ async def handle_chat_stream(user_id: str, message: str):
     yield emit_update("d3", "running")
     if extracted_entities:
         update_profile(user_id, extracted_entities)
+        profile.update(extracted_entities)  # Merge new entities into local memory
     yield emit_update("d3", "done", f"Route: {route}")
         
     # 4. ROUTE A: Clarification
@@ -61,9 +62,14 @@ async def handle_chat_stream(user_id: str, message: str):
         system_prompt = get_clarification_prompt(profile)
         
         chat_response = ""
-        async for chunk in call_llm_stream(message, system_prompt):
-            chat_response += chunk
-            yield json.dumps({"type": "stream_chunk", "content": chunk}) + "\n"
+        try:
+            async for chunk in call_llm_stream(message, system_prompt):
+                chat_response += chunk
+                yield json.dumps({"type": "stream_chunk", "content": chunk}) + "\n"
+        except Exception as e:
+            logger.error(f"Clarification stream failed: {e}")
+            chat_response = "Maaf, sistem AI (Hugging Face) sedang mengalami kendala teknis atau kehabisan token (402 Payment Required). Silakan periksa API token Anda."
+            yield json.dumps({"type": "stream_chunk", "content": chat_response}) + "\n"
             
         yield emit_update("syn1", "done", chat_response)
         
@@ -80,103 +86,150 @@ async def handle_chat_stream(user_id: str, message: str):
     
     keyword = profile.get("product_category", "produk")
     
+    needs_reg = call1_result.get("needs_regulation_check", False)
+    needs_shop = call1_result.get("needs_price_fetching", False)
+    
     if not sub_queries or not isinstance(sub_queries, list):
         # Fallback queries if LLM didn't provide them
         sub_queries = [
-            f"regulasi perizinan {keyword} di {profile.get('target_location', 'Indonesia')}",
-            f"harga pasaran {keyword} di {profile.get('target_location', 'Indonesia')}"
+            {"query": f"regulasi perizinan {keyword} di {profile.get('target_location', 'Indonesia')}", "type": "general"},
+            {"query": f"harga pasaran {keyword} di {profile.get('target_location', 'Indonesia')}", "type": "price_fetch"}
         ]
         
     # Build dynamic pipeline UI
     search_steps = []
-    for i, q in enumerate(sub_queries):
-        search_steps.append({"id": f"s{i+1}", "label": f"Google Search: '{q}'", "status": "waiting"})
+    for i, q_obj in enumerate(sub_queries):
+        if isinstance(q_obj, str):
+            q_obj = {"query": q_obj, "type": "general"}
+        q_text = q_obj.get("query", "")
+        search_steps.append({"id": f"s{i+1}", "label": f"Google Search: '{q_text}'", "status": "waiting"})
     
-    # Add Marketplace Pricing as the last step in the search group
-    search_steps.append({"id": "gshop", "label": f"Marketplace Pricing: '{keyword}'", "status": "waiting"})
+    if needs_shop:
+        search_steps.append({"id": "gshop", "label": f"Marketplace Pricing: '{keyword}'", "status": "waiting"})
     
-    pipeline_groups = [
-        {
-            "id": "search", "icon": "", "label": "Pencarian Data Pasar & Regulasi",
+    pipeline_groups = []
+    if search_steps:
+        pipeline_groups.append({
+            "id": "search", "icon": "", "label": "Pencarian Data Pasar & Web",
             "steps": search_steps
-        },
-        {
+        })
+        pipeline_groups.append({
             "id": "process", "icon": "", "label": "Pemrosesan Data",
             "steps": [
                 {"id": "p1", "label": "Kondensasi Hasil Scraping", "status": "waiting"},
             ]
-        },
-        {
+        })
+        
+    if needs_reg:
+        pipeline_groups.append({
             "id": "regulation", "icon": "", "label": "Pengecekan Regulasi",
             "steps": [
-                {"id": "r1", "label": f"Qdrant RAG: query regulasi {keyword}", "status": "waiting"},
+                {"id": "r1", "label": f"Qdrant RAG: {keyword}", "status": "waiting"},
                 {"id": "r2", "label": "Matching: regulatory_rules.json", "status": "waiting"},
             ]
-        },
-        {
-            "id": "synthesis", "icon": "", "label": "Sintesis Laporan & UI",
-            "steps": [
-                {"id": "syn1", "label": "Kompilasi Wayfinder Report (LLM)", "status": "waiting"}
-            ]
-        }
-    ]
+        })
+        
+    pipeline_groups.append({
+        "id": "synthesis", "icon": "", "label": "Sintesis Laporan & UI",
+        "steps": [
+            {"id": "syn1", "label": "Kompilasi Wayfinder Report (LLM)", "status": "waiting"}
+        ]
+    })
     
     yield json.dumps({"type": "pipeline_init", "pipeline": pipeline_groups}) + "\n"
     
     # Set running statuses
     for i in range(len(sub_queries)):
         yield emit_update(f"s{i+1}", "running")
-    yield emit_update("gshop", "running")
-    yield emit_update("r1", "running")
+    if needs_shop:
+        yield emit_update("gshop", "running")
+    if needs_reg:
+        yield emit_update("r1", "running")
     
     shared_visited = set()
     search_tasks = []
-    for q in sub_queries:
-        search_tasks.append(web_search([q], visited_urls=shared_visited))
+    for q_obj in sub_queries:
+        if isinstance(q_obj, str):
+            q_obj = {"query": q_obj, "type": "general"}
+        q_text = q_obj.get("query", "")
+        search_tasks.append(web_search([q_text], visited_urls=shared_visited))
         
-    gshop_task = scrape_ecommerce_pricing(keyword)
-    vector_task = vector_search(sub_queries)
-    
     # Gather all tasks dynamically
-    all_tasks = search_tasks + [gshop_task, vector_task]
-    results = await asyncio.gather(*all_tasks)
+    all_tasks = search_tasks.copy()
+    gshop_index = -1
+    vector_index = -1
+    
+    if needs_shop:
+        all_tasks.append(scrape_ecommerce_pricing(keyword))
+        gshop_index = len(all_tasks) - 1
+        
+    if needs_reg:
+        # Pass queries string to vector_search
+        queries_str = [q.get("query", q) if isinstance(q, dict) else str(q) for q in sub_queries]
+        if not queries_str:
+             queries_str = [keyword]
+        all_tasks.append(vector_search(queries_str))
+        vector_index = len(all_tasks) - 1
+        
+    if all_tasks:
+        async def run_gather():
+            return await asyncio.gather(*all_tasks, return_exceptions=True)
+            
+        gather_task = asyncio.create_task(run_gather())
+        while not gather_task.done():
+            yield json.dumps({"type": "ping"}) + "\n"
+            await asyncio.sleep(2)
+        raw_results = gather_task.result()
+        
+        # Safely extract results, replacing exceptions with empty dicts/strings
+        results = []
+        for r in raw_results:
+            if isinstance(r, Exception):
+                logger.error(f"Async task failed: {r}")
+                results.append({})
+            else:
+                results.append(r)
+    else:
+        results = []
     
     # Unpack results
     search_results = results[:len(sub_queries)]
-    gshop_results = results[-2]
-    vector_results = results[-1]
+    gshop_results = results[gshop_index] if gshop_index != -1 else {}
+    vector_results = results[vector_index] if vector_index != -1 else ""
     
     # Emit done for searches
     full_market_data = ""
     combined_condensations = []
     
     for i, res in enumerate(search_results):
-        q = sub_queries[i]
+        q_obj = sub_queries[i]
+        if isinstance(q_obj, str):
+            q_obj = {"query": q_obj, "type": "general"}
+        q_text = q_obj.get("query", "")
         
         if not res.get('snippets'):
-            details = f"=== QUERY: {q} ===\n\n(No results found or search skipped)"
+            details = f"=== QUERY: {q_text} ===\n\n(No results found or search skipped)"
         else:
-            details = f"=== QUERY: {q} ===\n\nSnippets:\n{json.dumps(res.get('snippets', []), indent=2)}\n\nRAW MARKDOWN:\n{res.get('raw_markdown', '')[:15000]}"
+            details = f"=== QUERY: {q_text} ===\n\nSnippets:\n{json.dumps(res.get('snippets', []), indent=2)}\n\nRAW MARKDOWN:\n{res.get('raw_markdown', '')[:15000]}"
             
         yield emit_update(f"s{i+1}", "done", details)
         
         full_market_data += res.get("combined_text", "") + "\n\n"
         condensed = res.get("condensed_markdown", "")
-        combined_condensations.append(f"=== Hasil Analisis: '{q}' ===\n{condensed}")
+        if condensed:
+            combined_condensations.append(f"=== Hasil Analisis: '{q_text}' ===\n{condensed}")
 
     # Emit done for marketplace pricing
-    if not gshop_results.get('raw_markdown'):
-        gshop_details = f"=== Sumber: {gshop_results.get('url', 'N/A')} ===\n\n(Tidak ada data harga marketplace ditemukan)"
-    else:
-        gshop_details = f"=== Sumber: {gshop_results.get('url')} ===\n\nCONDENSED:\n{gshop_results.get('condensed_markdown', '')}\n\nRAW MARKDOWN:\n{gshop_results.get('raw_markdown', '')[:10000]}"
-        
-    yield emit_update("gshop", "done", gshop_details)
-    
-    full_market_data += f"\n\n=== MARKETPLACE PRICING DATA ===\n{gshop_results.get('condensed_markdown', '')}"
-    
-    # Add marketplace data to combined_condensations so the UI shows it in step p1
-    if gshop_results.get('condensed_markdown'):
-        combined_condensations.append(f"=== Hasil Analisis Marketplace: '{keyword}' ===\n{gshop_results.get('condensed_markdown')}")
+    if needs_shop:
+        if not gshop_results.get('raw_markdown'):
+            gshop_details = f"=== Sumber: {gshop_results.get('url', 'N/A')} ===\n\n(Tidak ada data harga marketplace ditemukan)"
+        else:
+            gshop_details = f"=== Sumber: {gshop_results.get('url')} ===\n\nCONDENSED:\n{gshop_results.get('condensed_markdown', '')}\n\nRAW MARKDOWN:\n{gshop_results.get('raw_markdown', '')[:10000]}"
+            
+        yield emit_update("gshop", "done", gshop_details)
+        full_market_data += f"\n\n=== MARKETPLACE PRICING DATA ===\n{gshop_results.get('condensed_markdown', '')}"
+        if gshop_results.get('condensed_markdown'):
+            combined_condensations.append(f"=== Hasil Analisis Marketplace: '{keyword}' ===\n{gshop_results.get('condensed_markdown')}")
     
     yield emit_update("p1", "running")
     yield emit_update("p1", "done", "\n\n".join(combined_condensations))

@@ -17,8 +17,8 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [x] Buat sistem *Mock Profile Persistence* (In-Memory/Context) untuk V1. (Selesai lebih awal: Backend sudah menggunakan SQLite di `models.py`!)
 
 **Arya (Data & AI Base):**
-- [x] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
-- [x] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
+- [ ] Bikin struktur awal `data/regulatory_rules.json` mencakup seluruh F&B (Risiko Rendah & Tinggi).
+- [ ] Buat *script* `seed_qdrant.py` untuk memecah (*chunking*) teks dan memasukkannya ke Qdrant.
 
 **Adillah (Bisnis, Validasi & UI Dev):**
 - [ ] Koding komponen UI statis pendukung di Next.js (layout, typography, styling dasar).
@@ -68,17 +68,17 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 
 ### 🔄 Workstream D: Architectural Refactor (Dynamic Agent) (PIC: Gilang)
 - [ ] **Dynamic Regulation Query:** Buat pemanggilan `vector_search` (Qdrant) bersifat opsional/dinamis. LLM hanya akan memanggilnya jika pertanyaan user membutuhkan informasi regulasi atau hukum.
-- [ ] **Prompt Engineering (Dynamic Architecture):**
-  - [ ] **Intent-Driven Queries (`decomposition.py`):** Rombak sistem prompt. Kueri pencarian tidak boleh lagi statis/kaku ("harga menu", "kompetitor"). Biarkan agen secara bebas merumuskan list of `sub_queries` beserta *intent* (`price_fetch` vs `general`) berdasarkan apa yang ditanyakan user.
-  - [ ] **Bento Synthesis (`assessment.py`):** Sesuaikan prompt agar LLM memahami format JSON baru yang lebih bebas, memungkinkannya memilih komponen visual mana yang akan di-render.
-- [ ] **Modular Web Search (with Guardrails):** Modifikasi web search tool agar berfungsi selayaknya chatbot web search umum namun tetap terkontrol. Pisahkan *scraping pipeline* berdasarkan *intent*:
+- [x] **Prompt Engineering (Dynamic Architecture):**
+  - [x] **Intent-Driven Queries (`decomposition.py`):** Rombak sistem prompt. Kueri pencarian tidak boleh lagi statis/kaku ("harga menu", "kompetitor"). Biarkan agen secara bebas merumuskan list of `sub_queries` beserta *intent* (`price_fetch` vs `general`) berdasarkan apa yang ditanyakan user.
+  - [x] **Bento Synthesis (`assessment.py`):** Sesuaikan prompt agar LLM memahami format JSON baru yang lebih bebas, memungkinkannya memilih komponen visual mana yang akan di-render.
+- [x] **Modular Web Search (with Guardrails):** Modifikasi web search tool agar berfungsi selayaknya chatbot web search umum namun tetap terkontrol. Pisahkan *scraping pipeline* berdasarkan *intent*:
   - Jika agen mencari harga (`price_fetch`), gunakan *pipeline* GIGO saat ini yang sangat teroptimasi.
   - Jika agen mencari hal lain, gunakan *pipeline* umum (*general search*) tanpa GIGO filter ketat.
 - [ ] **Dynamic E-Commerce Dorking:** Buat pemanggilan `scrape_ecommerce_pricing` (DuckDuckGo Dorking spesifik Tokopedia/Shopee) menjadi opsional di `agent.py`. Hanya dipanggil jika `decomposition.py` mengeluarkan *flag* `needs_price_fetching`.
-- [ ] **Bento UI Overhaul:**
-  - [ ] Pecah Markdown component agar tidak terlalu penuh (maksimal 1 topik per 1 block komponen).
-  - [ ] Ganti default `bar chart` menjadi `line chart` agar lebih masuk akal untuk memvisualisasikan tren pasar/harga.
-  - [ ] Biarkan LLM (`assessment.py`) secara bebas dan dinamis menyusun komponen Bento grid yang benar-benar relevan dengan *intent* pengguna, bukan memaksakan format kaku.
+- [x] **Bento UI Overhaul:**
+  - [x] Pecah Markdown component agar tidak terlalu penuh (maksimal 1 topik per 1 block komponen).
+  - [x] Ganti default `bar chart` menjadi `line chart` agar lebih masuk akal untuk memvisualisasikan tren pasar/harga.
+  - [x] Biarkan LLM (`assessment.py`) secara bebas dan dinamis menyusun komponen Bento grid yang benar-benar relevan dengan *intent* pengguna, bukan memaksakan format kaku.
 
 ---
 
@@ -86,7 +86,11 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 *Fase penyatuan seluruh komponen, pencarian bug, dan finalisasi berkas.*
 
 **Gilang & Arya (Testing & Bug Fixing):**
-- [ ] *End-to-End Testing*: Coba jalankan aplikasi dengan *use case* yang ekstrem/rumit.
+- [ ] **End-to-End & Edge Case Testing:**
+  - [ ] Uji coba skenario *Rate Limit* (429) API Hugging Face: pastikan agen berhasil menangkap *error* dan melakukan *fallback* tanpa merusak UI (*crash*).
+  - [ ] Uji coba multi-turn chat: kirim pesan lanjutan (follow-up) dan pastikan agen tidak kebingungan.
+  - [ ] Uji coba UI di resolusi Mobile (layar kecil): pastikan Bento Grid reflow dan indikator *scroll* input chat berfungsi dengan baik di *smartphone*.
+  - [ ] Uji coba dengan produk aneh/langka untuk melihat bagaimana model beradaptasi merender komponen (apakah halusinasi?).
 - [ ] **Tuning Prompt Engineering:** Perbaiki prompt secara iteratif saat menemukan *edge cases* atau halusinasi JSON selama testing berjalan.
 - [ ] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) agar tidak kena limit token HuggingFace.
   - [x] Frontend (`api.ts`): Memastikan `chat_history.slice(-10)` sudah terkirim di body *request*.
@@ -94,7 +98,11 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
   - [ ] Backend (`agent.py` & `inference.py`): Menginjeksikan `chat_history` ke dalam prompt LLM agar agen memiliki kesadaran konteks percakapan sebelumnya.
 - [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
 - [x] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
+  - [x] **Bento Grid Refactor:** Migrasi dari CSS Grid kaku (`grid-cols-3`) ke Flexbox (`flex-wrap`, `basis`, `flex-1`) untuk menghilangkan *gaping hole* (ruang kosong) secara dinamis.
+  - [x] **Metric Fallback:** Tambahkan *null checks* (`|| 0`) pada `MetricBlockRenderer` agar Next.js tidak crash (TypeError) saat LLM gagal me-return struktur angka yang valid.
 - [x] **Polishing & UX (Tambahan):** Selesaikan animasi FLIP *smooth-resize* untuk *chat input*, indikator *gradient scroll*, dan perbaiki *bug* agresif pada *auto-scroll* chat.
+  - [x] **Pipeline Details Polishing:** Rombak format `agent.py` (SSE) agar hasil kondensasi marketplace dan fallback message dirender dengan lebih rapi di UI dropdown.
+- [x] **HuggingFace Limit Optimization:** Kurangi batas pemotongan string markdown mentah dari 15.000 ke 8.000 karakter (`web.py`) agar terhindar dari limit *max input tokens* di API Inference gratisan.
 - [ ] *CODE FREEZE* — dilarang menambah fitur baru.
 
 **Adillah (Media, Submit & UI Bug Fixing):**

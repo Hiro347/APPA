@@ -31,10 +31,12 @@ export function ArtifactView({
   };
 
   const getBlockSpanClass = (block: ArtifactBlock) => {
-    if (block.type === 'table') return 'md:col-span-3';
-    if (block.type === 'text') return 'md:col-span-2';
-    if (block.type === 'chart') return 'md:col-span-2';
-    return 'md:col-span-1';
+    if (block.type === 'table') return 'w-full';
+    if (block.type === 'text') return 'w-full lg:flex-1 lg:basis-[600px] min-w-[300px]';
+    if (block.type === 'chart') return 'w-full lg:flex-1 lg:basis-[500px] min-w-[300px]';
+    if (block.type === 'metric') return 'w-full md:flex-1 md:basis-[300px] min-w-[250px]';
+    if (block.type === 'checklist') return 'w-full md:flex-1 md:basis-[300px] min-w-[250px]';
+    return 'w-full';
   };
 
   return (
@@ -48,7 +50,7 @@ export function ArtifactView({
       </div>
 
       {/* Content blocks (Bento Grid) */}
-      <div className="p-8 max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-auto flex-1">
+      <div className="p-8 max-w-6xl mx-auto w-full flex flex-wrap gap-4 flex-1 content-start items-stretch">
         {artifact.blocks.map((block, index) => {
           const spanClass = getBlockSpanClass(block);
 
@@ -113,9 +115,13 @@ function TextBlockRenderer({ block }: { block: TextBlock }) {
 }
 
 function MetricBlockRenderer({ block }: { block: MetricBlock }) {
-  const margin = block.data.recommendation - block.data.hpp;
-  const marginPct = block.data.recommendation > 0
-    ? Math.round((margin / block.data.recommendation) * 100)
+  const hpp = block.data.hpp || 0;
+  const market_avg = block.data.market_avg || 0;
+  const recommendation = block.data.recommendation || 0;
+
+  const margin = recommendation - hpp;
+  const marginPct = recommendation > 0
+    ? Math.round((margin / recommendation) * 100)
     : 0;
 
   return (
@@ -123,16 +129,16 @@ function MetricBlockRenderer({ block }: { block: MetricBlock }) {
       <div className="grid grid-cols-2 gap-3">
         <div className="p-4 rounded-md border border-gray-100 bg-gray-50/50">
           <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">Modal HPP</p>
-          <p className="text-xl font-bold text-gray-900">Rp{block.data.hpp.toLocaleString()}</p>
+          <p className="text-xl font-bold text-gray-900">Rp{hpp.toLocaleString()}</p>
         </div>
         <div className="p-4 rounded-md border border-gray-100 bg-gray-50/50">
           <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">Rata-rata Pasar</p>
-          <p className="text-xl font-bold text-gray-900">Rp{block.data.market_avg.toLocaleString()}</p>
+          <p className="text-xl font-bold text-gray-900">Rp{market_avg.toLocaleString()}</p>
         </div>
       </div>
       <div className="p-4 rounded-md border border-gray-905 bg-white">
         <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-0.5">Rekomendasi Harga Jual</p>
-        <p className="text-2xl font-black text-gray-900">Rp{block.data.recommendation.toLocaleString()}</p>
+        <p className="text-2xl font-black text-gray-900">Rp{recommendation.toLocaleString()}</p>
         <p className="text-xs text-gray-500 mt-1 font-medium">Margin: Rp{margin.toLocaleString()} ({marginPct}%)</p>
       </div>
     </div>

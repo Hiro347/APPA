@@ -212,8 +212,8 @@ async def condense_market_data(markdown_text: str, query: str) -> str:
     TODO: [PRODUCTION-READY] Ensure BM25ContentFilter is applied before this step to reduce token usage. 
     The output should be Markdown prose, NOT JSON, as it will be consumed by the Assessment LLM later.
     """
-    # Truncate markdown to prevent hitting token limits (expanded for 3 URLs)
-    markdown_text = markdown_text[:15000]
+    # Truncate markdown to prevent hitting token limits on free Hugging Face API
+    markdown_text = markdown_text[:8000]
     
     system_prompt = get_condensation_prompt(query)
     
