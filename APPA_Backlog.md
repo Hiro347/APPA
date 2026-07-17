@@ -97,6 +97,12 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 
 **Gilang (Live Hackathon 10 Jam)**
 - [x] Migrasi *Mock Profile Persistence* ke **SQLite Database** sesungguhnya. (Selesai lebih awal di Foundation!)
+- [ ] **[BONUS] Pencarian Supplier Bahan Baku Grosir:**
+  - [ ] Tambahkan *prompt variant* baru di `decomposition.py` agar LLM Call 1 men-*generate* query pencarian supplier (misal: `"Grosir Singkong Surabaya"`) ketika user bertanya soal sumber bahan baku.
+  - [ ] Gunakan **SerpApi Google Shopping API** (`gl=id`, location sesuai kota user) yang sudah ada di `.env` (`SEARCH_API_KEY`) — **BUKAN** *direct scraping* Tokopedia/Shopee (anti-bot terlalu kuat, risiko gagal saat demo *live*).
+  - [ ] Render hasil pencarian supplier ke dalam komponen `<TableBlock />` yang sudah ada (kolom: Nama Toko, Harga Grosir, Platform, Link Langsung).
+  - [ ] LLM Call 2 (Sintesis) menghitung estimasi HPP berdasarkan harga grosir terverifikasi dari Google Shopping, dan menyarankan user untuk negosiasi langsung ke Pasar Induk jika volume sudah besar.
+  - *Catatan: Komponen `<MapBlock />` untuk lokasi fisik supplier sengaja di-DROP karena Google Shopping tidak mengembalikan alamat fisik penjual secara reliabel. Cukup `<TableBlock />`.*
 
 **Arya**
 - [ ] *Tuning* ulang latensi Qdrant dan respons `Qwen3-8B` agar stabil saat didemokan langsung di depan juri.
