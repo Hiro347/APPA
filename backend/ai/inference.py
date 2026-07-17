@@ -24,18 +24,18 @@ def call_llm(prompt: str, system_prompt: str = "") -> str:
     """
     if client:
         try:
-            full_prompt = ""
+            messages = []
             if system_prompt:
-                full_prompt += f"<|system|>\n{system_prompt}\n"
-            full_prompt += f"<|user|>\n{prompt}\n<|assistant|>\n"
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
 
-            response = client.text_generation(
-                prompt=full_prompt,
-                max_new_tokens=1024,
+            response = client.chat.completions.create(
+                model=settings.HF_MODEL_ID,
+                messages=messages,
+                max_tokens=1024,
                 temperature=0.3,
-                repetition_penalty=1.1,
             )
-            return response.strip()
+            return response.choices[0].message.content.strip()
         except Exception as e:
             logger.warning(f"HuggingFace API call failed: {e}. Delegating to mock_llm.")
 
