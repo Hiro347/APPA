@@ -38,17 +38,16 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [x] **Sinkronisasi Backend:** *Refactor* Pydantic schema (`routes.py`), *mock response* (`inference.py`), dan *System Prompt* (`assessment.py`) agar me-*return* JSON dengan struktur Bento Grid `artifacts`/`blocks` terbaru.
 - [x] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
 - [x] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
-- [x] **SearchArsenal & Multi-Tier Fallback:** Implementasi `SearchArsenal` di `web.py` dengan *exponential backoff* dan *jitter* untuk mengamankan 100% uptime dari pemblokiran bot (DuckDuckGo Tor -> SearXNG -> Yahoo Scraper).
+- [x] **SearchArsenal & Multi-Tier Non-Blocking Search:** Implementasi `SearchArsenal` di `web.py` tanpa event loop delay & tanpa proxy Tor mati (Google Custom Search API -> Yahoo HTML -> DDG HTML -> SearXNG).
 - [x] **Sovereign Local Stack:** Integrasikan container lokal `tor`, `searxng`, dan `llama.cpp` ke dalam `docker-compose.yml` agar aplikasi dapat berjalan 100% lokal tanpa ketergantungan API pihak ketiga (bebas dari error 429 atau internet *down*).
 - [x] **Fallback Module:** Buat modul `fallback.py` mandiri untuk merender *Generative UI* yang valid jika LLM Call 2 rusak/halusinasi JSON, memisahkan logika darurat dari *Core Orchestrator*.
-- [x] **Condensation Pipeline (Menunggu LLM Ini):**
-  - [x] Ubah output `condense_market_data` dari JSON (`MarketDataSchema`) menjadi **ringkasan Markdown** — karena konsumer satu-satunya adalah LLM Sintesis (Call 2) yang membaca *natural language*, bukan mesin parser (SLM-MUX Pattern).
-  - [x] Refactor `condensation.py`: Hapus `MarketDataSchema` Pydantic, ganti system prompt menjadi instruksi ringkas Markdown (ekstrak harga, kompetitor, insight kualitatif dalam format *bullet points*).
-  - [x] Tambahkan **BM25ContentFilter** dari Crawl4AI di `scrape_pages()` dan `scrape_google_shopping()` untuk memfilter noise sebelum masuk LLM (`result.markdown.fit_markdown`).
-  - [x] Ganti `mock_llm.py` dengan panggilan HuggingFace asli (`call_llm`) untuk fungsi `condense_market_data`.
-  - [x] Hapus `asyncio.sleep` mock di `agent.py` untuk step `p1`/`p2` dan sambungkan ke eksekusi pipeline asli.
-  - [x] Update label pipeline UI: `p1` → "Kondensasi Hasil Scraping" (tanpa "ke JSON"), hapus `p2` (Validasi Pydantic) karena tidak lagi relevan.
-  - [x] **Context Window Protection:** Batasi markdown scraping maksimal 1500 karakter sebelum diproses SLM untuk mencegah kebocoran memori (500 Server Error) selama *heavy load iteratif*.
+- [x] **Condensation Pipeline & Verbatim Extraction:**
+  - [x] Ubah output `condense_market_data` dari JSON (`MarketDataSchema`) menjadi **ringkasan Markdown** (SLM-MUX Pattern).
+  - [x] Refactor `condensation.py`: Perintahkan LLM mengekstrak nominal harga persis (*verbatim*) tanpa manipulasi matematika otomatis.
+  - [x] Upgrade Crawl4AI di `scrape_pages()` dengan **PruningContentFilter (Threshold 0.48)** untuk mencegah terhapusnya tabel harga e-commerce.
+  - [x] Gut & Refactor `web.py` (~550 baris bersih): Hapus pembagian matematika regex `Guardrail 4 & 5` Python yang merusak harga nominal dan hardcoded `/ pcs` string labels.
+  - [x] Tambahkan verifikasi string `_verify_price_in_text` untuk menjamin 0% halusinasi harga.
+  - [x] **Context Window Protection:** Batasi markdown scraping maksimal 12.000 karakter sebelum diproses SLM.
 - [x] Pastikan integrasi *database* ke endpoint API berjalan lancar (saat ini frontend masih pakai MOCK_PROFILE, backend sudah SQLite).
 
 ### 🧠 Workstream B: AI Training & Data (PIC: Arya)

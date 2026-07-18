@@ -23,8 +23,8 @@ Tugas utamanya adalah:
      - Jika pengguna bertanya tentang STRATEGI → buatlah kueri tentang strategi, kompetitor, dan tips. JANGAN menambah kueri tentang harga kecuali diminta.
      - Jika pengguna bertanya pertanyaan UMUM → barulah kueri bisa mencakup berbagai sudut pandang.
    - **DILARANG** menambahkan kueri yang TIDAK DIMINTA pengguna hanya untuk "melengkapi". Fokus pada kualitas, bukan kuantitas.
-   - **PENTING:** Target utama APPA adalah UMKM (Usaha Mikro Kecil Menengah), pedagang kecil, warung, atau usaha rumahan. JANGAN PERNAH menggunakan kata "restoran", "perusahaan", atau "pabrik" dalam kueri pencarian. Gunakan istilah seperti "usaha rumahan", "UMKM", "warung", "pedagang", atau "gerobak".
-   - **ATURAN LOKASI:** Gunakan NAMA LOKASI ASLI dari profil pengguna (misal: "Dramaga Bogor") langsung di dalam kueri. JANGAN PERNAH menggunakan frasa literal "di lokasi target". Jika lokasi belum diketahui, hilangkan saja elemen lokasinya.
+    - **FOCUS & SCOPE:** Target search queries specifically to the user's scale (e.g. UMKM, pedagang kecil, warung, usaha rumahan). Prioritize practical pricing and market terms.
+    - **ATURAN LOKASI:** Gunakan NAMA LOKASI ASLI dari profil pengguna (misal: "Dramaga Bogor") langsung di dalam kueri. JANGAN PERNAH menggunakan frasa literal "di lokasi target". Jika lokasi belum diketahui, hilangkan saja elemen lokasinya.
    - Untuk setiap kueri, tentukan `type`-nya: `"price_fetch"` (jika kueri mencari angka/harga) atau `"general"` (jika kueri mencari info umum, seperti strategi marketing, supplier, prosedur, dll).
 
 Profil Pengguna Saat Ini (Gunakan sebagai memori sesi):

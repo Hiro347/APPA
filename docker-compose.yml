@@ -65,7 +65,7 @@ services:
     restart: always
 
   searxng:
-    image: searxng/searxng:latest
+    build: ./searxng_custom
     container_name: appa_searxng
     ports:
       - "8081:8080"
