@@ -14,30 +14,29 @@ graph TD
     classDef frontend fill:#3178c6,stroke:#fff,stroke-width:2px,color:#fff;
     classDef backend fill:#059669,stroke:#fff,stroke-width:2px,color:#fff;
     classDef database fill:#ea580c,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef external fill:#475569,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef ai fill:#7c3aed,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef tool fill:#475569,stroke:#fff,stroke-width:2px,color:#fff;
     classDef file fill:#eab308,stroke:#fff,stroke-width:2px,color:#000;
 
     User([User / Browser]) -->|HTTP Request| NextJS
     
-    subgraph "Docker Compose (Host Environment)"
+    subgraph "Sovereign Local Stack (Docker Compose)"
         NextJS["Next.js Container<br/>(Frontend UI/UX)"]:::frontend
         FastAPI["FastAPI Container<br/>(Agent Orchestrator)"]:::backend
         Qdrant["Qdrant Container<br/>(Vector Database)"]:::database
+        Llama["llama.cpp Container<br/>(Local AI Engine via CUDA)"]:::ai
+        Tor["Tor Proxy<br/>(Anti-Bot Evasion)"]:::tool
+        SearXNG["SearXNG<br/>(Metasearch Engine)"]:::tool
         
         NextJS <-->|REST API| FastAPI
         FastAPI <-->|gRPC / HTTP| Qdrant
+        FastAPI <-->|HTTP / OpenAI API| Llama
+        FastAPI <-->|SOCKS5| Tor
+        FastAPI <-->|HTTP| SearXNG
         
         Rules["regulatory_rules.json<br/>(JSON Railway)"]:::file
         Rules -.->|Anti-Hallucination Logic| FastAPI
     end
-
-    subgraph "External APIs"
-        HF["HuggingFace Inference API<br/>(Qwen3-8B Fine-Tuned)"]:::external
-        Google["Google Search API<br/>(Real-time Market Data)"]:::external
-    end
-
-    FastAPI <-->|Prompt + Context| HF
-    FastAPI <-->|Search Queries| Google
 ```
 
 ---
@@ -48,14 +47,14 @@ graph TD
 |---|---|---|
 | **Frontend** | Next.js (React) | Full control UI/UX, SSR, App Router. Tim punya designer — Streamlit terlalu terbatas |
 | **Backend** | FastAPI (Python) | Async-native, auto-generate OpenAPI docs, Python ecosystem untuk AI |
-| **AI Model** | Qwen3-8B + QLoRA fine-tuning | 8B cukup untuk routing + gaya bahasa. QLoRA bisa training di Colab T4 |
-| **AI Inference** | HuggingFace Inference API | Model di-host di HF Hub setelah fine-tune. Tidak perlu GPU di Docker — rulebook membolehkan model API |
+| **AI Model** | DeepSeek/Qwen3 (GGUF) | Optimal untuk penalaran Agentic dan terbukti mampu dijalankan lokal di atas perangkat konsumen/mid-tier. |
+| **AI Inference** | llama.cpp (Local Server) | Menjamin privasi data, latensi stabil, dan 100% tahan uji dari masalah koneksi internet/rate limit API saat live demo hackathon. |
 | **Vector DB** | Qdrant | Docker image resmi, collection-based, gRPC, gratis |
 | **Relational DB** | SQLite | Zero-config, file-based, cukup untuk single-user demo |
-| **Search** | Google Search API / SerpAPI | Fan-out real-time untuk data pasar & kompetitor |
-| **Containerization** | Docker Compose | Wajib rulebook — 3 services, 2 volumes |
+| **Search Engine** | SearXNG + Tor (Local) | Menjamin scraping data pasar (Google/Marketplace) selalu berhasil tanpa diblokir oleh anti-bot WAF eksternal. |
+| **Containerization** | Docker Compose | Menyatukan **6 layanan lokal** secara utuh dan berdaulat. |
 
-**Kenapa bukan Streamlit?** Rulebook menilai **modularitas** dengan bobot 25% — "apakah komponen AI, backend, dan frontend terpisah dengan bersih?" Dengan Next.js + FastAPI, frontend dan backend adalah dua container terpisah yang berkomunikasi via REST API. Ini secara literal menjawab pertanyaan juri tentang pemisahan komponen.
+**Kenapa bukan Streamlit?** Rulebook menilai **modularitas** dengan bobot 25% — "apakah komponen AI, backend, dan frontend terpisah dengan bersih?" Dengan Next.js + FastAPI + Llama.cpp, arsitektur terpecah menjadi layanan mikrokontroler tersendiri yang berkomunikasi via API. Ini secara literal menjawab pertanyaan juri tentang pemisahan komponen.
 
 ---
 
@@ -132,8 +131,8 @@ appa/
 ```
 
 **Catatan penting:**
-- `training/` **tidak masuk Docker** — fine-tuning dilakukan di Colab/HuggingFace, hasilnya di-push ke HF Hub. Panitia tidak perlu GPU.
-- `backend/ai/` berisi kode **inference** (panggil HF API) — bukan training.
+- `training/` **tidak masuk Docker** — fine-tuning dilakukan di Colab, namun hasil model dikuantisasi menjadi `.gguf` dan di-*load* secara lokal oleh `llama.cpp` di dalam Docker.
+- `backend/ai/` berisi kode **inference** (panggil OpenAI-compatible API lokal) — bukan API eksternal.
 - `data/regulatory_rules.json` adalah **satu sumber kebenaran** untuk regulasi — dipakai oleh Qdrant seeding dan dataset generator.
 
 ---
@@ -180,9 +179,9 @@ flowchart TD
 
 | Call | Input | Output | Catatan |
 |---|---|---|---|
-| **LLM Call 1 (Riset)** | User message + user profile | `{route, sub_queries[], needs_regulation_check, needs_shopping_api}` | Intent extraction, Query Generation, dan Tool Routing (Dynamic ReAct). |
-| **LLM Call 2 (Analisis)** | Data pasar terkondensasi + Qdrant (opsional) | `{assessment, anomaly_flag, need_deep_dive}` | Memilih komponen Bento Grid secara dinamis sesuai konteks. Jika `need_deep_dive=false`, langsung ke sintesis UI |
-| **LLM Call 3** | Semua konteks + deep-dive results (opsional) | Final response (laporan konsolidasi) | Output terformat sesuai Klaster B dataset |
+| **LLM Call 1 (Riset)** | User message + user profile | `{route, sub_queries[], needs_regulation_check, user_intent_category}` | Intent extraction (`price_only`, `strategy_only`, dll) dan Tool Routing dinamis. |
+| **LLM Call 2 (Analisis)** | Data pasar terkondensasi (SLM-MUX) + Qdrant | `{assessment, anomaly_flag, need_deep_dive}` | Memilih komponen Bento Grid secara dinamis sesuai konteks dan melakukan sintesis akhir yang diawasi *Python-Level Guardrails*. |
+| **LLM Call 3** | Semua konteks + deep-dive results | Final response (laporan konsolidasi) | Dipanggil opsional jika perlu deep-dive riset tambahan. |
 
 ### API Endpoints (Kontrak Data Frontend & Backend)
 
@@ -261,9 +260,9 @@ Trigger awal untuk memasukkan `regulatory_rules.json` ke dalam Qdrant Vector DB 
 
 ---
 
-## 4. Docker Compose
+## 4. Docker Compose (Sovereign Local Stack)
 
-Tiga container, dua volume. Panitia cukup jalankan `docker compose up --build`.
+Terdapat 6 container inti yang semuanya berjalan secara lokal (termasuk LLM dan Metasearch Engine). Panitia cukup jalankan `docker compose up --build`.
 
 ```yaml
 version: "3.8"
@@ -276,50 +275,61 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+
+  llm:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models:z
+    command: -m /models/appa-v1.0-model.Q4_K_M.gguf --host 0.0.0.0 --port 8080 -n 8192 -c 8192
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  tor:
+    image: dperson/torproxy
+    ports:
+      - "9050:9050"
+
+  searxng:
+    image: searxng/searxng:latest
+    ports:
+      - "8081:8080"
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
       - db_data:/app/data
     environment:
       - QDRANT_HOST=qdrant
-      - QDRANT_PORT=6333
-      - HF_MODEL_ID=appa/qwen3-8b-finetuned  # ganti setelah training
-      - HF_API_TOKEN=${HF_API_TOKEN}
-      - SEARCH_API_KEY=${SEARCH_API_KEY}
-    depends_on:
-      qdrant:
-        condition: service_healthy
+      - LOCAL_LLM_URL=http://llm:8080/v1
+      - PROXY_URL=socks5h://tor:9050
+      - SEARXNG_URL=http://searxng:8080
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8000
-    depends_on:
-      - backend
 
 volumes:
-  db_data:       # SQLite — profil pengguna, compliance_status
-  qdrant_data:   # Indeks vektor & embedding regulasi
+  db_data:       # SQLite — profil pengguna
+  qdrant_data:   # Indeks vektor regulasi
 ```
 
 **Yang perlu diperhatikan tim:**
-- `QDRANT_HOST=qdrant` dan `NEXT_PUBLIC_API_URL=http://backend:8000` — di dalam Docker network, container akses via **nama service**, bukan `localhost`.
-- `HF_API_TOKEN` dan `SEARCH_API_KEY` disimpan di file `.env` (jangan commit ke Git). Tambahkan `.env.example` sebagai referensi.
-- **Test wajib sebelum submit:** clone repo ke folder baru → buat `.env` → `docker compose up --build` → pastikan berjalan tanpa error. Ini yang akan dilakukan panitia.
+- Stack ini sepenuhnya **OFFLINE/LOCAL SOVEREIGN** dari API eksternal. Model LLM tidak memanggil HuggingFace, melainkan berjalan secara *native* via `llama.cpp` di GPU lokal.
+- Pengumpulan data eksternal didukung oleh `searxng` dan diproksi melalui `tor` untuk menghindari IP ban dari E-Commerce (anti-WAF).
 
 ### Dockerfile contoh (backend)
 
@@ -358,34 +368,29 @@ CMD ["npm", "start"]
 
 ## 5. Komponen AI
 
-### Fine-tuning (di Google Colab dengan Unsloth)
+### Fine-tuning & Deployment (GGUF Local)
 
-- **Model dasar:** `Qwen3-4B-Instruct` (Utama) / `Qwen3-8B-Instruct` (Alternatif Cloud)
-- **Framework:** **Unsloth** (Wajib, karena 2x lebih cepat dan sangat hemat VRAM, sangat optimal untuk Google Colab T4 gratis).
+- **Model dasar:** `DeepSeek-R1` atau `Qwen3`
+- **Framework:** **Unsloth** (sangat hemat VRAM).
 - **Metode:** QLoRA (rank 16, alpha 32, 4-bit NF4)
-- **Output:** Model adapter (GGUF/Safetensors) di-push ke HuggingFace Hub → diakses via Inference API (Bukan deploy lokal pakai Ollama/vLLM saat demo agar Docker tetap ringan).
+- **Output:** Model adapter dikonversi menjadi file tunggal `.gguf` (Q4_K_M) dan dilampirkan ke dalam folder `./models/` di repo proyek. Docker menjalankan model ini sepenuhnya secara lokal via `llama.cpp`.
 
-**Fokus fine-tuning:**
-- Klaster A (gaya bahasa dagang informal) — model menjawab santai, bukan kaku ala pasal UU
-- Klaster B (konsistensi format output 5 bagian) — termasuk bagian ke-5 "Status Kepatuhan" yang kondisional
-
-**Bukan** untuk routing/JSON generation — itu tetap structured function-calling deterministik.
-
-### Inference (di Docker, via HuggingFace API)
+### Inference (di Docker, via OpenAI-Compatible Llama.cpp)
 
 ```python
 # backend/ai/inference.py (simplified)
 from huggingface_hub import InferenceClient
 
-client = InferenceClient(model=config.HF_MODEL_ID, token=config.HF_API_TOKEN)
+# Menggunakan InferenceClient sebagai wrapper API standar OpenAI, diarahkan ke Localhost
+client = InferenceClient(base_url=settings.LOCAL_LLM_URL, api_key="sk-local")
 
 def call_llm(prompt: str, system_prompt: str) -> str:
-    response = client.text_generation(
-        prompt=f"<|system|>{system_prompt}<|user|>{prompt}<|assistant|>",
-        max_new_tokens=2048,
+    response = client.chat_completion(
+        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}],
+        max_tokens=2048,
         temperature=0.3,
     )
-    return response
+    return response.choices[0].message.content
 ```
 
 ### Dataset (1.000 entri, 4 klaster)
@@ -639,13 +644,13 @@ Selain Qdrant, *Agent Orchestrator* melakukan *fan-out* ke sumber eksternal untu
 
 | Jenis Data | Sumber Eksternal | Format / Metode Akses | Fungsi |
 |---|---|---|---|
-| **Semua Data Pasar & Harga (Prioritas Utama)** | DuckDuckGo Search (dorking) + Web Scraping | Web Scraping (HTML -> **Markdown**) | **Strategi Agentic Web Search:** Agent mencari *query* di DuckDuckGo dengan *dorking* khusus (contoh: `"harga keripik singkong" "pcs" OR "rp"`). Hasil *snippet* kemudian disaring secara berlapis:<br/>1. **GIGO (Garbage In, Garbage Out) Filter**: Hanya meloloskan data yang memiliki kata kunci kuantitas dinamis (misal: *pcs, gram, liter, kodi, ukuran*).<br/>2. **LLM Chain-of-Thought Math**: Pada `condensation.py`, LLM dipaksa untuk menghitung secara matematis (misal: Rp 40.000 / 10 pcs = Rp 4.000 per pcs) sebelum memberikan hasil rata-rata, untuk mencegah halusinasi kalkulasi.<br/>3. **Concurrency Lock**: Pemrosesan LLM dibungkus dengan `asyncio.Lock()` untuk mencegah API *Rate Limit* saat melakukan *scraping* paralel. |
-| **Pencarian E-Commerce & Supplier Grosir** | **DuckDuckGo Search (Dorking khusus Tokopedia/Shopee)** | Web Scraping -> Snippet | Menggunakan dorking khusus (contoh: `site:tokopedia.com "Grosir Singkong Surabaya" "Rp"`) untuk mendapatkan harga langsung dari DuckDuckGo tanpa memicu anti-bot E-Commerce. Ini menggantikan Google Shopping API yang mahal dan terkena limit. |
-| **Data Cadangan (Bonus/Fallback)** | Open Data Bapanas (Jawa Barat) | REST API / CSV | Hanya sebagai pembanding jika AI butuh kepastian harga pokok (HPP) pemerintah. |
+| **Semua Data Pasar & Harga (Prioritas Utama)** | **SearchArsenal Multi-Tier (DuckDuckGo Tor $\rightarrow$ SearXNG $\rightarrow$ Yahoo HTML)** + Web Scraping | Web Scraping (HTML -> **Markdown**) | **Strategi Agentic Web Search:** Agent mencari *query* melalui *SearchArsenal* yang dilengkapi dengan *exponential backoff* dan *jitter* untuk menghindari pemblokiran WAF. Hasil *snippet* kemudian disaring secara berlapis:<br/>1. **GIGO (Garbage In, Garbage Out) Filter**: Hanya meloloskan data yang relevan.<br/>2. **LLM Chain-of-Thought Math + Regex Fallback**: Pada `condensation.py`, LLM dipaksa untuk menghitung secara matematis. Jika gagal, *Python-level Regex* akan mem-parsing string seperti "isi 50 pcs" untuk normalisasi harga otomatis.<br/>3. **Context Window Protection**: Teks markdown dibatasi maksimal 1500 karakter sebelum diproses SLM untuk mencegah *memory leaks* (500 Error) selama iterasi *heavy load*. |
+| **Pencarian E-Commerce & Supplier Grosir** | **SearchArsenal (Dorking Tokopedia/Shopee/Tiktok)** | Web Scraping -> Snippet | Menggunakan dorking khusus (contoh: `site:tokopedia.com "Grosir Singkong" "Rp"`) untuk mendapatkan harga tanpa memicu anti-bot E-Commerce. Ini menggantikan Google Shopping API. |
+| **Data Cadangan (Bonus/Fallback)** | Open Data Bapanas (Jawa Barat) / `fallback.py` Module | REST API / JSON | Modul mandiri `fallback.py` disiapkan untuk merender *Generative UI* yang valid jika LLM *Orchestrator* gagal atau berhalusinasi saat *Synthesis*. |
 
 **Strategi Resiliensi (Live Demo Fallback):**
 Penyakit utama *live hackathon offline* adalah koneksi internet *down* atau limit API habis. 
-Untuk mencegah aplikasi *crash*, Arya wajib menyiapkan `data/fallback_mock_jabar.json`. Jika `asyncio.gather` gagal menghubungi Google/Bapanas setelah 3 detik (*timeout*), *Agent* otomatis menarik data dari *file json lokal* ini. Demo akan tetap berjalan lancar!
+Untuk mencegah aplikasi *crash*, sistem dilengkapi dengan `SearchArsenal` dan `fallback.py`. Jika `asyncio.gather` gagal menghubungi API luar, *Agent* otomatis menarik data dari *file json lokal* (`data/fallback_mock_jabar.json`). Demo akan tetap berjalan lancar tanpa UI yang patah!
 
 ---
 

@@ -1,4 +1,44 @@
 {
+  "dimsum_mentai": {
+    "product": "Dimsum Mentai",
+    "region": "Jawa Barat (Bandung & Depok)",
+    "market_demand": "Sangat Tinggi. Makanan olahan fusion (Jepang-Lokal) sangat diminati Gen-Z dan Millennial di Jawa Barat. Tren saus mentai mendongkrak harga jual hingga 30%.",
+    "average_competitor_price": 25000,
+    "price_range": {
+      "toko_online": "Rp 20.000 - Rp 25.000 (isi 4-5 pcs)",
+      "franchise_mall": "Rp 35.000 - Rp 45.000 (isi 4 pcs premium)",
+      "warung_tenda": "Rp 15.000 - Rp 18.000 (isi 4 pcs biasa)"
+    },
+    "commodity_price": {
+      "daging_ayam_giling": "Rp 45.000/kg",
+      "saus_mayonnaise": "Rp 28.000/kg",
+      "telur_ikan_tobiko": "Rp 85.000/200g"
+    },
+    "competitors": [
+      {
+        "name": "Dimsum Mentai Boss",
+        "scale": "Menengah / Ritel",
+        "pricing": "Rp 28.000 (isi 4)",
+        "strategy": "Branding saus mentai bakar melimpah dan packaging box eksklusif."
+      },
+      {
+        "name": "Dimsum 10 Ribuan",
+        "scale": "Mikro / Kaki Lima",
+        "pricing": "Rp 15.000 (isi 4 + mentai)",
+        "strategy": "Menyasar pelajar dengan porsi kecil saus racikan sendiri (mayo pedas biasa)."
+      },
+      {
+        "name": "Dimsum Frozen Mentai",
+        "scale": "Agen Frozen Food",
+        "pricing": "Rp 45.000 (isi 10 beku)",
+        "strategy": "Fokus pada kuantitas untuk stok kulkas keluarga, saus mentai sachet terpisah."
+      }
+    ],
+    "sources": [
+      "Shopee Food & GrabFood Trend 2026",
+      "Laporan Penjualan UMKM Jawa Barat"
+    ]
+  },
   "keripik_singkong_pedas": {
     "product": "Keripik Singkong Pedas",
     "region": "Jawa Barat (Bandung & Surabaya)",

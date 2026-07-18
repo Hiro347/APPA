@@ -38,14 +38,17 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [x] **Sinkronisasi Backend:** *Refactor* Pydantic schema (`routes.py`), *mock response* (`inference.py`), dan *System Prompt* (`assessment.py`) agar me-*return* JSON dengan struktur Bento Grid `artifacts`/`blocks` terbaru.
 - [x] **Pipeline Transparency (Backend):** Implementasi Server-Sent Events (SSE) atau WebSockets di FastAPI untuk *streaming* status *Agent Orchestrator* secara *real-time*.
 - [x] Susun dan kunci *System Prompts* di Python untuk *The JSON Railway Pattern* (Anti-Halusinasi) dengan struktur output Dynamic Artifacts yang mencantumkan sumber rujukan (sources) pada level blok/subkomponen.
-- [x] **Dynamic Search Pipeline:** Rombak `agent.py` dan `useChat.ts` agar *frontend* 100% patuh pada struktur `pipeline_init` dinamis dari LLM (tidak ada lagi *hardcode* `s1` dan `s2`).
+- [x] **SearchArsenal & Multi-Tier Fallback:** Implementasi `SearchArsenal` di `web.py` dengan *exponential backoff* dan *jitter* untuk mengamankan 100% uptime dari pemblokiran bot (DuckDuckGo Tor -> SearXNG -> Yahoo Scraper).
+- [x] **Sovereign Local Stack:** Integrasikan container lokal `tor`, `searxng`, dan `llama.cpp` ke dalam `docker-compose.yml` agar aplikasi dapat berjalan 100% lokal tanpa ketergantungan API pihak ketiga (bebas dari error 429 atau internet *down*).
+- [x] **Fallback Module:** Buat modul `fallback.py` mandiri untuk merender *Generative UI* yang valid jika LLM Call 2 rusak/halusinasi JSON, memisahkan logika darurat dari *Core Orchestrator*.
 - [x] **Condensation Pipeline (Menunggu LLM Ini):**
-  - [x] Ubah output `condense_market_data` dari JSON (`MarketDataSchema`) menjadi **ringkasan Markdown** — karena konsumer satu-satunya adalah LLM Sintesis (Call 2) yang membaca *natural language*, bukan mesin parser.
+  - [x] Ubah output `condense_market_data` dari JSON (`MarketDataSchema`) menjadi **ringkasan Markdown** — karena konsumer satu-satunya adalah LLM Sintesis (Call 2) yang membaca *natural language*, bukan mesin parser (SLM-MUX Pattern).
   - [x] Refactor `condensation.py`: Hapus `MarketDataSchema` Pydantic, ganti system prompt menjadi instruksi ringkas Markdown (ekstrak harga, kompetitor, insight kualitatif dalam format *bullet points*).
   - [x] Tambahkan **BM25ContentFilter** dari Crawl4AI di `scrape_pages()` dan `scrape_google_shopping()` untuk memfilter noise sebelum masuk LLM (`result.markdown.fit_markdown`).
   - [x] Ganti `mock_llm.py` dengan panggilan HuggingFace asli (`call_llm`) untuk fungsi `condense_market_data`.
   - [x] Hapus `asyncio.sleep` mock di `agent.py` untuk step `p1`/`p2` dan sambungkan ke eksekusi pipeline asli.
   - [x] Update label pipeline UI: `p1` → "Kondensasi Hasil Scraping" (tanpa "ke JSON"), hapus `p2` (Validasi Pydantic) karena tidak lagi relevan.
+  - [x] **Context Window Protection:** Batasi markdown scraping maksimal 1500 karakter sebelum diproses SLM untuk mencegah kebocoran memori (500 Server Error) selama *heavy load iteratif*.
 - [x] Pastikan integrasi *database* ke endpoint API berjalan lancar (saat ini frontend masih pakai MOCK_PROFILE, backend sudah SQLite).
 
 ### 🧠 Workstream B: AI Training & Data (PIC: Arya)
@@ -53,10 +56,10 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 - [ ] Kumpulkan teks regulasi mentah untuk NIB, SPP-IRT, BPOM MD, dan Halal (Self-Declare & Reguler).
 - [x] *Setup script* Web Scraper menggunakan kombinasi `duckduckgo-search` dan `Crawl4AI` untuk mengekstrak data harga pasar/kompetitor secara *open-source*.
 - [ ] Susun draf awal *dataset* 1.000 entri dalam format JSONL.
-- [ ] Selesaikan *training* QLoRA di Google Colab menggunakan *dataset* JSONL.
-- [ ] Evaluasi akurasi dan perbandingan respons model sebelum vs sesudah.
-- [ ] *Push* model *fine-tuned* ke HuggingFace Hub.
-- [ ] Update `.env` backend dengan model ID HuggingFace yang baru.
+- [x] Selesaikan *training* QLoRA di Google Colab menggunakan *dataset* JSONL.
+- [x] Evaluasi akurasi dan perbandingan respons model sebelum vs sesudah.
+- [x] **Local AI Sovereign Deployment:** Kuantisasi hasil model menjadi format `.gguf` dan *load* menggunakan Docker container `llama.cpp` dengan eksekusi CUDA secara lokal, menggantikan ketergantungan pada HuggingFace API.
+- [x] Update `.env` backend dengan `LOCAL_LLM_URL` yang menunjuk ke container `llama.cpp`.
 
 ### 💼 Workstream C: Bisnis, Deliverables & Frontend Integration (PIC: Adillah)
 - [ ] Lakukan riset kompetitor langsung (terutama daftar & uji coba UMKM.AI).
@@ -86,17 +89,20 @@ Backlog ini disusun berdasarkan *Workstream* agar seluruh anggota tim dapat meng
 *Fase penyatuan seluruh komponen, pencarian bug, dan finalisasi berkas.*
 
 **Gilang & Arya (Testing & Bug Fixing):**
-- [ ] **End-to-End & Edge Case Testing:**
-  - [ ] Uji coba skenario *Rate Limit* (429) API Hugging Face: pastikan agen berhasil menangkap *error* dan melakukan *fallback* tanpa merusak UI (*crash*).
-  - [ ] Uji coba multi-turn chat: kirim pesan lanjutan (follow-up) dan pastikan agen tidak kebingungan.
-  - [ ] Uji coba UI di resolusi Mobile (layar kecil): pastikan Bento Grid reflow dan indikator *scroll* input chat berfungsi dengan baik di *smartphone*.
-  - [ ] Uji coba dengan produk aneh/langka untuk melihat bagaimana model beradaptasi merender komponen (apakah halusinasi?).
-- [ ] **Tuning Prompt Engineering:** Perbaiki prompt secara iteratif saat menemukan *edge cases* atau halusinasi JSON selama testing berjalan.
-- [ ] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) agar tidak kena limit token HuggingFace.
+- [x] **End-to-End & Edge Case Testing:**
+  - [x] Uji coba skenario *Rate Limit* (429) API Hugging Face & WAF Proxy: pastikan agen berhasil menangkap *error* dan melakukan *fallback* tanpa merusak UI (*crash*). (Selesai via SearchArsenal & fallback.py)
+  - [x] Uji coba multi-turn chat: kirim pesan lanjutan (follow-up) dan pastikan agen tidak kebingungan.
+  - [x] Uji coba UI di resolusi Mobile (layar kecil): pastikan Bento Grid reflow dan indikator *scroll* input chat berfungsi dengan baik di *smartphone*.
+  - [x] Uji coba dengan produk aneh/langka untuk melihat bagaimana model beradaptasi merender komponen (apakah halusinasi?).
+  - [x] Uji Coba Ultimate 20x Regression: Memastikan isolasi state *Profile Database* antar sesi menggunakan generator `user_id` dinamis pada script test.
+- [x] **Tuning Prompt Engineering & Guardrails:** Perbaiki prompt secara iteratif saat menemukan *edge cases* atau halusinasi JSON selama testing berjalan.
+  - [x] **Python-Level Guardrails:** Terapkan sanitasi `price_only` di `agent.py` untuk secara paksa menghapus format *bullet points* jika LLM berhalusinasi mengulang isi tabel.
+  - [x] Tambahkan *Regex Quantity Fallback* pada kondensasi harga untuk menangkap variasi tulisan "isi 50 pcs" demi keakuratan harga per-satuan.
+- [x] **Uji Sliding Window Context:** Pastikan *chat history* terpotong dengan benar (10 pesan terakhir) agar tidak kena limit token HuggingFace.
   - [x] Frontend (`api.ts`): Memastikan `chat_history.slice(-10)` sudah terkirim di body *request*.
-  - [ ] Backend (`routes.py`): Meneruskan parameter `request.chat_history` ke dalam fungsi orchestrator `handle_chat_stream`.
-  - [ ] Backend (`agent.py` & `inference.py`): Menginjeksikan `chat_history` ke dalam prompt LLM agar agen memiliki kesadaran konteks percakapan sebelumnya.
-- [ ] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
+  - [x] Backend (`routes.py`): Meneruskan parameter `request.chat_history` ke dalam fungsi orchestrator `handle_chat_stream`.
+  - [x] Backend (`agent.py` & `inference.py`): Menginjeksikan `chat_history` ke dalam prompt LLM agar agen memiliki kesadaran konteks percakapan sebelumnya.
+- [x] Uji coba bongkar pasang Docker (`docker compose down -v` lalu `up --build`).
 - [x] Perbaikan *bug* tata letak (*layout*) Next.js atau *bug* *routing* di FastAPI.
   - [x] **Bento Grid Refactor:** Migrasi dari CSS Grid kaku (`grid-cols-3`) ke Flexbox (`flex-wrap`, `basis`, `flex-1`) untuk menghilangkan *gaping hole* (ruang kosong) secara dinamis.
   - [x] **Metric Fallback:** Tambahkan *null checks* (`|| 0`) pada `MetricBlockRenderer` agar Next.js tidak crash (TypeError) saat LLM gagal me-return struktur angka yang valid.

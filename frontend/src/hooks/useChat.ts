@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChatMessage, Artifact, UserProfile, ArtifactBlock } from '../lib/types';
-import { sendChatMessage } from '../lib/api';
+import { sendChatMessage, getProfile } from '../lib/api';
 
 const MOCK_PROFILE: UserProfile = {
   compliance_status: [
@@ -27,10 +27,16 @@ export function useChat() {
   ]);
 
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
-  // TODO: [MOCK REPLACEMENT] Fetch initial profile from database instead of MOCK_PROFILE
   const [profile, setProfile] = useState<UserProfile>(MOCK_PROFILE);
   const [isProcessing, setIsProcessing] = useState(false);
   const cancelRef = useRef<(() => void) | null>(null);
+
+  // Fetch initial profile from SQLite database
+  useEffect(() => {
+    getProfile(USER_ID).then((data) => {
+      if (data) setProfile(data);
+    }).catch(console.error);
+  }, []);
 
   const updateLastAssistant = useCallback((updater: (msg: ChatMessage) => ChatMessage) => {
     setMessages(prev => {
@@ -127,6 +133,13 @@ export function useChat() {
                     isStreaming: true,
                     pipelineComplete: true,
                   }));
+                } else if (data.type === 'error') {
+                  updateLastAssistant(msg => ({
+                    ...msg,
+                    content: `[SERVER ERROR] ${data.message}`,
+                    isStreaming: false,
+                    pipelineComplete: true,
+                  }));
                 } else if (data.type === 'result') {
                   const artifactsToSet = data.data.artifacts || [];
 
@@ -146,7 +159,9 @@ export function useChat() {
                   }
                   
                   if (data.data.profile_updated) {
-                    // Implicit update or trigger a refetch here if needed
+                    getProfile(USER_ID).then((p) => {
+                      if (p) setProfile(p);
+                    }).catch(console.error);
                   }
                   setIsProcessing(false);
                 }

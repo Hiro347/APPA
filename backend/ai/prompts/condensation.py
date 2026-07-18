@@ -1,20 +1,64 @@
-def get_condensation_prompt(query: str) -> str:
+def get_price_condensation_prompt(query: str) -> str:
     """
-    Returns the system prompt for condensing Markdown scraped data into a concise Markdown summary.
+    Highly specialized agent for extracting and sanitizing price points from web data.
     """
-    return f"""Kamu adalah modul peringkas data riset pasar tingkat lanjut untuk sistem APPA (Analisa Pasar Pintar & Akurat).
-Tugasmu adalah memproses artikel teks mentah hasil scraping web (Markdown) dan mengekstrak informasi esensialnya menjadi ringkasan Markdown padat berupa poin-poin (bullet points).
+    return f"""Kamu adalah agen spesialis ekstraksi harga pasar untuk sistem APPA.
+Tugasmu adalah memproses artikel teks (Markdown) dan HANYA mengekstrak data harga yang berkaitan dengan: '{query}'.
 
-PENTING:
-- Ekstrak SEMUA informasi yang berkaitan dengan inti/topik utama dari query ini: '{query}'.
-- PENTING: Jika kueri mencari harga, JANGAN mengekstrak produk atau menu jika harganya tidak mencantumkan angka yang jelas (misal: "Harga terjangkau", "Belum disebutkan", "Harga bervariasi"). ABAIKAN produk tersebut sama sekali!
-- KHUSUS UNTUK HARGA (1): Jika target riset merupakan barang satuan dan harga yang tertera adalah harga paket (contoh: isi 10 pcs Rp 40.000), kamu WAJIB menuliskan logika matematikanya (contoh: 40.000 / 10 = 4.000 per pcs) agar tidak terjadi double-division (pembagian ganda).
-- SANITY CHECK HARGA: Jika harga yang tertera sudah sangat rendah (misal Rp 2.100) meskipun judulnya "isi 100", gunakan logika bisnismu! Itu adalah harga ALREADY PER PCS. Jangan membagi 2.100 dengan 100 menjadi Rp 21. Tidak ada dimsum seharga Rp 21. Abaikan data yang tidak masuk akal.
-- FILTER AKURASI HARGA: Jika sebuah produk tidak mencantumkan jumlah kuantitas/isi secara eksplisit, JANGAN asumsikan itu harga 1 pcs! ABAIKAN produk tersebut dari perhitungan rata-rata.
-- KHUSUS UNTUK HARGA (2): Buatlah kesimpulan Harga Terendah, Harga Tertinggi, dan Harga Rata-rata (Average) per satuan HANYA dari data yang sudah lolos sanity check.
-- KHUSUS UNTUK E-COMMERCE: Jika sumber data berasal dari marketplace, WAJIB mencantumkan Nama Toko (Store Name).
-- JANGAN HILANGKAN detail kualitatif yang relevan! Rangkum strategi pemasaran, varian rasa, keluhan konsumen, atau taktik bisnis yang dibahas.
-- Jangan menambahkan informasi di luar teks yang diberikan (dilarang berhalusinasi).
-- Jika artikel sama sekali tidak memuat informasi yang berkaitan dengan topik, atau jika mencari harga namun tidak ada angka riil yang ditemukan, cukup output persis kalimat ini: "Tidak ada data spesifik yang relevan ditemukan."
-- Pastikan output HANYA berupa Markdown (tanpa blok kode ```markdown). Jangan pernah membalas dengan JSON.
+ATURAN EKSTRAKSI HARGA:
+1. ANTI-HALUSINASI (SANGAT PENTING): Jika teks HANYA berisi nama produk TANPA ada angka harga yang jelas, JANGAN mengekstrak apapun! Lebih baik kembalikan array kosong `[]` daripada mengarang harga palsu.
+2. EKSTRAK SEMUA DATA VALID: Kamu WAJIB mengekstrak SEMUA data harga makanan yang BENAR-BENAR ADA di teks. Semakin banyak data yang diekstrak, semakin baik.
+3. JANGAN MENCAMPUR DATA: Pastikan harga yang kamu ekstrak BENAR-BENAR milik produk tersebut. Jangan memasangkan nama "Dimsum Ayam" dengan harga dari "Aluminium Foil" yang kebetulan ada di sebelahnya!
+4. RELEVANSI KETAT: HANYA ekstrak produk makanan utama. DILARANG KERAS mengekstrak produk kemasan (plastik, botol, tray, wadah, aluminium foil) atau alat dapur.
+5. KUANTITAS BUKAN BERAT (PENTING): `total_quantity` HANYA untuk JUMLAH PCS/BIJI/PORSI (misal "isi 10", "6 pcs"). DILARANG KERAS memasukkan berat/massa (misal 600gr, 1000g, 1kg) atau persentase (10%) ke dalam `total_quantity`! Jika teks hanya menyebutkan berat dan bukan jumlah pcs, kamu HARUS menulis angka `1`.
+6. NAMA TOKO: Wajib cantumkan Nama Toko (Store Name) jika ada di teks.
+
+FORMAT OUTPUT WAJIB (JSON ONLY):
+Kamu HARUS merespon HANYA dengan JSON valid sesuai struktur berikut. JANGAN PERNAH menyertakan teks Markdown.
+{{
+  "bento_hints": ["table"],
+  "prices": [
+    {{
+      "product_name": "string (Nama spesifik produk)",
+      "total_price": "number (Harga total yang tertera, misal 20000. HANYA angka bulat)",
+      "total_quantity": "number (Jumlah produk dalam paket tersebut, misal 6. HANYA angka bulat. Jika 1 porsi, tulis 1)",
+      "original_price_text": "string (Teks harga asli dari artikel)",
+      "store_name": "string (Nama toko atau sumber asli)"
+    }}
+  ]
+}}
 """
+
+def get_general_condensation_prompt(query: str) -> str:
+    """
+    Highly specialized agent for extracting qualitative strategies, competitor info, and tips.
+    """
+    return f"""Kamu adalah agen spesialis riset kualitatif (strategi, kompetitor, operasional) untuk sistem APPA.
+Tugasmu adalah memproses artikel teks mentah hasil scraping web (Markdown) dan mengekstrak informasi esensial yang menjawab query: '{query}'.
+
+ATURAN EKSTRAKSI KUALITATIF:
+- PEMANGKASAN KEJAM: Rangkum dan ekstrak Maksimal 3 hingga 5 entri/fakta yang paling representatif saja.
+- FOKUS PADA QUERY: Jika kueri membahas tentang "strategi", ekstrak strategi. Jika membahas "kompetitor", ekstrak nama dan kelebihan kompetitor. JANGAN mengekstrak resep masakan jika tidak diminta.
+- PECAH INFORMASI: Wajib pecah informasi menjadi beberapa objek JSON. JANGAN menumpuk banyak fakta (seperti daftar 3 kompetitor) ke dalam satu objek. Jika ada 3 kompetitor, buat 3 objek terpisah!
+- JANGAN BERHALUSINASI: Jangan menambahkan informasi di luar teks yang diberikan. Jika tidak ada informasi relevan, kembalikan JSON dengan array kosong.
+- DILARANG MENJELASKAN PROSES: JANGAN PERNAH menyalin atau menjelaskan instruksi prompt ini di dalam outputmu.
+
+FORMAT OUTPUT WAJIB (JSON ONLY):
+Kamu HARUS merespon HANYA dengan JSON valid sesuai struktur berikut. JANGAN PERNAH menyertakan teks Markdown.
+{{
+  "bento_hints": ["text"],
+  "findings": [
+    {{
+      "topic": "string (Judul Topik, misal: 'Kelebihan Kompetitor A')",
+      "fact": "string (Fakta padat yang diekstrak)"
+    }}
+  ]
+}}
+"""
+
+CONDENSER_AGENTS = {
+    "price_fetch": get_price_condensation_prompt,
+    "general": get_general_condensation_prompt,
+    # Easily extensible in the future:
+    # "legal_research": get_legal_condensation_prompt,
+}

@@ -146,8 +146,20 @@ function MetricBlockRenderer({ block }: { block: MetricBlock }) {
 }
 
 function ChartBlockRenderer({ block }: { block: ChartBlock }) {
-  const chartData = block.data.xAxis.map((x, i) => ({ name: x, value: block.data.yAxis[i] }));
+  // Add safety fallbacks in case the LLM hallucinates different keys (e.g., x_axis instead of xAxis) or omits them
+  const xAxis = block.data.xAxis || (block.data as any).x_axis || [];
+  const yAxis = block.data.yAxis || (block.data as any).y_axis || [];
+  
+  const chartData = xAxis.map((x: string, i: number) => ({ name: x, value: yAxis[i] }));
   const isLine = block.data.chartType === 'line';
+
+  if (chartData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-xs text-gray-400 border border-dashed border-gray-200 rounded-md bg-gray-50/50">
+        Visualisasi grafik tidak tersedia
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col flex-1 h-full justify-between">
@@ -197,7 +209,7 @@ function ChecklistBlockRenderer({
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-gray-900 mb-2">Checklist Regulasi & Izin</h3>
       <div className="space-y-2">
-        {block.data.items.map((item, idx) => {
+        {(block?.data?.items || []).map((item, idx) => {
           const isDone = item.status === 'done';
           return (
             <div
